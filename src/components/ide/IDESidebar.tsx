@@ -1,22 +1,29 @@
 import { useState } from "react";
-import { Search, ChevronDown, ChevronRight, FolderOpen, FileCode, AlertCircle, Clock, FileEdit, CheckCircle } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, FolderOpen, FileCode, AlertCircle, Clock, FileEdit, CheckCircle, Grid3X3 } from "lucide-react";
 import { rules, categories, statusLabels, type Rule, type RuleStatus } from "@/data/mockRules";
+import { matrices, type Matrix } from "@/data/mockMatrices";
+
+export type SelectedItem =
+  | { type: "rule"; item: Rule }
+  | { type: "matrix"; item: Matrix };
 
 interface IDESidebarProps {
-  selectedRule: Rule | null;
-  onSelectRule: (rule: Rule) => void;
+  selected: SelectedItem | null;
+  onSelect: (item: SelectedItem) => void;
 }
 
-export function IDESidebar({ selectedRule, onSelectRule }: IDESidebarProps) {
+export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
   const [search, setSearch] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(categories)
+    new Set([...categories, "Структура и матрицы"])
   );
-  const [expandedStatuses, setExpandedStatuses] = useState(false);
   const [viewMode, setViewMode] = useState<"projects" | "statuses">("projects");
 
   const filteredRules = rules.filter((r) =>
     r.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const filteredMatrices = matrices.filter((m) =>
+    m.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const toggleCategory = (cat: string) => {
@@ -33,11 +40,20 @@ export function IDESidebar({ selectedRule, onSelectRule }: IDESidebarProps) {
     rules: filteredRules.filter((r) => r.category === cat),
   }));
 
+  const allItems = [
+    ...rules.map((r) => ({ id: r.id, name: r.name, status: r.status, type: "rule" as const, item: r })),
+    ...matrices.map((m) => ({ id: m.id, name: m.name, status: m.status, type: "matrix" as const, item: m })),
+  ];
+
+  const filteredAllItems = allItems.filter((i) =>
+    i.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   const rulesByStatus = (["active", "draft", "scheduled", "error"] as RuleStatus[]).map(
     (status) => ({
       status,
       label: statusLabels[status],
-      rules: filteredRules.filter((r) => r.status === status),
+      items: filteredAllItems.filter((i) => i.status === status),
     })
   );
 
@@ -48,6 +64,14 @@ export function IDESidebar({ selectedRule, onSelectRule }: IDESidebarProps) {
     error: <AlertCircle className="w-3.5 h-3.5 text-destructive" />,
   };
 
+  const isSelected = (id: string) => {
+    if (!selected) return false;
+    return selected.item.id === id;
+  };
+
+  const totalCount = rules.length + matrices.length;
+  const activeCount = rules.filter((r) => r.status === "active").length + matrices.filter((m) => m.status === "active").length;
+
   return (
     <div className="w-[260px] min-w-[260px] bg-sidebar border-r border-border flex flex-col h-full">
       {/* Search */}
@@ -56,7 +80,7 @@ export function IDESidebar({ selectedRule, onSelectRule }: IDESidebarProps) {
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Поиск правил... ⌘K"
+            placeholder="Поиск правил и матриц... ⌘K"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-input text-foreground text-xs pl-7 pr-2 py-1.5 rounded-sm border border-border focus:border-primary focus:outline-none placeholder:text-muted-foreground"
@@ -95,6 +119,8 @@ export function IDESidebar({ selectedRule, onSelectRule }: IDESidebarProps) {
             <div className="px-2 py-1 text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
               Производственная среда
             </div>
+
+            {/* Rule categories */}
             {rulesByCategory.map(({ category, rules: catRules }) => (
               <div key={category}>
                 <button
@@ -116,9 +142,9 @@ export function IDESidebar({ selectedRule, onSelectRule }: IDESidebarProps) {
                   catRules.map((rule) => (
                     <button
                       key={rule.id}
-                      onClick={() => onSelectRule(rule)}
+                      onClick={() => onSelect({ type: "rule", item: rule })}
                       className={`w-full flex items-center gap-1.5 pl-8 pr-2 py-1 text-xs transition-colors ${
-                        selectedRule?.id === rule.id
+                        isSelected(rule.id)
                           ? "bg-accent text-accent-foreground"
                           : "text-sidebar-foreground hover:bg-accent/50"
                       }`}
@@ -134,30 +160,77 @@ export function IDESidebar({ selectedRule, onSelectRule }: IDESidebarProps) {
                   ))}
               </div>
             ))}
+
+            {/* Matrix section */}
+            <div>
+              <button
+                onClick={() => toggleCategory("Структура и матрицы")}
+                className="w-full flex items-center gap-1 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors"
+              >
+                {expandedCategories.has("Структура и матрицы") ? (
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                )}
+                <FolderOpen className="w-3.5 h-3.5 text-primary/70" />
+                <span>Структура и матрицы</span>
+                <span className="ml-auto text-[10px] text-muted-foreground">
+                  {filteredMatrices.length}
+                </span>
+              </button>
+              {expandedCategories.has("Структура и матрицы") &&
+                filteredMatrices.map((matrix) => (
+                  <button
+                    key={matrix.id}
+                    onClick={() => onSelect({ type: "matrix", item: matrix })}
+                    className={`w-full flex items-center gap-1.5 pl-8 pr-2 py-1 text-xs transition-colors ${
+                      isSelected(matrix.id)
+                        ? "bg-accent text-accent-foreground"
+                        : "text-sidebar-foreground hover:bg-accent/50"
+                    }`}
+                  >
+                    <Grid3X3 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                    <span className="truncate">{matrix.name}</span>
+                    <span className={`status-dot ml-auto flex-shrink-0 ${
+                      matrix.status === "active" ? "status-active" :
+                      matrix.status === "error" ? "status-error" :
+                      matrix.status === "draft" ? "status-draft" : "status-scheduled"
+                    }`} />
+                  </button>
+                ))}
+            </div>
           </>
         ) : (
           <>
-            {rulesByStatus.map(({ status, label, rules: statusRules }) => (
+            {rulesByStatus.map(({ status, label, items }) => (
               <div key={status}>
                 <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-secondary-foreground">
                   {statusIcons[status]}
                   <span>{label}</span>
                   <span className="ml-auto text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                    {statusRules.length}
+                    {items.length}
                   </span>
                 </div>
-                {statusRules.map((rule) => (
+                {items.map((entry) => (
                   <button
-                    key={rule.id}
-                    onClick={() => onSelectRule(rule)}
+                    key={entry.id}
+                    onClick={() => onSelect(
+                      entry.type === "rule"
+                        ? { type: "rule", item: entry.item as Rule }
+                        : { type: "matrix", item: entry.item as Matrix }
+                    )}
                     className={`w-full flex items-center gap-1.5 pl-7 pr-2 py-1 text-xs transition-colors ${
-                      selectedRule?.id === rule.id
+                      isSelected(entry.id)
                         ? "bg-accent text-accent-foreground"
                         : "text-sidebar-foreground hover:bg-accent/50"
                     }`}
                   >
-                    <FileCode className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                    <span className="truncate">{rule.name}</span>
+                    {entry.type === "rule" ? (
+                      <FileCode className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                    ) : (
+                      <Grid3X3 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                    )}
+                    <span className="truncate">{entry.name}</span>
                   </button>
                 ))}
               </div>
@@ -168,7 +241,7 @@ export function IDESidebar({ selectedRule, onSelectRule }: IDESidebarProps) {
 
       {/* Footer */}
       <div className="border-t border-border px-3 py-2 text-[10px] text-muted-foreground">
-        {rules.length} правил · {rules.filter((r) => r.status === "active").length} активных
+        {totalCount} элементов · {activeCount} активных
       </div>
     </div>
   );
