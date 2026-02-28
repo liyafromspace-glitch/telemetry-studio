@@ -1,7 +1,7 @@
-import { IDELayout } from "@/components/ide/IDELayout";
+import { PlatformShell } from "@/components/platform/PlatformShell";
 
 const Index = () => {
-  return <IDELayout />;
+  return <PlatformShell />;
 };
 
 export default Index;
