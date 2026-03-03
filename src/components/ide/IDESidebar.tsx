@@ -12,11 +12,32 @@ interface IDESidebarProps {
   onSelect: (item: SelectedItem) => void;
 }
 
-// Function icon (lambda symbol)
 function FunctionIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
       <text x="1" y="10" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor">λ</text>
+    </svg>
+  );
+}
+
+// Mini sparkline for sidebar categories
+function MiniSparkline({ seed }: { seed: number }) {
+  const data = Array.from({ length: 12 }, (_, i) => 
+    Math.sin(i * 0.8 + seed) * 0.4 + Math.cos(i * 0.3 + seed * 2) * 0.3 + 0.5
+  );
+  const w = 48;
+  const h = 14;
+  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - v * h}`).join(" ");
+
+  return (
+    <svg width={w} height={h} className="sidebar-sparkline ml-auto flex-shrink-0">
+      <defs>
+        <linearGradient id={`sg-${seed}`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.8" />
+        </linearGradient>
+      </defs>
+      <polyline points={points} fill="none" stroke={`url(#sg-${seed})`} strokeWidth="1.2" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -129,7 +150,7 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
               Производственная среда
             </div>
 
-            {rulesByCategory.map(({ category, rules: catRules }) => (
+            {rulesByCategory.map(({ category, rules: catRules }, ci) => (
               <div key={category}>
                 <button
                   onClick={() => toggleCategory(category)}
@@ -142,6 +163,7 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
                   )}
                   <FolderOpen className="w-3.5 h-3.5 text-muted-foreground" />
                   <span className="font-medium">{category}</span>
+                  <MiniSparkline seed={ci + 1} />
                 </button>
                 {expandedCategories.has(category) &&
                   catRules.map((rule) => (
