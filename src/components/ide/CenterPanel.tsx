@@ -5,7 +5,7 @@ import { DependencyGraph } from "./DependencyGraph";
 import { SimulationPanel } from "./SimulationPanel";
 import { VersionHistory } from "./VersionHistory";
 import { ActivationModal } from "./ActivationModal";
-import { ChevronRight, Save, PlayCircle, Zap, CheckCircle } from "lucide-react";
+import { ChevronRight, ChevronDown, Save, Zap, CheckCircle } from "lucide-react";
 
 interface CenterPanelProps {
   rule: Rule;
@@ -14,7 +14,7 @@ interface CenterPanelProps {
 const tabs = [
   { id: "overview", label: "Обзор" },
   { id: "dependencies", label: "Зависимости" },
-  { id: "simulation", label: "Симуляция" },
+  { id: "simulation", label: "Симуляции" },
   { id: "history", label: "История версий" },
 ] as const;
 
@@ -29,24 +29,27 @@ export function CenterPanel({ rule }: CenterPanelProps) {
       {/* Breadcrumb + actions */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <span>Производственная среда</span>
+          <span className="hover:text-foreground cursor-pointer transition-colors">Производственная среда</span>
           <ChevronRight className="w-3 h-3" />
-          <span>{rule.category}</span>
+          <span className="hover:text-foreground cursor-pointer transition-colors flex items-center gap-0.5">
+            {rule.category}
+            <ChevronDown className="w-2.5 h-2.5" />
+          </span>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-foreground font-medium">{rule.name}</span>
+          <span className="text-foreground font-semibold">{rule.name}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <button className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors">
+          <button className="btn-secondary">
             <CheckCircle className="w-3 h-3" />
             Проверить
           </button>
-          <button className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors">
+          <button className="btn-secondary">
             <Save className="w-3 h-3" />
             Сохранить
           </button>
           <button
             onClick={() => setShowActivation(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-opacity"
+            className="btn-primary"
           >
             <Zap className="w-3 h-3" />
             Активировать
@@ -60,7 +63,7 @@ export function CenterPanel({ rule }: CenterPanelProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-xs transition-colors relative ${
+            className={`px-4 py-2 text-xs font-medium transition-colors relative ${
               activeTab === tab.id
                 ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground"
@@ -82,7 +85,6 @@ export function CenterPanel({ rule }: CenterPanelProps) {
         {activeTab === "history" && <VersionHistory rule={rule} />}
       </div>
 
-      {/* Activation modal */}
       {showActivation && (
         <ActivationModal
           rule={rule}

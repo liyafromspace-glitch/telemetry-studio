@@ -14,41 +14,42 @@ const navItems: { state: AppState; icon: typeof Radio; label: string }[] = [
   { state: "govern", icon: Shield, label: "GOVERN" },
 ];
 
-const stateAccentClass: Record<AppState, string> = {
-  live: "text-destructive",
-  investigate: "text-warning",
-  analyze: "text-warning",
-  configure: "text-primary",
-  govern: "text-[hsl(270,60%,65%)]",
+const stateAccentColors: Record<AppState, string> = {
+  live: "var(--destructive)",
+  investigate: "var(--warning)",
+  analyze: "var(--warning)",
+  configure: "var(--primary)",
+  govern: "270 60% 65%",
 };
 
 export function GlobalNav({ activeState, onStateChange }: GlobalNavProps) {
   return (
-    <div className="w-14 min-w-14 bg-card border-r border-border flex flex-col items-center py-3 gap-1">
+    <div className="w-12 min-w-12 bg-card border-r border-border flex flex-col items-center py-2 gap-0.5">
       {navItems.map(({ state, icon: Icon, label }) => {
         const isActive = activeState === state;
         return (
           <button
             key={state}
             onClick={() => onStateChange(state)}
-            className={`relative w-10 h-12 flex flex-col items-center justify-center gap-0.5 rounded-sm transition-colors ${
+            className={`relative w-10 h-11 flex flex-col items-center justify-center gap-0.5 rounded-sm transition-all ${
               isActive
-                ? `bg-accent ${stateAccentClass[state]}`
+                ? "bg-accent text-foreground"
                 : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             }`}
             title={label}
           >
             {isActive && (
-              <div className={`absolute left-0 top-2 bottom-2 w-[2px] rounded-r ${
-                state === "live" ? "bg-destructive" :
-                state === "investigate" ? "bg-warning" :
-                state === "analyze" ? "bg-warning" :
-                state === "configure" ? "bg-primary" :
-                "bg-[hsl(270,60%,65%)]"
-              }`} />
+              <div
+                className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r"
+                style={{
+                  backgroundColor: state === "govern"
+                    ? `hsl(${stateAccentColors[state]})`
+                    : `hsl(${stateAccentColors[state]})`
+                }}
+              />
             )}
             <Icon className="w-4 h-4" />
-            <span className="text-[7px] font-medium tracking-wider">{label}</span>
+            <span className="text-[7px] font-semibold tracking-wider">{label}</span>
           </button>
         );
       })}

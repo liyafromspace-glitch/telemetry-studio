@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, ChevronDown, ChevronRight, FolderOpen, FileCode, AlertCircle, Clock, FileEdit, CheckCircle, Grid3X3 } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, FolderOpen, AlertCircle, Clock, FileEdit, CheckCircle, Grid3X3 } from "lucide-react";
 import { rules, categories, statusLabels, type Rule, type RuleStatus } from "@/data/mockRules";
 import { matrices, type Matrix } from "@/data/mockMatrices";
 
@@ -10,6 +10,15 @@ export type SelectedItem =
 interface IDESidebarProps {
   selected: SelectedItem | null;
   onSelect: (item: SelectedItem) => void;
+}
+
+// Function icon (lambda symbol)
+function FunctionIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="1" y="10" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor">λ</text>
+    </svg>
+  );
 }
 
 export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
@@ -73,9 +82,9 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
   const activeCount = rules.filter((r) => r.status === "active").length + matrices.filter((m) => m.status === "active").length;
 
   return (
-    <div className="w-[260px] min-w-[260px] bg-sidebar border-r border-border flex flex-col h-full">
+    <div className="w-[260px] min-w-[260px] bg-sidebar border-r border-sidebar-border flex flex-col h-full">
       {/* Search */}
-      <div className="p-2 border-b border-border">
+      <div className="p-2 border-b border-sidebar-border">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input
@@ -89,10 +98,10 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
       </div>
 
       {/* View mode tabs */}
-      <div className="flex border-b border-border text-[11px]">
+      <div className="flex border-b border-sidebar-border text-[11px]">
         <button
           onClick={() => setViewMode("projects")}
-          className={`flex-1 py-1.5 text-center transition-colors ${
+          className={`flex-1 py-1.5 text-center font-medium transition-colors ${
             viewMode === "projects"
               ? "text-foreground border-b-2 border-primary"
               : "text-muted-foreground hover:text-foreground"
@@ -102,7 +111,7 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
         </button>
         <button
           onClick={() => setViewMode("statuses")}
-          className={`flex-1 py-1.5 text-center transition-colors ${
+          className={`flex-1 py-1.5 text-center font-medium transition-colors ${
             viewMode === "statuses"
               ? "text-foreground border-b-2 border-primary"
               : "text-muted-foreground hover:text-foreground"
@@ -116,16 +125,15 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
       <div className="flex-1 overflow-y-auto py-1">
         {viewMode === "projects" ? (
           <>
-            <div className="px-2 py-1 text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+            <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
               Производственная среда
             </div>
 
-            {/* Rule categories */}
             {rulesByCategory.map(({ category, rules: catRules }) => (
               <div key={category}>
                 <button
                   onClick={() => toggleCategory(category)}
-                  className="w-full flex items-center gap-1 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors"
+                  className="w-full flex items-center gap-1.5 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors"
                 >
                   {expandedCategories.has(category) ? (
                     <ChevronDown className="w-3 h-3 text-muted-foreground" />
@@ -133,23 +141,18 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
                     <ChevronRight className="w-3 h-3 text-muted-foreground" />
                   )}
                   <FolderOpen className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span>{category}</span>
-                  <span className="ml-auto text-[10px] text-muted-foreground">
-                    {catRules.length}
-                  </span>
+                  <span className="font-medium">{category}</span>
                 </button>
                 {expandedCategories.has(category) &&
                   catRules.map((rule) => (
                     <button
                       key={rule.id}
                       onClick={() => onSelect({ type: "rule", item: rule })}
-                      className={`w-full flex items-center gap-1.5 pl-8 pr-2 py-1 text-xs transition-colors ${
-                        isSelected(rule.id)
-                          ? "bg-accent text-accent-foreground"
-                          : "text-sidebar-foreground hover:bg-accent/50"
+                      className={`tree-item pl-8 ${
+                        isSelected(rule.id) ? "tree-item-active" : "tree-item-inactive"
                       }`}
                     >
-                      <FileCode className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      <FunctionIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                       <span className="truncate">{rule.name}</span>
                       <span className={`status-dot ml-auto flex-shrink-0 ${
                         rule.status === "active" ? "status-active" :
@@ -165,7 +168,7 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
             <div>
               <button
                 onClick={() => toggleCategory("Структура и матрицы")}
-                className="w-full flex items-center gap-1 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors"
+                className="w-full flex items-center gap-1.5 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors"
               >
                 {expandedCategories.has("Структура и матрицы") ? (
                   <ChevronDown className="w-3 h-3 text-muted-foreground" />
@@ -173,20 +176,15 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
                   <ChevronRight className="w-3 h-3 text-muted-foreground" />
                 )}
                 <FolderOpen className="w-3.5 h-3.5 text-primary/70" />
-                <span>Структура и матрицы</span>
-                <span className="ml-auto text-[10px] text-muted-foreground">
-                  {filteredMatrices.length}
-                </span>
+                <span className="font-medium">Структура и матрицы</span>
               </button>
               {expandedCategories.has("Структура и матрицы") &&
                 filteredMatrices.map((matrix) => (
                   <button
                     key={matrix.id}
                     onClick={() => onSelect({ type: "matrix", item: matrix })}
-                    className={`w-full flex items-center gap-1.5 pl-8 pr-2 py-1 text-xs transition-colors ${
-                      isSelected(matrix.id)
-                        ? "bg-accent text-accent-foreground"
-                        : "text-sidebar-foreground hover:bg-accent/50"
+                    className={`tree-item pl-8 ${
+                      isSelected(matrix.id) ? "tree-item-active" : "tree-item-inactive"
                     }`}
                   >
                     <Grid3X3 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
@@ -204,9 +202,9 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
           <>
             {rulesByStatus.map(({ status, label, items }) => (
               <div key={status}>
-                <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-secondary-foreground">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-secondary-foreground">
                   {statusIcons[status]}
-                  <span>{label}</span>
+                  <span className="font-medium">{label}</span>
                   <span className="ml-auto text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                     {items.length}
                   </span>
@@ -219,14 +217,12 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
                         ? { type: "rule", item: entry.item as Rule }
                         : { type: "matrix", item: entry.item as Matrix }
                     )}
-                    className={`w-full flex items-center gap-1.5 pl-7 pr-2 py-1 text-xs transition-colors ${
-                      isSelected(entry.id)
-                        ? "bg-accent text-accent-foreground"
-                        : "text-sidebar-foreground hover:bg-accent/50"
+                    className={`tree-item pl-7 ${
+                      isSelected(entry.id) ? "tree-item-active" : "tree-item-inactive"
                     }`}
                   >
                     {entry.type === "rule" ? (
-                      <FileCode className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      <FunctionIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                     ) : (
                       <Grid3X3 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                     )}
@@ -240,7 +236,7 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border px-3 py-2 text-[10px] text-muted-foreground">
+      <div className="border-t border-sidebar-border px-3 py-2 text-[10px] text-muted-foreground">
         {totalCount} элементов · {activeCount} активных
       </div>
     </div>
