@@ -5,7 +5,6 @@ interface LiveViewProps {
   onNavigateToInvestigate: (signalParam: string) => void;
 }
 
-// Mock historical data for sparklines
 const mockHistory: Record<string, number[]> = {
   "TI03025.PV": [85, 84, 83, 82, 0, 0, 0],
   "PT02012.PV": [340, 355, 370, 390, 400, 412, 413],
@@ -21,14 +20,30 @@ function MiniSparkline({ data, status }: { data: number[]; status: string }) {
   const min = Math.min(...filtered);
   const max = Math.max(...filtered);
   const range = max - min || 1;
-  const w = 48;
-  const h = 16;
-  const points = filtered.map((v, i) => `${(i / (filtered.length - 1)) * w},${h - ((v - min) / range) * h}`).join(" ");
-  const color = status === "critical" ? "hsl(2, 93%, 63%)" : status === "warning" ? "hsl(39, 74%, 48%)" : "hsl(127, 50%, 49%)";
+  const w = 60;
+  const h = 18;
+  const pts = filtered.map((v, i) => ({
+    x: (i / (filtered.length - 1)) * w,
+    y: h - ((v - min) / range) * (h - 4) - 2,
+  }));
+  const linePoints = pts.map(p => `${p.x},${p.y}`).join(" ");
+  const areaPoints = `0,${h} ${linePoints} ${w},${h}`;
+  const color = status === "critical" ? "hsl(2, 93%, 63%)" : status === "warning" ? "hsl(39, 74%, 48%)" : "hsl(185, 70%, 50%)";
 
   return (
     <svg width={w} height={h} className="inline-block">
-      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
+      <defs>
+        <linearGradient id={`lg-${status}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+        <filter id={`gf-${status}`}>
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+      <polygon points={areaPoints} fill={`url(#lg-${status})`} />
+      <polyline points={linePoints} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" filter={`url(#gf-${status})`} />
     </svg>
   );
 }
@@ -39,7 +54,6 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-2 text-xs">
           <Radio className="w-3.5 h-3.5 text-destructive animate-pulse" />
@@ -61,7 +75,6 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
         </div>
       </div>
 
-      {/* Signals table */}
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs">
           <thead>

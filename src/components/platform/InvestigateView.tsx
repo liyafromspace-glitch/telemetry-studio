@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { incidents, incidentStatusLabels, type Incident, type IncidentStatus } from "@/data/mockPlatform";
 import {
   AlertTriangle, XCircle, CheckCircle, Clock, User, FileText, Link2, ArrowRight,
@@ -12,7 +12,6 @@ interface InvestigateViewProps {
 }
 
 export function InvestigateView({ onNavigateToConfigure, initialSignal }: InvestigateViewProps) {
-  // If a signal was passed from LIVE, try to find matching incident
   const findIncidentBySignal = (signal: string | null | undefined) => {
     if (!signal) return incidents[0].id;
     const match = incidents.find(i => i.linkedParameters.some(p => p.includes(signal.split(".")[0])));
@@ -20,13 +19,6 @@ export function InvestigateView({ onNavigateToConfigure, initialSignal }: Invest
   };
 
   const [selectedId, setSelectedId] = useState<string>(findIncidentBySignal(initialSignal));
-
-  useEffect(() => {
-    if (initialSignal) {
-      setSelectedId(findIncidentBySignal(initialSignal));
-    }
-  }, [initialSignal]);
-
   const selected = incidents.find((i) => i.id === selectedId) || incidents[0];
 
   const priorityColor = (p: string) =>
@@ -41,7 +33,6 @@ export function InvestigateView({ onNavigateToConfigure, initialSignal }: Invest
 
   return (
     <div className="flex-1 flex min-h-0">
-      {/* Incident list */}
       <div className="w-[280px] min-w-[280px] border-r border-border flex flex-col bg-card">
         <div className="ide-header">Инциденты</div>
         {initialSignal && (
@@ -74,7 +65,6 @@ export function InvestigateView({ onNavigateToConfigure, initialSignal }: Invest
         </div>
       </div>
 
-      {/* Incident detail */}
       <IncidentDetail incident={selected} onNavigateToConfigure={onNavigateToConfigure} />
     </div>
   );
@@ -92,7 +82,6 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <span>Инциденты</span>
@@ -101,15 +90,11 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
           <ChevronRight className="w-3 h-3" />
           <span className="text-foreground font-medium">{incident.title}</span>
         </div>
-        <button
-          onClick={onNavigateToConfigure}
-          className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-opacity"
-        >
+        <button onClick={onNavigateToConfigure} className="btn-primary">
           Открыть в CONFIGURE <ArrowRight className="w-3 h-3" />
         </button>
       </div>
 
-      {/* Status bar */}
       <div className="flex items-center gap-4 px-4 py-1.5 border-b border-border bg-card text-[10px]">
         <span className="flex items-center gap-1 text-muted-foreground">
           Статус: <span className="text-foreground">{incidentStatusLabels[incident.status]}</span>
@@ -124,13 +109,12 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         )}
       </div>
 
-      {/* Tabs */}
       <div className="flex border-b border-border bg-card">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-xs transition-colors relative ${
+            className={`px-4 py-2 text-xs font-medium transition-colors relative ${
               activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -140,11 +124,10 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         ))}
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto bg-background p-4">
         {activeTab === "description" && (
           <div className="space-y-3 animate-fade-in">
-            <div className="ide-panel rounded-sm">
+            <div className="ide-panel-glow rounded-sm">
               <div className="ide-header">Описание</div>
               <div className="p-3 text-xs text-foreground leading-relaxed">{incident.description}</div>
             </div>
@@ -152,11 +135,11 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
               title="Почему произошёл инцидент"
               steps={buildIncidentChain(incident)}
             />
-            <div className="ide-panel rounded-sm">
+            <div className="ide-panel-glow rounded-sm">
               <div className="ide-header">Связанные параметры</div>
               <div className="p-3 flex flex-wrap gap-1.5">
                 {incident.linkedParameters.map((p) => (
-                  <span key={p} className="px-2 py-0.5 bg-accent rounded-sm text-[10px] font-mono text-foreground">{p}</span>
+                  <span key={p} className="px-2 py-0.5 bg-accent rounded-sm text-[10px] font-mono text-foreground border border-border">{p}</span>
                 ))}
               </div>
             </div>
@@ -164,7 +147,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         )}
 
         {activeTab === "tasks" && (
-          <div className="ide-panel rounded-sm animate-fade-in">
+          <div className="ide-panel-glow rounded-sm animate-fade-in">
             <div className="ide-header">Задачи</div>
             <div className="divide-y divide-border">
               {incident.tasks.length === 0 ? (
@@ -191,7 +174,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         )}
 
         {activeTab === "history" && (
-          <div className="ide-panel rounded-sm animate-fade-in">
+          <div className="ide-panel-glow rounded-sm animate-fade-in">
             <div className="ide-header">История</div>
             <div className="divide-y divide-border">
               {incident.history.map((entry, i) => (
@@ -212,7 +195,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
 
         {activeTab === "linked" && (
           <div className="space-y-3 animate-fade-in">
-            <div className="ide-panel rounded-sm">
+            <div className="ide-panel-glow rounded-sm">
               <div className="ide-header flex items-center gap-1.5">
                 <Cpu className="w-3 h-3" /> Функции
               </div>
@@ -224,7 +207,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
                 ))}
               </div>
             </div>
-            <div className="ide-panel rounded-sm">
+            <div className="ide-panel-glow rounded-sm">
               <div className="ide-header flex items-center gap-1.5">
                 <Grid3X3 className="w-3 h-3" /> Матрицы
               </div>
@@ -236,7 +219,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
                 ))}
               </div>
             </div>
-            <div className="ide-panel rounded-sm">
+            <div className="ide-panel-glow rounded-sm">
               <div className="ide-header flex items-center gap-1.5">
                 <FileText className="w-3 h-3" /> Отчёты
               </div>

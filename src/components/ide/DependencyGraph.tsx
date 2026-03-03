@@ -67,29 +67,28 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
   const getNode = (id: string) => nodes.find((n) => n.id === id)!;
 
   const statusColor = (s: string) =>
-    s === "success" ? "hsl(127, 50%, 49%)" : s === "warning" ? "hsl(39, 74%, 48%)" : "hsl(2, 93%, 63%)";
+    s === "success" ? "hsl(160, 55%, 48%)" : s === "warning" ? "hsl(39, 74%, 48%)" : "hsl(2, 93%, 63%)";
 
   const statusBg = (s: string, hovered: boolean) => {
     const alpha = hovered ? 0.25 : 0.1;
-    return s === "success" ? `hsl(127, 50%, 49%, ${alpha})` : s === "warning" ? `hsl(39, 74%, 48%, ${alpha})` : `hsl(2, 93%, 63%, ${alpha})`;
+    return s === "success" ? `hsl(160, 55%, 48%, ${alpha})` : s === "warning" ? `hsl(39, 74%, 48%, ${alpha})` : `hsl(2, 93%, 63%, ${alpha})`;
   };
 
-  // Node shape renderers
   const renderNodeShape = (node: GraphNode, isHovered: boolean) => {
     const color = statusColor(node.status);
     const bg = statusBg(node.status, isHovered);
     const sw = isHovered ? 2 : 1.5;
 
     switch (node.type) {
-      case "signal": // circle
+      case "signal":
         return <circle cx={node.x} cy={node.y} r={28} fill={bg} stroke={color} strokeWidth={sw} className="transition-all duration-150" />;
-      case "function": // hexagon
+      case "function":
         return <HexagonShape cx={node.x} cy={node.y} r={32} fill={bg} stroke={color} strokeWidth={sw} />;
-      case "matrix": // square
+      case "matrix":
         return <rect x={node.x - 28} y={node.y - 24} width={56} height={48} rx={4} fill={bg} stroke={color} strokeWidth={sw} className="transition-all duration-150" />;
-      case "incident": // triangle
+      case "incident":
         return <TriangleShape cx={node.x} cy={node.y} r={28} fill={bg} stroke={color} strokeWidth={sw} />;
-      case "report": // rounded rect
+      case "report":
         return <rect x={node.x - 40} y={node.y - 20} width={80} height={40} rx={12} fill={bg} stroke={color} strokeWidth={sw} className="transition-all duration-150" />;
       default:
         return <rect x={node.x - 40} y={node.y - 20} width={80} height={40} rx={4} fill={bg} stroke={color} strokeWidth={sw} className="transition-all duration-150" />;
@@ -98,10 +97,9 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
 
   return (
     <div className="p-4 animate-fade-in">
-      <div className="ide-panel rounded-sm">
+      <div className="ide-panel-glow rounded-sm">
         <div className="ide-header flex items-center justify-between">
           <span>Граф зависимостей</span>
-          {/* Mode switcher */}
           <div className="flex gap-0.5 normal-case tracking-normal">
             {(["modules", "functions", "signals"] as GraphMode[]).map(mode => (
               <button
@@ -119,7 +117,12 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
         <div className="p-4 overflow-x-auto">
           <TooltipProvider delayDuration={200}>
             <svg width="700" height="320" viewBox="0 0 700 320" className="w-full max-w-[700px]">
-              {/* Edges with criticality-based stroke width */}
+              <defs>
+                <filter id="edgeGlow">
+                  <feGaussianBlur stdDeviation="2" result="blur" />
+                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </defs>
               {edges.map(([from, to, criticality]) => {
                 const a = getNode(from);
                 const b = getNode(to);
@@ -128,19 +131,16 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                 return (
                   <line
                     key={`${from}-${to}`}
-                    x1={a.x}
-                    y1={a.y}
-                    x2={b.x}
-                    y2={b.y}
-                    stroke={isHighlighted ? "hsl(220, 10%, 55%)" : "hsl(228, 8%, 30%)"}
+                    x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+                    stroke={isHighlighted ? "hsl(185, 70%, 50%, 0.6)" : "hsl(228, 8%, 25%)"}
                     strokeWidth={isHighlighted ? criticality + 1 : criticality}
                     strokeDasharray={criticality >= 3 ? "none" : "4 2"}
+                    filter={isHighlighted ? "url(#edgeGlow)" : undefined}
                     className="transition-all duration-150"
                   />
                 );
               })}
 
-              {/* Nodes */}
               {nodes.map((node) => {
                 const isHovered = hoveredNode === node.id;
                 return (
@@ -155,24 +155,10 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                         }}
                       >
                         {renderNodeShape(node, isHovered)}
-                        <text
-                          x={node.x}
-                          y={node.y - 2}
-                          textAnchor="middle"
-                          fill="hsl(220, 10%, 85%)"
-                          fontSize="9"
-                          fontFamily="Inter, sans-serif"
-                        >
+                        <text x={node.x} y={node.y - 2} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="9" fontFamily="Inter, sans-serif">
                           {node.label.length > 14 ? node.label.slice(0, 13) + "…" : node.label}
                         </text>
-                        <text
-                          x={node.x}
-                          y={node.y + 10}
-                          textAnchor="middle"
-                          fill="hsl(220, 8%, 55%)"
-                          fontSize="7"
-                          fontFamily="Inter, sans-serif"
-                        >
+                        <text x={node.x} y={node.y + 10} textAnchor="middle" fill="hsl(220, 8%, 50%)" fontSize="7" fontFamily="Inter, sans-serif">
                           {node.type === "signal" ? "Сигнал" : node.type === "function" ? "Функция" : node.type === "matrix" ? "Матрица" : node.type === "incident" ? "Инцидент" : "Отчёт"}
                         </text>
                       </g>
@@ -188,20 +174,19 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
         </div>
       </div>
 
-      {/* Legend */}
       <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground px-1">
         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-success inline-block" /> Успешно</span>
         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-warning inline-block" /> Предупреждения</span>
         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-destructive inline-block" /> Ошибки</span>
         <span className="text-border">|</span>
         <span className="flex items-center gap-1">
-          <svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="none" stroke="hsl(220,8%,55%)" strokeWidth="1" /></svg> Сигнал
+          <svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="none" stroke="hsl(220,8%,50%)" strokeWidth="1" /></svg> Сигнал
         </span>
         <span className="flex items-center gap-1">
-          <svg width="12" height="12"><rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="hsl(220,8%,55%)" strokeWidth="1" /></svg> Матрица
+          <svg width="12" height="12"><rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="hsl(220,8%,50%)" strokeWidth="1" /></svg> Матрица
         </span>
         <span className="flex items-center gap-1">
-          <svg width="14" height="12"><polygon points="7,1 13,6 7,11 1,6" fill="none" stroke="hsl(220,8%,55%)" strokeWidth="1" /></svg> Функция
+          <svg width="14" height="12"><polygon points="7,1 13,6 7,11 1,6" fill="none" stroke="hsl(220,8%,50%)" strokeWidth="1" /></svg> Функция
         </span>
       </div>
     </div>
