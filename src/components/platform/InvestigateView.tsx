@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { incidents, incidentStatusLabels, type Incident, type IncidentStatus } from "@/data/mockPlatform";
 import {
   AlertTriangle, XCircle, CheckCircle, Clock, User, FileText, Link2, ArrowRight,
@@ -7,10 +7,25 @@ import {
 
 interface InvestigateViewProps {
   onNavigateToConfigure: () => void;
+  initialSignal?: string | null;
 }
 
-export function InvestigateView({ onNavigateToConfigure }: InvestigateViewProps) {
-  const [selectedId, setSelectedId] = useState<string>(incidents[0].id);
+export function InvestigateView({ onNavigateToConfigure, initialSignal }: InvestigateViewProps) {
+  // If a signal was passed from LIVE, try to find matching incident
+  const findIncidentBySignal = (signal: string | null | undefined) => {
+    if (!signal) return incidents[0].id;
+    const match = incidents.find(i => i.linkedParameters.some(p => p.includes(signal.split(".")[0])));
+    return match?.id || incidents[0].id;
+  };
+
+  const [selectedId, setSelectedId] = useState<string>(findIncidentBySignal(initialSignal));
+
+  useEffect(() => {
+    if (initialSignal) {
+      setSelectedId(findIncidentBySignal(initialSignal));
+    }
+  }, [initialSignal]);
+
   const selected = incidents.find((i) => i.id === selectedId) || incidents[0];
 
   const priorityColor = (p: string) =>
@@ -28,6 +43,11 @@ export function InvestigateView({ onNavigateToConfigure }: InvestigateViewProps)
       {/* Incident list */}
       <div className="w-[280px] min-w-[280px] border-r border-border flex flex-col bg-card">
         <div className="ide-header">Инциденты</div>
+        {initialSignal && (
+          <div className="px-3 py-1.5 bg-primary/10 border-b border-border text-[10px] text-primary">
+            Фильтр: {initialSignal}
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto">
           {incidents.map((inc) => (
             <button
