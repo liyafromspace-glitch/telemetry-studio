@@ -10,10 +10,10 @@ import { AnalyzeView } from "./AnalyzeView";
 import { ConfigureView } from "./ConfigureView";
 import { GovernView } from "./GovernView";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { Activity, Layers, Minimize2 } from "lucide-react";
+import { Activity, Minimize2, Maximize2 } from "lucide-react";
 
 export function PlatformShell() {
-  const [activeState, setActiveState] = useState<AppState>("live");
+  const [activeState, setActiveState] = useState<AppState>("configure");
   const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
   const [investigateSignal, setInvestigateSignal] = useState<string | null>(null);
 
@@ -32,7 +32,6 @@ export function PlatformShell() {
   useKeyboardShortcuts({
     onStateChange: setActiveState,
     onSearch: () => {
-      // Focus search input if available
       const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Поиск"]');
       searchInput?.focus();
     },
@@ -40,44 +39,45 @@ export function PlatformShell() {
 
   return (
     <div className={`h-screen flex flex-col bg-background text-foreground ${density === "compact" ? "density-compact" : ""}`}>
-      {/* Top bar */}
-      <div className="h-9 flex items-center justify-between px-3 border-b border-border bg-card text-xs">
-        <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-primary" />
-          <span className="font-semibold text-foreground tracking-tight">
-            Industrial Telemetry Platform
-          </span>
-          <span className="text-muted-foreground">·</span>
-          <span className="text-muted-foreground">{defaultContext.environment}</span>
+      {/* Top header bar */}
+      <div className="h-10 flex items-center justify-between px-3 border-b border-border bg-card text-xs select-none">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-primary" />
+            <span className="font-semibold text-foreground tracking-tight">
+              Industrial Telemetry Platform
+            </span>
+          </div>
+          <span className="text-muted-foreground/50">·</span>
+          <span className="text-muted-foreground text-[11px]">{defaultContext.environment}</span>
         </div>
-        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-          <span className="flex items-center gap-1">
+        <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
+          <ContextBar context={defaultContext} />
+          <div className="w-px h-4 bg-border" />
+          <span className="flex items-center gap-1.5">
             <span className="status-dot status-active" />
-            {totalActive} активных
+            <span>{totalActive} активных</span>
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1.5">
             <span className="status-dot status-error" />
-            {totalErrors} ошибок
+            <span>{totalErrors} ошибок</span>
           </span>
-          {/* Density toggle */}
+          <div className="w-px h-4 bg-border" />
           <button
             onClick={() => setDensity(d => d === "comfortable" ? "compact" : "comfortable")}
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm hover:bg-accent transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded-sm hover:bg-accent transition-colors"
             title={density === "comfortable" ? "Компактный режим" : "Комфортный режим"}
           >
             {density === "comfortable" ? (
               <Minimize2 className="w-3 h-3" />
             ) : (
-              <Layers className="w-3 h-3" />
+              <Maximize2 className="w-3 h-3" />
             )}
-            <span className="text-[9px]">{density === "comfortable" ? "Компактный" : "Комфортный"}</span>
+            <span className="text-[10px]">{density === "comfortable" ? "Компактный" : "Комфортный"}</span>
           </button>
-          <span>v2.4.1</span>
+          <span className="text-[10px] text-muted-foreground/60">v2.4.1</span>
         </div>
       </div>
-
-      {/* Context bar */}
-      <ContextBar context={defaultContext} />
 
       {/* Main area */}
       <div className="flex-1 flex min-h-0">
@@ -102,16 +102,19 @@ export function PlatformShell() {
       </div>
 
       {/* Status bar */}
-      <div className="h-6 flex items-center justify-between px-3 border-t border-border bg-card text-[10px] text-muted-foreground">
-        <div className="flex items-center gap-3">
-          <span className="uppercase tracking-wider font-medium">
-            {activeState === "live" ? "LIVE" :
-             activeState === "investigate" ? "INVESTIGATE" :
-             activeState === "analyze" ? "ANALYZE" :
-             activeState === "configure" ? "CONFIGURE" : "GOVERN"}
+      <div className="h-6 flex items-center justify-between px-3 border-t border-border bg-card text-[10px] text-muted-foreground select-none">
+        <div className="flex items-center gap-4">
+          <span className="uppercase tracking-wider font-semibold text-foreground/70">
+            {activeState.toUpperCase()}
           </span>
           <span>UTC+3</span>
-          <span className="text-[9px]">{density === "compact" ? "▪ Компактный" : "▫ Комфортный"}</span>
+          <span>{density === "compact" ? "▪ Компактный" : "▫ Комфортный"}</span>
+          <span className="text-muted-foreground/50">·</span>
+          <div className="flex items-center gap-2">
+            <span className="btn-secondary !py-0 !px-1.5 !text-[9px] cursor-default">Проверить ▾</span>
+            <span className="btn-secondary !py-0 !px-1.5 !text-[9px] cursor-default">Сохранить ▾</span>
+            <span className="btn-secondary !py-0 !px-1.5 !text-[9px] cursor-default">Активировать ▾</span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <span>⌘K Поиск</span>
