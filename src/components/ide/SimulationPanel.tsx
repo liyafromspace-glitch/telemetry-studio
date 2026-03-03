@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Play, SkipForward, RotateCcw, CheckCircle, AlertTriangle, XCircle, Code, Sliders } from "lucide-react";
 import { Rule } from "@/data/mockRules";
+import { CausalChain, buildSimulationChain } from "@/components/ide/CausalChain";
 
 interface SimulationPanelProps {
   rule: Rule;
@@ -271,6 +272,18 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
           Сброс
         </button>
       </div>
+
+      {/* Causal Chain */}
+      {traces.length > 0 && (
+        <CausalChain
+          title="Как работает функция"
+          steps={buildSimulationChain(
+            fields.map(f => ({ name: f.name, value: f.value })),
+            rule.name,
+            rule.errorCount > 0
+          )}
+        />
+      )}
 
       {/* Evaluation Trace */}
       {traces.length > 0 && (
