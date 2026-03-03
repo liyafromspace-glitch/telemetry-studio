@@ -14,32 +14,27 @@ export function GovernView({ onNavigateToAnalyze }: GovernViewProps) {
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-2 text-xs">
-          <Shield className="w-3.5 h-3.5 text-[hsl(270,60%,65%)]" />
+          <Shield className="w-3.5 h-3.5 text-primary" />
           <span className="font-medium text-foreground">Журнал управления и аудита</span>
         </div>
-        <button
-          onClick={onNavigateToAnalyze}
-          className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors"
-        >
+        <button onClick={onNavigateToAnalyze} className="btn-secondary">
           Перейти к отчётам <ArrowRight className="w-3 h-3" />
         </button>
       </div>
 
-      {/* Tabs */}
       <div className="flex border-b border-border bg-card">
         <button
           onClick={() => setActiveTab("log")}
-          className={`px-4 py-2 text-xs relative ${activeTab === "log" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          className={`px-4 py-2 text-xs font-medium relative ${activeTab === "log" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
         >
           Журнал активаций
           {activeTab === "log" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />}
         </button>
         <button
           onClick={() => setActiveTab("compare")}
-          className={`px-4 py-2 text-xs relative ${activeTab === "compare" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          className={`px-4 py-2 text-xs font-medium relative ${activeTab === "compare" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
         >
           Сравнение версий
           {activeTab === "compare" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />}
@@ -47,7 +42,6 @@ export function GovernView({ onNavigateToAnalyze }: GovernViewProps) {
       </div>
 
       {activeTab === "log" ? (
-        /* Audit log as table */
         <div className="flex-1 overflow-auto">
           <table className="w-full text-xs">
             <thead>
@@ -74,7 +68,6 @@ export function GovernView({ onNavigateToAnalyze }: GovernViewProps) {
           </table>
         </div>
       ) : (
-        /* Version comparison */
         <div className="flex-1 overflow-auto p-4 animate-fade-in">
           <VersionCompare />
         </div>
@@ -103,7 +96,7 @@ function AuditRow({ entry, expanded, onToggle }: { entry: VersionAuditEntry; exp
         </td>
         <td className="px-4 py-2 text-foreground max-w-[300px] truncate">{entry.entityName}</td>
         <td className="px-4 py-2">
-          <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-accent text-muted-foreground">
+          <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-accent text-muted-foreground border border-border">
             {entry.entityType === "function" ? "Функция" : "Матрица"}
           </span>
         </td>
@@ -121,15 +114,13 @@ function AuditRow({ entry, expanded, onToggle }: { entry: VersionAuditEntry; exp
         </td>
       </tr>
       {expanded && (
-        <tr className="bg-accent/20">
+        <tr className="bg-accent/10">
           <td colSpan={7} className="px-4 py-3">
             <div className="space-y-2">
-              {/* Diff preview */}
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Изменение:</div>
-              <div className="ide-panel rounded-sm p-2 text-xs font-mono text-foreground bg-background border border-border">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Изменение:</div>
+              <div className="ide-panel-glow rounded-sm p-2 text-xs font-mono text-foreground">
                 {entry.changeDescription}
               </div>
-              {/* Impact breakdown */}
               <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Link2 className="w-2.5 h-2.5" /> {entry.impactParameters} параметров
@@ -152,45 +143,45 @@ function AuditRow({ entry, expanded, onToggle }: { entry: VersionAuditEntry; exp
 function VersionCompare() {
   return (
     <div className="space-y-4">
-      <div className="ide-panel rounded-sm">
+      <div className="ide-panel-glow rounded-sm">
         <div className="ide-header">Сравнение: Матрица диапазонов давления v3 → v4</div>
         <div className="grid grid-cols-2 divide-x divide-border">
           <div className="p-3">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">v3 (предыдущая)</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2 font-semibold">v3 (предыдущая)</div>
             <div className="space-y-1 text-xs font-mono">
               <div className="text-muted-foreground">Участок Б → Манометр #2</div>
-              <div className="text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-sm">Допустимое отклонение: <strong>200</strong> бар</div>
+              <div className="text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-sm border border-destructive/20">Допустимое отклонение: <strong>200</strong> бар</div>
               <div className="text-muted-foreground mt-2">Участок В → Манометр #3</div>
               <div className="text-muted-foreground px-1.5 py-0.5">Диапазон: 0–350 бар</div>
             </div>
           </div>
           <div className="p-3">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">v4 (текущая)</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2 font-semibold">v4 (текущая)</div>
             <div className="space-y-1 text-xs font-mono">
               <div className="text-muted-foreground">Участок Б → Манометр #2</div>
-              <div className="text-success bg-success/10 px-1.5 py-0.5 rounded-sm">Допустимое отклонение: <strong>250</strong> бар</div>
+              <div className="text-success bg-success/10 px-1.5 py-0.5 rounded-sm border border-success/20">Допустимое отклонение: <strong>250</strong> бар</div>
               <div className="text-muted-foreground mt-2">Участок В → Манометр #3</div>
-              <div className="text-success bg-success/10 px-1.5 py-0.5 rounded-sm">Диапазон: 0–400 бар <span className="text-[9px]">(добавлено)</span></div>
+              <div className="text-success bg-success/10 px-1.5 py-0.5 rounded-sm border border-success/20">Диапазон: 0–400 бар <span className="text-[9px]">(добавлено)</span></div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="ide-panel rounded-sm">
+      <div className="ide-panel-glow rounded-sm">
         <div className="ide-header">Сравнение: Конвертация температуры v4 → v5</div>
         <div className="grid grid-cols-2 divide-x divide-border">
           <div className="p-3">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">v4</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2 font-semibold">v4</div>
             <div className="space-y-1 text-xs font-mono">
               <div className="text-muted-foreground">Поддерживаемые единицы:</div>
               <div className="text-muted-foreground px-1.5 py-0.5">°C, °F</div>
             </div>
           </div>
           <div className="p-3">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">v5</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2 font-semibold">v5</div>
             <div className="space-y-1 text-xs font-mono">
               <div className="text-muted-foreground">Поддерживаемые единицы:</div>
-              <div className="text-success bg-success/10 px-1.5 py-0.5 rounded-sm">°C, °F, <strong>K</strong> <span className="text-[9px]">(добавлено)</span></div>
+              <div className="text-success bg-success/10 px-1.5 py-0.5 rounded-sm border border-success/20">°C, °F, <strong>K</strong> <span className="text-[9px]">(добавлено)</span></div>
             </div>
           </div>
         </div>

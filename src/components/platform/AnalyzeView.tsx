@@ -4,13 +4,12 @@ import {
   FileText, Link2, Cpu, Grid3X3, ChevronRight, Clock, ArrowRight, TrendingUp
 } from "lucide-react";
 import { CausalChain, buildReportChain } from "@/components/ide/CausalChain";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from "recharts";
 
 interface AnalyzeViewProps {
   onNavigateToInvestigate: () => void;
 }
 
-// Mock chart data
 const chartData = Array.from({ length: 20 }, (_, i) => ({
   time: `${String(i + 1).padStart(2, "0")}:00`,
   TI03025: i < 15 ? 82 + Math.random() * 6 : null,
@@ -24,7 +23,6 @@ export function AnalyzeView({ onNavigateToInvestigate }: AnalyzeViewProps) {
 
   return (
     <div className="flex-1 flex min-h-0">
-      {/* Report list */}
       <div className="w-[260px] min-w-[260px] border-r border-border flex flex-col bg-card">
         <div className="ide-header">Отчёты</div>
         <div className="flex-1 overflow-y-auto">
@@ -48,7 +46,6 @@ export function AnalyzeView({ onNavigateToInvestigate }: AnalyzeViewProps) {
         </div>
       </div>
 
-      {/* Report detail */}
       <ReportDetail report={selected} onNavigateToInvestigate={onNavigateToInvestigate} />
     </div>
   );
@@ -57,7 +54,6 @@ export function AnalyzeView({ onNavigateToInvestigate }: AnalyzeViewProps) {
 function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onNavigateToInvestigate: () => void }) {
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      {/* Breadcrumb */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <span>Отчёты</span>
@@ -66,56 +62,68 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
         </div>
         <button
           onClick={onNavigateToInvestigate}
-          className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors"
+          className="btn-secondary"
         >
           Показать связанные инциденты <ArrowRight className="w-3 h-3" />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto bg-background p-4 space-y-4 animate-fade-in">
-        {/* Description */}
-        <div className="ide-panel rounded-sm">
+        <div className="ide-panel-glow rounded-sm">
           <div className="ide-header">Описание</div>
           <div className="p-3 text-xs text-foreground leading-relaxed">{report.description}</div>
         </div>
 
-        {/* Chart */}
-        <div className="ide-panel rounded-sm">
+        {/* Chart with teal glow palette */}
+        <div className="ide-panel-glow rounded-sm">
           <div className="ide-header flex items-center gap-1.5">
             <TrendingUp className="w-3 h-3" /> Визуализация
           </div>
-          <div className="p-3 h-[240px]">
+          <div className="p-3 h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228, 8%, 22%)" />
-                <XAxis dataKey="time" tick={{ fontSize: 9, fill: "hsl(220, 8%, 55%)" }} stroke="hsl(228, 8%, 22%)" />
-                <YAxis tick={{ fontSize: 9, fill: "hsl(220, 8%, 55%)" }} stroke="hsl(228, 8%, 22%)" />
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="gradTI" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradPT" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(2, 93%, 63%)" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="hsl(2, 93%, 63%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradFT" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(39, 74%, 48%)" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="hsl(39, 74%, 48%)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228, 8%, 18%)" />
+                <XAxis dataKey="time" tick={{ fontSize: 9, fill: "hsl(220, 8%, 45%)" }} stroke="hsl(228, 8%, 18%)" />
+                <YAxis tick={{ fontSize: 9, fill: "hsl(220, 8%, 45%)" }} stroke="hsl(228, 8%, 18%)" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(230, 9%, 17%)",
-                    border: "1px solid hsl(228, 8%, 22%)",
+                    backgroundColor: "hsl(230, 10%, 15%)",
+                    border: "1px solid hsl(185, 70%, 50%, 0.2)",
                     borderRadius: "4px",
                     fontSize: "10px",
+                    boxShadow: "0 0 12px hsl(185, 70%, 50%, 0.1)",
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: "10px" }} />
-                <Line type="monotone" dataKey="TI03025" stroke="hsl(212, 92%, 58%)" strokeWidth={1.5} dot={false} connectNulls={false} />
-                <Line type="monotone" dataKey="PT02012" stroke="hsl(2, 93%, 63%)" strokeWidth={1.5} dot={false} />
-                <Line type="monotone" dataKey="FT01007" stroke="hsl(39, 74%, 48%)" strokeWidth={1.5} dot={false} />
-              </LineChart>
+                <Area type="monotone" dataKey="TI03025" stroke="hsl(185, 70%, 50%)" strokeWidth={1.5} fill="url(#gradTI)" dot={false} connectNulls={false} />
+                <Area type="monotone" dataKey="PT02012" stroke="hsl(2, 93%, 63%)" strokeWidth={1.5} fill="url(#gradPT)" dot={false} />
+                <Area type="monotone" dataKey="FT01007" stroke="hsl(39, 74%, 48%)" strokeWidth={1.5} fill="url(#gradFT)" dot={false} />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Causal Chain */}
         <CausalChain
           title="Логическая цепочка события"
           steps={buildReportChain(report)}
         />
 
-        {/* Linked entities */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          <div className="ide-panel rounded-sm">
+          <div className="ide-panel-glow rounded-sm">
             <div className="ide-header flex items-center gap-1.5">
               <Link2 className="w-3 h-3" /> Параметры
             </div>
@@ -125,7 +133,7 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
               ))}
             </div>
           </div>
-          <div className="ide-panel rounded-sm">
+          <div className="ide-panel-glow rounded-sm">
             <div className="ide-header flex items-center gap-1.5">
               <Cpu className="w-3 h-3" /> Функции
             </div>
@@ -135,7 +143,7 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
               ))}
             </div>
           </div>
-          <div className="ide-panel rounded-sm">
+          <div className="ide-panel-glow rounded-sm">
             <div className="ide-header flex items-center gap-1.5">
               <Grid3X3 className="w-3 h-3" /> Матрицы
             </div>
