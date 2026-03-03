@@ -8,7 +8,7 @@ interface RightPanelProps {
 }
 
 const mockSparklineData: Record<string, number[]> = {
-  "Влажность": [22, 24, 24, 25, 76, 26, 76],
+  "Влажность": [72, 74, 74, 25, 78, 26, 76],
   "Температура": [82, 84, 85, 83, 86, 85, 84],
   "Уровень нефти": [4.1, 4.2, 4.15, 4.3, 4.21, 4.18, 4.25],
   "Давление": [340, 355, 370, 390, 400, 412, 410],
@@ -23,23 +23,42 @@ const templates = [
   { id: "t3", name: "Отказ клапана", icon: "🔧" },
 ];
 
-function Sparkline({ data, color = "hsl(var(--primary))" }: { data: number[]; color?: string }) {
+function Sparkline({ data }: { data: number[] }) {
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
-  const w = 120;
-  const h = 24;
-  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 4) - 2}`).join(" ");
+  const w = 140;
+  const h = 28;
+  const pts = data.map((v, i) => ({
+    x: (i / (data.length - 1)) * w,
+    y: h - ((v - min) / range) * (h - 6) - 3,
+  }));
+  const linePoints = pts.map(p => `${p.x},${p.y}`).join(" ");
+  // Area fill
+  const areaPoints = `0,${h} ${linePoints} ${w},${h}`;
 
   return (
     <svg width={w} height={h} className="inline-block">
       <defs>
-        <linearGradient id="sparkGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={color} stopOpacity="1" />
+        <linearGradient id="sparkGlowLine" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.3" />
+          <stop offset="50%" stopColor="hsl(180, 80%, 60%)" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="1" />
         </linearGradient>
+        <linearGradient id="sparkGlowArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0" />
+        </linearGradient>
+        <filter id="glowFilter">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
-      <polyline points={points} fill="none" stroke="url(#sparkGrad)" strokeWidth="1.5" strokeLinejoin="round" />
+      <polygon points={areaPoints} fill="url(#sparkGlowArea)" />
+      <polyline points={linePoints} fill="none" stroke="url(#sparkGlowLine)" strokeWidth="1.5" strokeLinejoin="round" filter="url(#glowFilter)" />
     </svg>
   );
 }
@@ -99,13 +118,7 @@ export function RightPanel({ rule }: RightPanelProps) {
             ))}
           </div>
           {/* Inline validation */}
-          {rule.parameterType === "Давление" && (
-            <div className="flex items-start gap-1.5 text-warning bg-warning/10 p-2 rounded-sm border border-warning/20">
-              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span className="text-[10px] font-medium">⚠ Допустимый диапазон: 0–100 %RH</span>
-            </div>
-          )}
-          {rule.parameterType === "Влажность" && (
+          {(rule.parameterType === "Давление" || rule.parameterType === "Влажность") && (
             <div className="flex items-start gap-1.5 text-warning bg-warning/10 p-2 rounded-sm border border-warning/20">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
               <span className="text-[10px] font-medium">⚠ Допустимый диапазон: 0–100 %RH</span>

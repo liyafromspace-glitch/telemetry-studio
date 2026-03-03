@@ -7,66 +7,76 @@ interface RuleOverviewProps {
 }
 
 function highlightCode(code: string) {
-  // Simple syntax highlighting
   return code.split('\n').map((line, i) => {
-    let highlighted = line;
-    // Comments
     if (line.trimStart().startsWith('//')) {
       return <div key={i}><span className="comment">{line}</span></div>;
     }
-    // Keywords
-    highlighted = line;
-    const parts: React.ReactNode[] = [];
+
     const keywords = /\b(const|let|var|if|else|return|function|new|typeof|instanceof)\b/g;
     const stringRegex = /"[^"]*"|'[^']*'/g;
-    
-    // For simplicity, just return the line with basic coloring
-    let remaining = line;
-    let lastIndex = 0;
+    const numberRegex = /\b\d+\.?\d*\b/g;
+
     const tokens: { start: number; end: number; type: string; text: string }[] = [];
-    
-    // Find strings
+
     let match;
     while ((match = stringRegex.exec(line)) !== null) {
       tokens.push({ start: match.index, end: match.index + match[0].length, type: 'string', text: match[0] });
     }
-    // Find keywords
     while ((match = keywords.exec(line)) !== null) {
       const overlaps = tokens.some(t => match!.index >= t.start && match!.index < t.end);
-      if (!overlaps) {
-        tokens.push({ start: match.index, end: match.index + match[0].length, type: 'keyword', text: match[0] });
-      }
+      if (!overlaps) tokens.push({ start: match.index, end: match.index + match[0].length, type: 'keyword', text: match[0] });
     }
-    // Find numbers
-    const numberRegex = /\b\d+\.?\d*\b/g;
     while ((match = numberRegex.exec(line)) !== null) {
       const overlaps = tokens.some(t => match!.index >= t.start && match!.index < t.end);
-      if (!overlaps) {
-        tokens.push({ start: match.index, end: match.index + match[0].length, type: 'number', text: match[0] });
-      }
+      if (!overlaps) tokens.push({ start: match.index, end: match.index + match[0].length, type: 'number', text: match[0] });
     }
 
     tokens.sort((a, b) => a.start - b.start);
 
-    if (tokens.length === 0) {
-      return <div key={i}>{line || '\u00A0'}</div>;
-    }
+    if (tokens.length === 0) return <div key={i}>{line || '\u00A0'}</div>;
 
     const result: React.ReactNode[] = [];
     let pos = 0;
     tokens.forEach((token, ti) => {
-      if (token.start > pos) {
-        result.push(<span key={`t-${ti}-pre`}>{line.slice(pos, token.start)}</span>);
-      }
+      if (token.start > pos) result.push(<span key={`t-${ti}-pre`}>{line.slice(pos, token.start)}</span>);
       result.push(<span key={`t-${ti}`} className={token.type}>{token.text}</span>);
       pos = token.end;
     });
-    if (pos < line.length) {
-      result.push(<span key="rest">{line.slice(pos)}</span>);
-    }
+    if (pos < line.length) result.push(<span key="rest">{line.slice(pos)}</span>);
 
     return <div key={i}>{result}</div>;
   });
+}
+
+// Structure diagram with glow
+function GlowDiagram({ variant }: { variant: number }) {
+  const sizes = [
+    { outer: 70, inner: 35 },
+    { outer: 60, inner: 30 },
+    { outer: 55, inner: 28 },
+  ];
+  const s = sizes[variant % 3];
+  
+  return (
+    <div className="aspect-[4/3] bg-background/30 rounded-sm border border-border flex items-center justify-center relative overflow-hidden">
+      {/* Background glow */}
+      <div 
+        className="absolute inset-0 opacity-20"
+        style={{
+          background: 'radial-gradient(circle at center, hsl(185 70% 50% / 0.15) 0%, transparent 70%)'
+        }}
+      />
+      <div 
+        className="rounded-full border-2 glow-ring flex items-center justify-center"
+        style={{ width: s.outer, height: s.outer }}
+      >
+        <div 
+          className="rounded-full border glow-ring-inner"
+          style={{ width: s.inner, height: s.inner }}
+        />
+      </div>
+    </div>
+  );
 }
 
 export function RuleOverview({ rule }: RuleOverviewProps) {
@@ -122,8 +132,8 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
         </div>
       </div>
 
-      {/* Properties with inline action buttons */}
-      <div className="ide-panel rounded-sm">
+      {/* Properties */}
+      <div className="ide-panel-glow rounded-sm">
         <div className="ide-header flex items-center justify-between">
           <span>Основные свойства</span>
           <div className="flex items-center gap-1.5 normal-case tracking-normal">
@@ -152,15 +162,20 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       </div>
 
       {/* Code editor */}
-      <div className="ide-panel rounded-sm">
+      <div className="ide-panel-glow rounded-sm relative overflow-hidden">
         <div className="ide-header">Функция преобразования</div>
-        <pre className="p-4 text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block bg-background/50">
+        {/* Left glow edge */}
+        <div 
+          className="absolute left-0 top-8 bottom-0 w-1"
+          style={{ background: 'linear-gradient(180deg, hsl(185 70% 50% / 0.3) 0%, hsl(185 70% 50% / 0.05) 100%)' }}
+        />
+        <pre className="p-4 pl-5 text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block" style={{ background: 'hsl(228 12% 11%)' }}>
           <code>{highlightCode(rule.code)}</code>
         </pre>
       </div>
 
-      {/* Structure section - collapsible */}
-      <div className="ide-panel rounded-sm">
+      {/* Structure section */}
+      <div className="ide-panel-glow rounded-sm">
         <button 
           onClick={() => setStructureOpen(!structureOpen)}
           className="ide-header w-full flex items-center justify-between cursor-pointer hover:bg-accent/30 transition-colors"
@@ -170,12 +185,8 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
         </button>
         {structureOpen && (
           <div className="p-4 grid grid-cols-3 gap-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="aspect-square bg-background/50 rounded-sm border border-border flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full border-2 border-primary/30 flex items-center justify-center">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20" />
-                </div>
-              </div>
+            {[0, 1, 2].map(i => (
+              <GlowDiagram key={i} variant={i} />
             ))}
           </div>
         )}
