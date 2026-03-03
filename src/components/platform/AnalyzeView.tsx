@@ -3,6 +3,7 @@ import { reports, type Report } from "@/data/mockPlatform";
 import {
   FileText, Link2, Cpu, Grid3X3, ChevronRight, Clock, ArrowRight, TrendingUp
 } from "lucide-react";
+import { CausalChain, buildReportChain } from "@/components/ide/CausalChain";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 interface AnalyzeViewProps {
@@ -105,6 +106,12 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
             </ResponsiveContainer>
           </div>
         </div>
+
+        {/* Causal Chain */}
+        <CausalChain
+          title="Логическая цепочка события"
+          steps={buildReportChain(report)}
+        />
 
         {/* Linked entities */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">

@@ -4,6 +4,7 @@ import {
   AlertTriangle, XCircle, CheckCircle, Clock, User, FileText, Link2, ArrowRight,
   ChevronRight, Cpu, Grid3X3
 } from "lucide-react";
+import { CausalChain, buildIncidentChain } from "@/components/ide/CausalChain";
 
 interface InvestigateViewProps {
   onNavigateToConfigure: () => void;
@@ -147,6 +148,10 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
               <div className="ide-header">Описание</div>
               <div className="p-3 text-xs text-foreground leading-relaxed">{incident.description}</div>
             </div>
+            <CausalChain
+              title="Почему произошёл инцидент"
+              steps={buildIncidentChain(incident)}
+            />
             <div className="ide-panel rounded-sm">
               <div className="ide-header">Связанные параметры</div>
               <div className="p-3 flex flex-wrap gap-1.5">
