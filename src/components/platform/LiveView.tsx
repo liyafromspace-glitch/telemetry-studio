@@ -5,6 +5,34 @@ interface LiveViewProps {
   onNavigateToInvestigate: (signalParam: string) => void;
 }
 
+// Mock historical data for sparklines
+const mockHistory: Record<string, number[]> = {
+  "TI03025.PV": [85, 84, 83, 82, 0, 0, 0],
+  "PT02012.PV": [340, 355, 370, 390, 400, 412, 413],
+  "FT01007.PV": [900, 950, 1000, 1050, 1100, 1200, 1247],
+  "LT04001.PV": [4.1, 4.15, 4.2, 4.18, 4.22, 4.21, 4.21],
+  "DT05003.PV": [841, 842, 841, 843, 842, 842, 842],
+  "HT06002.PV": [92, 94, 95, 96, 97, 98, 99],
+};
+
+function MiniSparkline({ data, status }: { data: number[]; status: string }) {
+  const filtered = data.filter(v => v > 0);
+  if (filtered.length < 2) return <span className="text-[10px] text-muted-foreground">—</span>;
+  const min = Math.min(...filtered);
+  const max = Math.max(...filtered);
+  const range = max - min || 1;
+  const w = 48;
+  const h = 16;
+  const points = filtered.map((v, i) => `${(i / (filtered.length - 1)) * w},${h - ((v - min) / range) * h}`).join(" ");
+  const color = status === "critical" ? "hsl(2, 93%, 63%)" : status === "warning" ? "hsl(39, 74%, 48%)" : "hsl(127, 50%, 49%)";
+
+  return (
+    <svg width={w} height={h} className="inline-block">
+      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
   const criticalCount = liveSignals.filter((s) => s.status === "critical").length;
   const warningCount = liveSignals.filter((s) => s.status === "warning").length;
@@ -43,6 +71,7 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
               <th className="text-right px-4 py-2 font-medium">Текущее</th>
               <th className="text-right px-4 py-2 font-medium">Ожидаемое</th>
               <th className="text-left px-4 py-2 font-medium">Ед.</th>
+              <th className="text-center px-4 py-2 font-medium">Тренд</th>
               <th className="text-left px-4 py-2 font-medium">Функция</th>
               <th className="text-left px-4 py-2 font-medium">Матрица</th>
               <th className="text-left px-4 py-2 font-medium">Время</th>
@@ -61,6 +90,8 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
 }
 
 function SignalRow({ signal, onInvestigate }: { signal: LiveSignal; onInvestigate: (p: string) => void }) {
+  const sparkData = mockHistory[signal.parameter] || [];
+
   return (
     <tr
       className={`border-b border-border transition-colors hover:bg-accent/30 ${
@@ -84,6 +115,9 @@ function SignalRow({ signal, onInvestigate }: { signal: LiveSignal; onInvestigat
       </td>
       <td className="px-4 py-2 text-right font-mono text-[11px] text-muted-foreground">{signal.expectedValue}</td>
       <td className="px-4 py-2 text-muted-foreground">{signal.unit}</td>
+      <td className="px-4 py-2 text-center">
+        <MiniSparkline data={sparkData} status={signal.status} />
+      </td>
       <td className="px-4 py-2 text-muted-foreground truncate max-w-[140px]">{signal.linkedFunction}</td>
       <td className="px-4 py-2 text-muted-foreground truncate max-w-[160px]">{signal.linkedMatrix}</td>
       <td className="px-4 py-2 text-[10px] text-muted-foreground">{signal.timestamp.split(" ")[1]}</td>
