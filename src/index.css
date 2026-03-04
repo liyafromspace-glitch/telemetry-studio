@@ -139,12 +139,7 @@
       0 0 12px -4px hsl(var(--glow) / 0.08),
       inset 0 1px 0 hsl(var(--glow) / 0.04);
   }
-  .ide-panel-glow:hover {
-    box-shadow:
-      0 0 20px -4px hsl(var(--glow) / 0.14),
-      inset 0 1px 0 hsl(var(--glow) / 0.06);
-    border-color: hsl(var(--glow) / 0.2);
-  }
+
   .ide-header {
     @apply px-3 py-2 border-b border-border text-[11px] font-semibold uppercase tracking-wider text-muted-foreground;
   }
