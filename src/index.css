@@ -165,9 +165,6 @@
     -webkit-backdrop-filter: blur(16px) saturate(1.4);
     border: 1px solid hsl(var(--border) / 0.5);
   }
-  .glass-toolbar:hover {
-    background: hsl(var(--card) / 0.8);
-  }
   .glass-controls {
     background: hsl(var(--background) / 0.6);
     backdrop-filter: blur(12px) saturate(1.3);
@@ -202,19 +199,15 @@
   }
   .conn-dot-blue {
     background: hsl(var(--conn-blue));
-    box-shadow: 0 0 6px hsl(var(--conn-blue) / 0.4);
   }
   .conn-dot-orange {
     background: hsl(var(--conn-orange));
-    box-shadow: 0 0 6px hsl(var(--conn-orange) / 0.4);
   }
   .conn-dot-pink {
     background: hsl(var(--conn-pink));
-    box-shadow: 0 0 6px hsl(var(--conn-pink) / 0.4);
   }
   .conn-dot-green {
     background: hsl(var(--conn-green));
-    box-shadow: 0 0 6px hsl(var(--conn-green) / 0.4);
   }
 
   /* ── Status badges (Vercel-style) ── */
@@ -262,13 +255,10 @@
   }
 
   .ide-panel {
-    @apply bg-card border border-border rounded-lg transition-shadow duration-200;
-  }
-  .ide-panel:hover {
-    box-shadow: 0 0 0 1px hsl(var(--border));
+    @apply bg-card border border-border rounded-lg;
   }
   .ide-panel-glow {
-    @apply bg-card border border-border rounded-lg transition-all duration-200;
+    @apply bg-card border border-border rounded-lg;
   }
 
   .ide-header {
@@ -279,20 +269,15 @@
   }
   .status-active {
     background-color: hsl(var(--success));
-    box-shadow: 0 0 6px hsl(var(--success) / 0.4);
-    animation: status-pulse 2s ease-in-out infinite;
   }
   .status-draft {
     background-color: hsl(var(--muted-foreground));
   }
   .status-error {
     background-color: hsl(var(--destructive));
-    box-shadow: 0 0 6px hsl(var(--destructive) / 0.4);
-    animation: status-pulse 1.5s ease-in-out infinite;
   }
   .status-scheduled {
     background-color: hsl(var(--primary));
-    box-shadow: 0 0 6px hsl(var(--primary) / 0.4);
   }
   .status-warning {
     background-color: hsl(var(--warning));
@@ -369,17 +354,14 @@
   /* Sparkline value dot */
   .sparkline-value {
     @apply inline-flex items-center justify-center w-6 h-6 rounded-full text-[9px] font-mono font-medium;
-    background-color: hsl(var(--glow) / 0.1);
-    color: hsl(var(--glow-bright));
-    border: 1px solid hsl(var(--glow) / 0.2);
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
   }
 
   /* Tree item */
   .tree-item {
-    @apply w-full flex items-center gap-1.5 pr-2 py-1 text-xs transition-all duration-150;
-  }
-  .tree-item:hover {
-    transform: translateX(2px);
+    @apply w-full flex items-center gap-1.5 pr-2 py-1 text-xs transition-colors duration-150;
   }
   .tree-item-active {
     @apply bg-accent text-accent-foreground;
@@ -396,14 +378,12 @@
     @apply border-b border-border;
   }
 
-  /* Glow ring for structure diagrams */
+  /* Glow ring — only for selected/active elements */
   .glow-ring {
-    box-shadow: 0 0 20px hsl(var(--glow) / 0.15);
     border-color: hsl(var(--glow) / 0.3);
   }
   .glow-ring-inner {
-    background: radial-gradient(circle, hsl(var(--glow) / 0.1) 0%, transparent 70%);
-    border-color: hsl(var(--glow) / 0.25);
+    border-color: hsl(var(--glow) / 0.2);
   }
 
   /* Mini sparkline for sidebar */
@@ -415,43 +395,22 @@
     opacity: 1;
   }
 
-  /* Node hover microinteraction */
+  /* Node hover — subtle opacity only */
   .graph-node {
-    transition:
-      transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
-      filter 150ms ease-out;
-    transform-origin: center;
+    transition: opacity 140ms ease-out;
     cursor: pointer;
   }
   .graph-node:hover {
-    transform: scale(1.04);
-    filter: brightness(1.1);
+    opacity: 0.85;
   }
 
-  /* Tab transition helper */
-  .tab-content-enter {
-    animation:
-      tab-slide 150ms ease-out,
-      fade-in-fast 100ms ease-out;
-  }
+  /* Tab transition — removed ambient entrance animation */
 
-  /* Staggered children animation */
-  .stagger-children > * {
-    animation: slide-up 200ms ease-out both;
-  }
-  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-  .stagger-children > *:nth-child(2) { animation-delay: 40ms; }
-  .stagger-children > *:nth-child(3) { animation-delay: 80ms; }
-  .stagger-children > *:nth-child(4) { animation-delay: 120ms; }
-  .stagger-children > *:nth-child(5) { animation-delay: 160ms; }
-  .stagger-children > *:nth-child(6) { animation-delay: 200ms; }
-
-  /* Interactive card lift */
+  /* Interactive card lift — subtle border only */
   .card-lift {
-    @apply transition-all duration-200;
+    @apply transition-colors duration-150;
   }
   .card-lift:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px -4px hsl(0 0% 0% / 0.3);
+    border-color: hsl(var(--border) / 0.8);
   }
 }
