@@ -9,7 +9,7 @@ export function ContextBar({ context }: ContextBarProps) {
   const isProduction = context.environment.includes("Северное");
 
   return (
-    <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+    <div className="flex items-center gap-3 text-[11px] text-muted-foreground glass-controls rounded-md px-2.5 py-1">
       <span className={isProduction ? "env-badge-production" : "env-badge-test"}>
         {isProduction ? "ПРОДАКШН" : "ТЕСТ"}
       </span>

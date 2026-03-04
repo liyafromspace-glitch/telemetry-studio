@@ -40,7 +40,7 @@ export function PlatformShell() {
   return (
     <div className={`h-screen flex flex-col bg-background text-foreground ${density === "compact" ? "density-compact" : ""}`}>
       {/* Top header bar */}
-      <div className="h-10 flex items-center justify-between px-3 border-b border-border bg-card text-xs select-none">
+      <div className="h-10 flex items-center justify-between px-3 border-b border-border glass-surface text-xs select-none">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-primary" />
@@ -102,7 +102,7 @@ export function PlatformShell() {
       </div>
 
       {/* Status bar */}
-      <div className="h-6 flex items-center justify-between px-3 border-t border-border bg-card text-[10px] text-muted-foreground select-none">
+      <div className="h-6 flex items-center justify-between px-3 border-t border-border glass-surface text-[10px] text-muted-foreground select-none">
         <div className="flex items-center gap-4">
           <span className="uppercase tracking-wider font-semibold text-foreground/70">
             {activeState.toUpperCase()}

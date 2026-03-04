@@ -24,7 +24,7 @@ const stateAccentColors: Record<AppState, string> = {
 
 export function GlobalNav({ activeState, onStateChange }: GlobalNavProps) {
   return (
-    <div className="w-12 min-w-12 bg-card border-r border-border flex flex-col items-center py-2 gap-0.5">
+    <div className="w-12 min-w-12 glass-surface border-r border-border/50 flex flex-col items-center py-2 gap-0.5">
       {navItems.map(({ state, icon: Icon, label }) => {
         const isActive = activeState === state;
         const accentColor = state === "govern"
