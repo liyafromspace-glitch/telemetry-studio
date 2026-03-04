@@ -67,6 +67,19 @@
     --code-function: 270 50% 70%;
     --code-operator: 220 14% 75%;
 
+    /* Impact heatmap tokens */
+    --impact-green: 160 55% 48%;
+    --impact-orange: 39 74% 48%;
+    --impact-red: 2 93% 63%;
+
+    /* Motion tokens */
+    --motion-fast: 120ms;
+    --motion-normal: 180ms;
+    --motion-graph: 220ms;
+
+    /* Ghost line */
+    --ghost-line: 185 70% 50%;
+
     /* Density variables */
     --density-row-height: 2rem;
     --density-padding: 0.75rem;

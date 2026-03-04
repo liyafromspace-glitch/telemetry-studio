@@ -5,6 +5,8 @@ import {
   ChevronRight, Cpu, Grid3X3
 } from "lucide-react";
 import { CausalChain, buildIncidentChain } from "@/components/ide/CausalChain";
+import { SystemStory } from "@/components/ide/SystemStory";
+import { IncidentPlayback } from "@/components/ide/IncidentPlayback";
 
 interface InvestigateViewProps {
   onNavigateToConfigure: () => void;
@@ -71,13 +73,14 @@ export function InvestigateView({ onNavigateToConfigure, initialSignal }: Invest
 }
 
 function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Incident; onNavigateToConfigure: () => void }) {
-  const [activeTab, setActiveTab] = useState<"description" | "tasks" | "history" | "linked">("description");
+  const [activeTab, setActiveTab] = useState<"description" | "story" | "tasks" | "history" | "linked">("description");
 
   const tabs = [
     { id: "description" as const, label: "Описание" },
+    { id: "story" as const, label: "Хронология" },
     { id: "tasks" as const, label: "Задачи" },
     { id: "history" as const, label: "История" },
-    { id: "linked" as const, label: "Связанные конфигурации" },
+    { id: "linked" as const, label: "Связанные" },
   ];
 
   return (
@@ -119,7 +122,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
             }`}
           >
             {tab.label}
-            {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />}
+            {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary animate-scale-in" />}
           </button>
         ))}
       </div>
@@ -131,6 +134,10 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
               <div className="ide-header">Описание</div>
               <div className="p-3 text-xs text-foreground leading-relaxed">{incident.description}</div>
             </div>
+
+            {/* Incident Playback */}
+            <IncidentPlayback incident={incident} />
+
             <CausalChain
               title="Почему произошёл инцидент"
               steps={buildIncidentChain(incident)}
@@ -143,6 +150,12 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === "story" && (
+          <div className="animate-fade-in">
+            <SystemStory incident={incident} />
           </div>
         )}
 
