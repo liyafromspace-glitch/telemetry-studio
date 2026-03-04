@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Matrix } from "@/data/mockMatrices";
 import { MatrixOverview } from "./MatrixOverview";
-import { MatrixStructure } from "./MatrixStructure";
+import { MatrixScopePanel } from "./MatrixScopePanel";
+import { MatrixLinksTable } from "./MatrixLinksTable";
 import { DependencyGraph } from "./DependencyGraph";
 import { SimulationPanel } from "./SimulationPanel";
 import { VersionHistory } from "./VersionHistory";
@@ -14,8 +15,7 @@ interface MatrixCenterPanelProps {
 
 const tabs = [
   { id: "overview", label: "Обзор" },
-  { id: "structure", label: "Структура" },
-  { id: "dependencies", label: "Зависимости" },
+  { id: "links", label: "Связи" },
   { id: "simulation", label: "Симуляция" },
   { id: "history", label: "История версий" },
 ] as const;
@@ -25,6 +25,8 @@ type TabId = (typeof tabs)[number]["id"];
 export function MatrixCenterPanel({ matrix }: MatrixCenterPanelProps) {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showActivation, setShowActivation] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
+  const [scopeCollapsed, setScopeCollapsed] = useState(false);
 
   // Adapt matrix to Rule shape for reusable components
   const ruleAdapter = {
@@ -41,7 +43,7 @@ export function MatrixCenterPanel({ matrix }: MatrixCenterPanelProps) {
     warningCount: matrix.warningCount,
     code: "",
     createdAt: matrix.createdAt,
-    category: "Структура и матрицы",
+    category: "Матрицы",
   };
 
   return (
@@ -51,22 +53,22 @@ export function MatrixCenterPanel({ matrix }: MatrixCenterPanelProps) {
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <span>Производственная среда</span>
           <ChevronRight className="w-3 h-3" />
-          <span>Структура и матрицы</span>
+          <span>Матрицы</span>
           <ChevronRight className="w-3 h-3" />
           <span className="text-foreground font-medium">{matrix.name}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <button className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors">
+          <button className="btn-secondary">
             <CheckCircle className="w-3 h-3" />
             Проверить
           </button>
-          <button className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors">
+          <button className="btn-secondary">
             <Save className="w-3 h-3" />
             Сохранить
           </button>
           <button
             onClick={() => setShowActivation(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-opacity"
+            className="btn-primary"
           >
             <Zap className="w-3 h-3" />
             Активировать
@@ -80,7 +82,7 @@ export function MatrixCenterPanel({ matrix }: MatrixCenterPanelProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-xs transition-colors relative ${
+            className={`px-4 py-2 text-xs font-medium transition-colors relative ${
               activeTab === tab.id
                 ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground"
@@ -95,10 +97,20 @@ export function MatrixCenterPanel({ matrix }: MatrixCenterPanelProps) {
       </div>
 
       {/* Tab content */}
-      <div className={`flex-1 ${activeTab === "structure" ? "flex" : "overflow-y-auto"} bg-background`}>
+      <div className={`flex-1 ${activeTab === "links" ? "flex" : "overflow-y-auto"} bg-background`}>
         {activeTab === "overview" && <MatrixOverview matrix={matrix} />}
-        {activeTab === "structure" && <MatrixStructure matrix={matrix} />}
-        {activeTab === "dependencies" && <DependencyGraph rule={ruleAdapter} />}
+        {activeTab === "links" && (
+          <>
+            <MatrixScopePanel
+              assets={matrix.assets}
+              selectedAsset={selectedAsset}
+              onSelectAsset={setSelectedAsset}
+              collapsed={scopeCollapsed}
+              onToggleCollapse={() => setScopeCollapsed(!scopeCollapsed)}
+            />
+            <MatrixLinksTable rows={matrix.rows} selectedAsset={selectedAsset} />
+          </>
+        )}
         {activeTab === "simulation" && <SimulationPanel rule={ruleAdapter} />}
         {activeTab === "history" && <VersionHistory rule={ruleAdapter} />}
       </div>
