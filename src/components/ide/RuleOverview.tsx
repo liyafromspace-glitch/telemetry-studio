@@ -50,11 +50,15 @@ function highlightCode(code: string) {
 
 // Structure node-graph diagram matching reference screenshot
 function GlowDiagram() {
-  // Node positions for a flow-chart style graph
   const nodes = [
-    { x: 60, y: 30 }, { x: 160, y: 30 }, { x: 260, y: 30 },
-    { x: 110, y: 90 }, { x: 210, y: 90 },
-    { x: 60, y: 150 }, { x: 160, y: 150 }, { x: 260, y: 150 },
+    { x: 50, y: 30, label: "Сигнал" },
+    { x: 160, y: 30, label: "Фильтр" },
+    { x: 270, y: 30, label: "Функция" },
+    { x: 105, y: 100, label: "λ" },
+    { x: 215, y: 100, label: "Матрица" },
+    { x: 50, y: 165, label: "Датчик" },
+    { x: 160, y: 165, label: "Проверка" },
+    { x: 270, y: 165, label: "Отчёт" },
   ];
   const edges: [number, number][] = [
     [0, 3], [1, 3], [1, 4], [2, 4],
@@ -62,43 +66,55 @@ function GlowDiagram() {
   ];
 
   return (
-    <svg viewBox="0 0 320 180" className="w-full h-full">
+    <svg viewBox="0 0 320 200" className="w-full h-full">
       <defs>
-        <linearGradient id="edgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="hsl(270 60% 55%)" stopOpacity="0.7" />
-          <stop offset="100%" stopColor="hsl(185 70% 50%)" stopOpacity="0.5" />
+        <linearGradient id="edgeGradPurpleTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="hsl(271 60% 55%)" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="hsl(240 50% 55%)" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="hsl(185 70% 50%)" stopOpacity="0.7" />
         </linearGradient>
-        <filter id="lineGlow">
-          <feGaussianBlur stdDeviation="3" result="blur" />
+        <filter id="lineGlowStrong">
+          <feGaussianBlur stdDeviation="4" result="blur" />
+          <feComposite in="blur" in2="SourceGraphic" operator="over" />
           <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
-        <filter id="nodeGlow">
-          <feGaussianBlur stdDeviation="4" result="blur" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        <filter id="nodeGlowTeal">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="hsl(185 70% 50%)" floodOpacity="0.25" />
         </filter>
       </defs>
-      {/* Edges */}
-      {edges.map(([from, to], i) => (
-        <line
-          key={i}
-          x1={nodes[from].x} y1={nodes[from].y}
-          x2={nodes[to].x} y2={nodes[to].y}
-          stroke="url(#edgeGrad)" strokeWidth="2"
-          filter="url(#lineGlow)"
-        />
-      ))}
+      {/* Edges with glow */}
+      {edges.map(([from, to], i) => {
+        const f = nodes[from], t = nodes[to];
+        // Curved paths for more organic feel
+        const mx = (f.x + t.x) / 2, my = (f.y + t.y) / 2;
+        return (
+          <g key={i}>
+            <line x1={f.x} y1={f.y} x2={t.x} y2={t.y}
+              stroke="url(#edgeGradPurpleTeal)" strokeWidth="2.5"
+              filter="url(#lineGlowStrong)" opacity="0.9"
+            />
+            {/* Flow dot indicator */}
+            <circle cx={mx} cy={my} r="2" fill="hsl(185 70% 60%)" opacity="0.7" />
+          </g>
+        );
+      })}
       {/* Nodes */}
       {nodes.map((n, i) => (
-        <g key={i}>
+        <g key={i} filter="url(#nodeGlowTeal)">
+          {/* Outer rect */}
           <rect
-            x={n.x - 16} y={n.y - 14} width={32} height={28} rx={4}
-            fill="hsl(228 10% 16%)" stroke="hsl(185 70% 50%)" strokeWidth="1.2"
-            filter="url(#nodeGlow)"
+            x={n.x - 20} y={n.y - 16} width={40} height={32} rx={3}
+            fill="hsl(228 10% 14%)" stroke="hsl(185 60% 45%)" strokeWidth="1"
           />
+          {/* Inner rect */}
           <rect
-            x={n.x - 12} y={n.y - 10} width={24} height={20} rx={2}
-            fill="hsl(228 10% 20%)" stroke="hsl(185 60% 40%)" strokeWidth="0.5"
+            x={n.x - 15} y={n.y - 11} width={30} height={22} rx={2}
+            fill="hsl(228 10% 18%)" stroke="hsl(185 50% 35%)" strokeWidth="0.5"
           />
+          {/* Label */}
+          <text x={n.x} y={n.y + 2} textAnchor="middle" fill="hsl(185 50% 70%)" fontSize="6" fontFamily="Inter, sans-serif">
+            {n.label}
+          </text>
         </g>
       ))}
     </svg>
