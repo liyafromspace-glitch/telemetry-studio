@@ -40,7 +40,7 @@
     --input: 228 8% 18%;
     --ring: 185 70% 50%;
 
-    --radius: 0.375rem;
+    --radius: 0.25rem;
 
     /* Glow color tokens */
     --glow: 185 70% 50%;
@@ -161,7 +161,7 @@
 
   /* Environment badges */
   .env-badge-production {
-    @apply px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded;
+    @apply px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-sm;
     background-color: hsl(var(--destructive) / 0.15);
     color: hsl(var(--destructive));
     border: 1px solid hsl(var(--destructive) / 0.3);
@@ -169,7 +169,7 @@
     letter-spacing: 0.08em;
   }
   .env-badge-test {
-    @apply px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded;
+    @apply px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-sm;
     background-color: hsl(var(--warning) / 0.15);
     color: hsl(var(--warning));
     border: 1px solid hsl(var(--warning) / 0.3);

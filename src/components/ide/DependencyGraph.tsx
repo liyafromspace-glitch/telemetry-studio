@@ -67,11 +67,11 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
   const getNode = (id: string) => nodes.find((n) => n.id === id)!;
 
   const statusColor = (s: string) =>
-    s === "success" ? "hsl(160, 55%, 48%)" : s === "warning" ? "hsl(39, 74%, 48%)" : "hsl(2, 93%, 63%)";
+    s === "success" ? "hsl(160 55% 48%)" : s === "warning" ? "hsl(39 74% 48%)" : "hsl(2 93% 63%)";
 
   const statusBg = (s: string, hovered: boolean) => {
-    const alpha = hovered ? 0.25 : 0.1;
-    return s === "success" ? `hsl(160, 55%, 48%, ${alpha})` : s === "warning" ? `hsl(39, 74%, 48%, ${alpha})` : `hsl(2, 93%, 63%, ${alpha})`;
+    const alpha = hovered ? 0.25 : 0.12;
+    return s === "success" ? `hsl(160 55% 48% / ${alpha})` : s === "warning" ? `hsl(39 74% 48% / ${alpha})` : `hsl(2 93% 63% / ${alpha})`;
   };
 
   const renderNodeShape = (node: GraphNode, isHovered: boolean) => {
@@ -81,17 +81,17 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
 
     switch (node.type) {
       case "signal":
-        return <circle cx={node.x} cy={node.y} r={28} fill={bg} stroke={color} strokeWidth={sw} className="transition-all duration-150" />;
+        return <circle cx={node.x} cy={node.y} r={28} fill={bg} stroke={color} strokeWidth={sw} filter={isHovered ? "url(#depNodeGlow)" : undefined} className="transition-all duration-150" />;
       case "function":
         return <HexagonShape cx={node.x} cy={node.y} r={32} fill={bg} stroke={color} strokeWidth={sw} />;
       case "matrix":
-        return <rect x={node.x - 28} y={node.y - 24} width={56} height={48} rx={4} fill={bg} stroke={color} strokeWidth={sw} className="transition-all duration-150" />;
+        return <rect x={node.x - 28} y={node.y - 24} width={56} height={48} rx={3} fill={bg} stroke={color} strokeWidth={sw} filter={isHovered ? "url(#depNodeGlow)" : undefined} className="transition-all duration-150" />;
       case "incident":
         return <TriangleShape cx={node.x} cy={node.y} r={28} fill={bg} stroke={color} strokeWidth={sw} />;
       case "report":
-        return <rect x={node.x - 40} y={node.y - 20} width={80} height={40} rx={12} fill={bg} stroke={color} strokeWidth={sw} className="transition-all duration-150" />;
+        return <rect x={node.x - 40} y={node.y - 20} width={80} height={40} rx={3} fill={bg} stroke={color} strokeWidth={sw} filter={isHovered ? "url(#depNodeGlow)" : undefined} className="transition-all duration-150" />;
       default:
-        return <rect x={node.x - 40} y={node.y - 20} width={80} height={40} rx={4} fill={bg} stroke={color} strokeWidth={sw} className="transition-all duration-150" />;
+        return <rect x={node.x - 40} y={node.y - 20} width={80} height={40} rx={3} fill={bg} stroke={color} strokeWidth={sw} filter={isHovered ? "url(#depNodeGlow)" : undefined} className="transition-all duration-150" />;
     }
   };
 
@@ -119,9 +119,16 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
             <svg width="700" height="320" viewBox="0 0 700 320" className="w-full max-w-[700px]">
               <defs>
                 <filter id="edgeGlow">
-                  <feGaussianBlur stdDeviation="2" result="blur" />
+                  <feGaussianBlur stdDeviation="3" result="blur" />
                   <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                 </filter>
+                <filter id="depNodeGlow">
+                  <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="hsl(185 70% 50%)" floodOpacity="0.2" />
+                </filter>
+                <linearGradient id="depEdgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(271 60% 55%)" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="hsl(185 70% 50%)" stopOpacity="0.5" />
+                </linearGradient>
               </defs>
               {edges.map(([from, to, criticality]) => {
                 const a = getNode(from);
@@ -132,8 +139,8 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                   <line
                     key={`${from}-${to}`}
                     x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-                    stroke={isHighlighted ? "hsl(185, 70%, 50%, 0.6)" : "hsl(228, 8%, 25%)"}
-                    strokeWidth={isHighlighted ? criticality + 1 : criticality}
+                    stroke={isHighlighted ? "url(#depEdgeGrad)" : "hsl(228 8% 22%)"}
+                    strokeWidth={isHighlighted ? criticality + 1.5 : criticality}
                     strokeDasharray={criticality >= 3 ? "none" : "4 2"}
                     filter={isHighlighted ? "url(#edgeGlow)" : undefined}
                     className="transition-all duration-150"
