@@ -6,54 +6,60 @@
 
 @layer base {
   :root {
-    --background: 228 10% 12%;
-    --foreground: 220 14% 86%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 93%;
 
-    --card: 230 10% 15%;
-    --card-foreground: 220 14% 86%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 93%;
 
-    --popover: 230 10% 15%;
-    --popover-foreground: 220 14% 86%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 93%;
 
     --primary: 185 70% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 228 10% 18%;
-    --secondary-foreground: 220 10% 72%;
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 0 0% 63%;
 
-    --muted: 228 8% 20%;
-    --muted-foreground: 220 8% 50%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 228 10% 22%;
-    --accent-foreground: 220 14% 86%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 93%;
 
-    --destructive: 2 93% 63%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 160 55% 48%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 39 74% 48%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 228 8% 18%;
-    --input: 228 8% 18%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
     --ring: 185 70% 50%;
 
     --radius: 0.5rem;
 
-    /* Glow color tokens */
+    /* Connection dot colors (Vercel-style) */
+    --conn-blue: 217 91% 60%;
+    --conn-orange: 38 92% 50%;
+    --conn-pink: 330 81% 60%;
+    --conn-green: 142 71% 45%;
+
+    /* Glow tokens (subtle) */
     --glow: 185 70% 50%;
     --glow-soft: 185 60% 40%;
     --glow-bright: 180 80% 60%;
 
-    --sidebar-background: 230 10% 12%;
-    --sidebar-foreground: 220 10% 72%;
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 63%;
     --sidebar-primary: 185 70% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 228 10% 18%;
-    --sidebar-accent-foreground: 220 14% 86%;
-    --sidebar-border: 228 8% 16%;
+    --sidebar-accent: 0 0% 13%;
+    --sidebar-accent-foreground: 0 0% 93%;
+    --sidebar-border: 0 0% 13%;
     --sidebar-ring: 185 70% 50%;
 
     --font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -62,15 +68,15 @@
     /* Code syntax tokens */
     --code-comment: 180 50% 55%;
     --code-keyword: 200 75% 65%;
-    --code-string: 160 50% 55%;
+    --code-string: 142 50% 55%;
     --code-number: 30 80% 65%;
     --code-function: 270 50% 70%;
-    --code-operator: 220 14% 75%;
+    --code-operator: 0 0% 65%;
 
     /* Impact heatmap tokens */
-    --impact-green: 160 55% 48%;
-    --impact-orange: 39 74% 48%;
-    --impact-red: 2 93% 63%;
+    --impact-green: 142 71% 45%;
+    --impact-orange: 38 92% 50%;
+    --impact-red: 0 84% 60%;
 
     /* Motion tokens */
     --motion-fast: 120ms;
@@ -142,59 +148,127 @@
 @layer utilities {
   /* ── Glass Micro-Surfaces 2026 ── */
   .glass-surface {
-    background: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(12px) saturate(1.4);
-    -webkit-backdrop-filter: blur(12px) saturate(1.4);
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow:
-      inset 0 1px 0 hsl(0 0% 100% / 0.04),
-      inset 0 -1px 0 hsl(0 0% 0% / 0.1),
-      0 2px 8px -2px hsl(0 0% 0% / 0.2);
+    background: hsl(var(--card) / 0.75);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    border: 1px solid hsl(var(--border) / 0.6);
   }
   .glass-surface-strong {
-    background: hsl(var(--card) / 0.45);
-    backdrop-filter: blur(20px) saturate(1.6);
-    -webkit-backdrop-filter: blur(20px) saturate(1.6);
-    border: 1px solid hsl(var(--border) / 0.4);
-    box-shadow:
-      inset 0 1px 0 hsl(0 0% 100% / 0.06),
-      inset 0 -1px 0 hsl(0 0% 0% / 0.12),
-      0 4px 16px -4px hsl(0 0% 0% / 0.3);
+    background: hsl(var(--card) / 0.5);
+    backdrop-filter: blur(24px) saturate(1.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    border: 1px solid hsl(var(--border) / 0.5);
   }
   .glass-toolbar {
-    background: hsl(var(--card) / 0.55);
-    backdrop-filter: blur(16px) saturate(1.5);
-    -webkit-backdrop-filter: blur(16px) saturate(1.5);
-    border: 1px solid hsl(var(--border) / 0.45);
-    box-shadow:
-      inset 0 1px 0 hsl(0 0% 100% / 0.05),
-      0 1px 4px hsl(0 0% 0% / 0.15);
+    background: hsl(var(--card) / 0.65);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid hsl(var(--border) / 0.5);
   }
   .glass-toolbar:hover {
-    background: hsl(var(--card) / 0.65);
-    box-shadow:
-      inset 0 1px 0 hsl(0 0% 100% / 0.06),
-      0 2px 8px hsl(0 0% 0% / 0.2);
+    background: hsl(var(--card) / 0.8);
   }
   .glass-controls {
-    background: hsl(var(--background) / 0.5);
-    backdrop-filter: blur(10px) saturate(1.3);
-    -webkit-backdrop-filter: blur(10px) saturate(1.3);
-    border: 1px solid hsl(var(--border) / 0.35);
-    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.12);
+    background: hsl(var(--background) / 0.6);
+    backdrop-filter: blur(12px) saturate(1.3);
+    -webkit-backdrop-filter: blur(12px) saturate(1.3);
+    border: 1px solid hsl(var(--border) / 0.4);
+  }
+
+  /* ── Vercel-style dashed containers ── */
+  .vercel-card {
+    @apply rounded-lg border transition-all duration-200;
+    background: hsl(var(--card));
+    border-color: hsl(var(--border));
+  }
+  .vercel-card-dashed {
+    @apply rounded-lg transition-all duration-200;
+    background: hsl(var(--card) / 0.5);
+    border: 1.5px dashed hsl(var(--border));
+  }
+  .vercel-card-dashed-blue {
+    border-color: hsl(var(--conn-blue) / 0.5);
+  }
+  .vercel-card-dashed-orange {
+    border-color: hsl(var(--conn-orange) / 0.5);
+  }
+  .vercel-card-dashed-pink {
+    border-color: hsl(var(--conn-pink) / 0.5);
+  }
+
+  /* ── Connection dots (Vercel-style) ── */
+  .conn-dot {
+    @apply w-2.5 h-2.5 rounded-full flex-shrink-0;
+  }
+  .conn-dot-blue {
+    background: hsl(var(--conn-blue));
+    box-shadow: 0 0 6px hsl(var(--conn-blue) / 0.4);
+  }
+  .conn-dot-orange {
+    background: hsl(var(--conn-orange));
+    box-shadow: 0 0 6px hsl(var(--conn-orange) / 0.4);
+  }
+  .conn-dot-pink {
+    background: hsl(var(--conn-pink));
+    box-shadow: 0 0 6px hsl(var(--conn-pink) / 0.4);
+  }
+  .conn-dot-green {
+    background: hsl(var(--conn-green));
+    box-shadow: 0 0 6px hsl(var(--conn-green) / 0.4);
+  }
+
+  /* ── Status badges (Vercel-style) ── */
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium;
+  }
+  .status-badge-success {
+    background: hsl(var(--success) / 0.12);
+    color: hsl(var(--success));
+  }
+  .status-badge-warning {
+    background: hsl(var(--warning) / 0.12);
+    color: hsl(var(--warning));
+  }
+  .status-badge-error {
+    background: hsl(var(--destructive) / 0.12);
+    color: hsl(var(--destructive));
+  }
+  .status-badge-idle {
+    background: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* ── Timeline segment bars (Vercel invocation style) ── */
+  .timeline-bar {
+    @apply flex items-center h-2 rounded-full overflow-hidden;
+  }
+  .timeline-segment {
+    @apply h-full;
+    min-width: 4px;
+  }
+  .timeline-segment-solid {
+    border-radius: 1px;
+  }
+  .timeline-segment-dashed {
+    background-image: repeating-linear-gradient(
+      90deg,
+      currentColor 0px,
+      currentColor 4px,
+      transparent 4px,
+      transparent 7px
+    );
+    background-color: transparent;
+    opacity: 0.6;
   }
 
   .ide-panel {
-    @apply bg-card border border-border transition-shadow duration-200;
+    @apply bg-card border border-border rounded-lg transition-shadow duration-200;
   }
   .ide-panel:hover {
-    box-shadow: 0 0 16px -6px hsl(var(--glow) / 0.06);
+    box-shadow: 0 0 0 1px hsl(var(--border));
   }
   .ide-panel-glow {
-    @apply bg-card border border-border transition-all duration-200;
-    box-shadow:
-      0 0 12px -4px hsl(var(--glow) / 0.08),
-      inset 0 1px 0 hsl(var(--glow) / 0.04);
+    @apply bg-card border border-border rounded-lg transition-all duration-200;
   }
 
   .ide-header {
@@ -226,20 +300,16 @@
 
   /* Environment badges */
   .env-badge-production {
-    @apply px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-sm;
-    background-color: hsl(var(--destructive) / 0.15);
+    @apply px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-full;
+    background-color: hsl(var(--destructive) / 0.12);
     color: hsl(var(--destructive));
-    border: 1px solid hsl(var(--destructive) / 0.3);
-    box-shadow: 0 0 8px hsl(var(--destructive) / 0.15);
-    letter-spacing: 0.08em;
+    border: 1px solid hsl(var(--destructive) / 0.25);
   }
   .env-badge-test {
-    @apply px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-sm;
-    background-color: hsl(var(--warning) / 0.15);
+    @apply px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-full;
+    background-color: hsl(var(--warning) / 0.12);
     color: hsl(var(--warning));
-    border: 1px solid hsl(var(--warning) / 0.3);
-    box-shadow: 0 0 8px hsl(var(--warning) / 0.15);
-    letter-spacing: 0.08em;
+    border: 1px solid hsl(var(--warning) / 0.25);
   }
 
   /* Code block */
@@ -265,7 +335,7 @@
 
   /* Stat card */
   .stat-card {
-    @apply ide-panel-glow rounded-sm p-3 flex flex-col gap-1 transition-all duration-200;
+    @apply vercel-card p-3 flex flex-col gap-1 transition-all duration-200;
   }
 
   .stat-card-label {
@@ -277,26 +347,23 @@
 
   /* Action button variants */
   .btn-secondary {
-    @apply flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-secondary-foreground hover:text-foreground bg-secondary hover:bg-accent border border-border rounded-sm transition-all duration-150;
+    @apply flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-secondary-foreground hover:text-foreground bg-secondary hover:bg-accent border border-border rounded-lg transition-all duration-150;
   }
   .btn-secondary:hover {
     transform: translateY(-0.5px);
-    box-shadow: 0 2px 8px hsl(var(--border) / 0.3);
   }
   .btn-secondary:active {
     transform: translateY(0.5px) scale(0.98);
   }
   .btn-primary {
-    @apply flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-primary text-primary-foreground rounded-sm transition-all duration-150;
-    box-shadow: 0 0 12px hsl(var(--primary) / 0.3);
+    @apply flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-foreground text-background rounded-lg transition-all duration-150;
   }
   .btn-primary:hover {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+    opacity: 0.9;
     transform: translateY(-0.5px);
   }
   .btn-primary:active {
     transform: translateY(0.5px) scale(0.97);
-    box-shadow: 0 0 8px hsl(var(--primary) / 0.2);
   }
 
   /* Sparkline value dot */
@@ -304,8 +371,7 @@
     @apply inline-flex items-center justify-center w-6 h-6 rounded-full text-[9px] font-mono font-medium;
     background-color: hsl(var(--glow) / 0.1);
     color: hsl(var(--glow-bright));
-    border: 1px solid hsl(var(--glow) / 0.25);
-    box-shadow: 0 0 6px hsl(var(--glow) / 0.15);
+    border: 1px solid hsl(var(--glow) / 0.2);
   }
 
   /* Tree item */
@@ -317,8 +383,8 @@
   }
   .tree-item-active {
     @apply bg-accent text-accent-foreground;
-    border-left: 2px solid hsl(var(--primary));
-    background: linear-gradient(90deg, hsl(var(--primary) / 0.08) 0%, transparent 100%);
+    border-left: 2px solid hsl(var(--foreground));
+    background: linear-gradient(90deg, hsl(var(--accent)) 0%, transparent 100%);
   }
   .tree-item-inactive {
     @apply text-sidebar-foreground hover:bg-accent/50;
@@ -332,15 +398,12 @@
 
   /* Glow ring for structure diagrams */
   .glow-ring {
-    box-shadow:
-      0 0 20px hsl(var(--glow) / 0.2),
-      0 0 40px hsl(var(--glow) / 0.08);
-    border-color: hsl(var(--glow) / 0.4);
+    box-shadow: 0 0 20px hsl(var(--glow) / 0.15);
+    border-color: hsl(var(--glow) / 0.3);
   }
   .glow-ring-inner {
-    background: radial-gradient(circle, hsl(var(--glow) / 0.15) 0%, transparent 70%);
-    border-color: hsl(var(--glow) / 0.3);
-    box-shadow: 0 0 12px hsl(var(--glow) / 0.25);
+    background: radial-gradient(circle, hsl(var(--glow) / 0.1) 0%, transparent 70%);
+    border-color: hsl(var(--glow) / 0.25);
   }
 
   /* Mini sparkline for sidebar */
@@ -361,8 +424,8 @@
     cursor: pointer;
   }
   .graph-node:hover {
-    transform: scale(1.08);
-    filter: drop-shadow(0 0 10px hsl(var(--glow) / 0.35));
+    transform: scale(1.04);
+    filter: brightness(1.1);
   }
 
   /* Tab transition helper */
@@ -376,31 +439,19 @@
   .stagger-children > * {
     animation: slide-up 200ms ease-out both;
   }
-  .stagger-children > *:nth-child(1) {
-    animation-delay: 0ms;
-  }
-  .stagger-children > *:nth-child(2) {
-    animation-delay: 40ms;
-  }
-  .stagger-children > *:nth-child(3) {
-    animation-delay: 80ms;
-  }
-  .stagger-children > *:nth-child(4) {
-    animation-delay: 120ms;
-  }
-  .stagger-children > *:nth-child(5) {
-    animation-delay: 160ms;
-  }
-  .stagger-children > *:nth-child(6) {
-    animation-delay: 200ms;
-  }
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 40ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 80ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 120ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 160ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 200ms; }
 
   /* Interactive card lift */
   .card-lift {
     @apply transition-all duration-200;
   }
   .card-lift:hover {
-    transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 8px 24px -8px hsl(var(--glow) / 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -4px hsl(0 0% 0% / 0.3);
   }
 }

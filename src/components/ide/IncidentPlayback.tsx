@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Play, Pause, RotateCcw, FastForward } from "lucide-react";
+import { Play, Pause, RotateCcw, CheckCircle, AlertTriangle, XCircle, Loader2 } from "lucide-react";
 import { type Incident } from "@/data/mockPlatform";
 
 interface PlaybackStep {
@@ -38,12 +38,20 @@ const defaultPlayback: PlaybackStep[] = [
   { nodeId: "inc", label: "Инцидент", type: "incident", description: "Создан" },
 ];
 
-const typeColors: Record<string, string> = {
-  signal: "border-primary bg-primary/10 text-primary",
-  condition: "border-warning bg-warning/10 text-warning",
-  function: "border-[hsl(270,50%,60%)] bg-[hsl(270,50%,60%)]/10 text-[hsl(270,50%,60%)]",
-  matrix: "border-warning bg-warning/10 text-warning",
-  incident: "border-destructive bg-destructive/10 text-destructive",
+const typeConnColor: Record<string, string> = {
+  signal: "conn-dot-blue",
+  condition: "conn-dot-orange",
+  function: "conn-dot-pink",
+  matrix: "conn-dot-orange",
+  incident: "conn-dot-pink",
+};
+
+const typeBadgeStyle: Record<string, string> = {
+  signal: "status-badge-success",
+  condition: "status-badge-warning",
+  function: "status-badge-error",
+  matrix: "status-badge-warning",
+  incident: "status-badge-error",
 };
 
 interface IncidentPlaybackProps {
@@ -81,91 +89,117 @@ export function IncidentPlayback({ incident }: IncidentPlaybackProps) {
   };
 
   return (
-    <div className="ide-panel-glow rounded-sm">
+    <div className="vercel-card">
       <div className="ide-header flex items-center justify-between">
         <span className="flex items-center gap-1.5">
-          <Play className="w-3 h-3 text-primary" />
+          <Play className="w-3 h-3 text-foreground" />
           Воспроизведение инцидента
         </span>
         <div className="flex items-center gap-1 normal-case tracking-normal">
-          <button
-            onClick={reset}
-            className="p-1 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
+          <button onClick={reset} className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
             <RotateCcw className="w-3 h-3" />
           </button>
           <button
             onClick={() => setSpeed(speed === 1 ? 2 : speed === 2 ? 4 : 1)}
-            className="px-1.5 py-0.5 rounded-sm text-[9px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+            className="px-1.5 py-0.5 rounded-md text-[9px] font-mono text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             {speed}x
           </button>
         </div>
       </div>
 
-      <div className="p-3">
-        {/* Playback visualization */}
-        <div className="flex items-center gap-0.5 mb-3 overflow-x-auto pb-1">
-          {steps.map((step, i) => (
-            <div key={i} className="flex items-center gap-0.5">
-              <div
-                className={`relative px-2.5 py-1.5 rounded-sm text-[10px] font-medium border transition-all duration-220 ${
-                  i <= currentStep
-                    ? typeColors[step.type]
-                    : "border-border bg-secondary text-muted-foreground"
-                } ${i === currentStep ? "shadow-[0_0_12px_hsl(var(--primary)/0.2)] scale-105" : ""}`}
-              >
-                {step.label.length > 16 ? step.label.slice(0, 15) + "…" : step.label}
-                {/* Flow animation dot */}
-                {i === currentStep && playing && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary animate-ripple" />
-                )}
+      <div className="p-3 space-y-3">
+        {/* Vercel-style chain visualization */}
+        <div className="space-y-0">
+          {steps.map((step, i) => {
+            const isActive = i === currentStep;
+            const isDone = i < currentStep;
+            const isPending = i > currentStep && currentStep >= 0;
+
+            return (
+              <div key={i} className="flex items-stretch gap-0">
+                {/* Vertical connection line + dot */}
+                <div className="flex flex-col items-center w-6 flex-shrink-0">
+                  {i > 0 && (
+                    <div className={`w-px flex-1 transition-all duration-200 ${isDone || isActive ? "bg-foreground/30" : "bg-border"}`} />
+                  )}
+                  <div className={`w-3 h-3 rounded-full flex-shrink-0 transition-all duration-200 ${
+                    isDone ? "bg-success" : isActive ? "bg-foreground shadow-[0_0_8px_hsl(0,0%,100%/0.3)]" : "bg-muted"
+                  }`}>
+                    {isDone && <CheckCircle className="w-3 h-3 text-background" />}
+                    {isActive && playing && <Loader2 className="w-3 h-3 text-background animate-spin" />}
+                  </div>
+                  {i < steps.length - 1 && (
+                    <div className={`w-px flex-1 transition-all duration-200 ${isDone ? "bg-foreground/30" : "bg-border"}`} />
+                  )}
+                </div>
+
+                {/* Step card */}
+                <div className={`flex-1 ml-2 py-1.5 transition-all duration-200 ${isActive ? "opacity-100" : isDone ? "opacity-60" : "opacity-30"}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-foreground">
+                      {step.label.length > 20 ? step.label.slice(0, 19) + "…" : step.label}
+                    </span>
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full ${
+                      isDone ? "status-badge-success" : isActive ? "bg-foreground/10 text-foreground" : "status-badge-idle"
+                    }`}>
+                      {isDone ? "Complete" : isActive ? "Active" : "Idle"}
+                    </span>
+                  </div>
+                  {(isActive || isDone) && (
+                    <div className="text-[11px] text-muted-foreground mt-0.5 animate-fade-in">
+                      {step.description}
+                    </div>
+                  )}
+                </div>
               </div>
-              {i < steps.length - 1 && (
-                <span
-                  className={`text-[10px] transition-all duration-220 ${
-                    i < currentStep ? "text-primary" : "text-muted-foreground/30"
-                  }`}
-                >
-                  →
-                </span>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Current step detail */}
-        {currentStep >= 0 && currentStep < steps.length && (
-          <div className="glass-controls rounded-md px-3 py-2 mb-3 animate-fade-in">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-mono text-[10px] text-muted-foreground">
-                Шаг {currentStep + 1}/{steps.length}
-              </span>
-              <span className="text-foreground font-medium">{steps[currentStep].label}</span>
-            </div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">
-              {steps[currentStep].description}
-            </div>
-          </div>
-        )}
+        {/* Vercel-style timeline segment bar */}
+        <div className="flex items-center gap-0.5">
+          {steps.map((step, i) => {
+            const isDone = i < currentStep;
+            const isActive = i === currentStep;
+            const color = step.type === "signal" ? "hsl(217, 91%, 60%)" :
+                         step.type === "incident" ? "hsl(330, 81%, 60%)" :
+                         step.type === "condition" ? "hsl(38, 92%, 50%)" :
+                         "hsl(142, 71%, 45%)";
+            return (
+              <div key={i} className="flex-1 flex gap-0.5">
+                <div
+                  className="flex-1 h-1.5 rounded-full transition-all duration-200"
+                  style={{
+                    background: isDone || isActive ? color : "hsl(0, 0%, 18%)",
+                    opacity: isDone ? 1 : isActive ? 0.7 : 0.3,
+                  }}
+                />
+                {i < steps.length - 1 && (
+                  <div
+                    className="w-2 h-1.5 rounded-full"
+                    style={{
+                      background: isDone ? color : "hsl(0, 0%, 18%)",
+                      opacity: isDone ? 0.4 : 0.15,
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         {/* Play button */}
         <button
           onClick={playing ? () => setPlaying(false) : startPlayback}
-          className="btn-primary w-full justify-center"
+          className="btn-primary w-full justify-center rounded-lg"
         >
           {playing ? (
-            <>
-              <Pause className="w-3.5 h-3.5" /> Пауза
-            </>
+            <><Pause className="w-3.5 h-3.5" /> Пауза</>
           ) : currentStep >= steps.length - 1 ? (
-            <>
-              <RotateCcw className="w-3.5 h-3.5" /> Воспроизвести снова
-            </>
+            <><RotateCcw className="w-3.5 h-3.5" /> Воспроизвести снова</>
           ) : (
-            <>
-              <Play className="w-3.5 h-3.5" /> Воспроизвести инцидент
-            </>
+            <><Play className="w-3.5 h-3.5" /> Воспроизвести инцидент</>
           )}
         </button>
       </div>

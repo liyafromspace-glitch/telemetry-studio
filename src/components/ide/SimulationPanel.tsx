@@ -34,24 +34,11 @@ const defaultFields: Record<string, SignalField[]> = {
   ],
 };
 
-// Ghost prediction data per parameter type
 const ghostData: Record<string, { actual: number[]; predicted: number[] }> = {
-  "Влажность": {
-    actual: [72, 74, 74, 75, 78, 76, 76],
-    predicted: [73, 74, 75, 76, 77, 77, 78],
-  },
-  "Температура": {
-    actual: [82, 84, 85, 88, 92, 95, 96],
-    predicted: [82, 83, 84, 85, 86, 87, 87],
-  },
-  "Давление": {
-    actual: [340, 355, 370, 390, 400, 412, 413],
-    predicted: [340, 350, 358, 365, 370, 375, 378],
-  },
-  "default": {
-    actual: [50, 55, 52, 58, 54, 56, 53],
-    predicted: [51, 53, 54, 55, 55, 56, 56],
-  },
+  "Влажность": { actual: [72, 74, 74, 75, 78, 76, 76], predicted: [73, 74, 75, 76, 77, 77, 78] },
+  "Температура": { actual: [82, 84, 85, 88, 92, 95, 96], predicted: [82, 83, 84, 85, 86, 87, 87] },
+  "Давление": { actual: [340, 355, 370, 390, 400, 412, 413], predicted: [340, 350, 358, 365, 370, 375, 378] },
+  "default": { actual: [50, 55, 52, 58, 54, 56, 53], predicted: [51, 53, 54, 55, 55, 56, 56] },
 };
 
 type EvalStep = {
@@ -110,10 +97,7 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
     if (next >= steps.length) return;
     setCurrentStep(next);
     setSteps((s) =>
-      s.map((st, i) => ({
-        ...st,
-        status: i < next ? "pass" : i === next ? "active" : "pending",
-      }))
+      s.map((st, i) => ({ ...st, status: i < next ? "pass" : i === next ? "active" : "pending" }))
     );
     if (next === steps.length - 1) {
       setTimeout(() => finishSimulation(), 300);
@@ -135,24 +119,10 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
             { expression: `Проверка диапазона`, result: rule.warningCount > 0 ? "ПРЕДУПРЕЖДЕНИЕ" : "OK", pass: rule.warningCount === 0 },
             { expression: `Функция: ${rule.name}`, result: "выполнена", pass: true },
           ];
-
     setTraces(mockTraces);
-    setOutput(
-      JSON.stringify(
-        {
-          processed: true,
-          result: rule.errorCount > 0 ? "alarm" : "ok",
-          timestamp: "2024-02-20T10:00:00Z",
-        },
-        null,
-        2
-      )
-    );
+    setOutput(JSON.stringify({ processed: true, result: rule.errorCount > 0 ? "alarm" : "ok", timestamp: "2024-02-20T10:00:00Z" }, null, 2));
     setSteps((s) =>
-      s.map((st) => ({
-        ...st,
-        status: rule.errorCount > 0 ? (st.label === "Результат" ? "fail" : "pass") : "pass",
-      }))
+      s.map((st) => ({ ...st, status: rule.errorCount > 0 ? (st.label === "Результат" ? "fail" : "pass") : "pass" }))
     );
     setCurrentStep(steps.length);
   };
@@ -161,7 +131,6 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
     setRunning(true);
     setCurrentStep(0);
     setSteps((s) => s.map((st, i) => ({ ...st, status: i === 0 ? "active" : "pending" })));
-
     let step = 0;
     const interval = setInterval(() => {
       step++;
@@ -173,10 +142,7 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
       }
       setCurrentStep(step);
       setSteps((s) =>
-        s.map((st, i) => ({
-          ...st,
-          status: i < step ? "pass" : i === step ? "active" : "pending",
-        }))
+        s.map((st, i) => ({ ...st, status: i < step ? "pass" : i === step ? "active" : "pending" }))
       );
     }, 400);
   };
@@ -184,84 +150,89 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
   return (
     <div className="p-4 space-y-3 animate-fade-in">
       {/* Execution Timeline */}
-      <div className="ide-panel rounded-sm">
+      <div className="vercel-card">
         <div className="ide-header">Поток выполнения</div>
-        <div className="p-3 flex items-center gap-1">
-          {steps.map((step, i) => (
-            <div key={i} className="flex items-center gap-1">
-              <div
-                className={`px-2 py-1 rounded-sm text-[10px] font-medium border transition-colors ${
-                  step.status === "active"
-                    ? "border-primary bg-primary/10 text-primary"
-                    : step.status === "pass"
-                    ? "border-success/50 bg-success/10 text-success"
-                    : step.status === "fail"
-                    ? "border-destructive/50 bg-destructive/10 text-destructive"
-                    : step.status === "warning"
-                    ? "border-warning/50 bg-warning/10 text-warning"
-                    : "border-border bg-secondary text-muted-foreground"
-                }`}
-              >
-                {step.label}
+        <div className="p-3">
+          <div className="flex items-center gap-1">
+            {steps.map((step, i) => (
+              <div key={i} className="flex items-center gap-1">
+                <div className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all duration-200 ${
+                  step.status === "active" ? "bg-foreground text-background"
+                  : step.status === "pass" ? "status-badge-success"
+                  : step.status === "fail" ? "status-badge-error"
+                  : step.status === "warning" ? "status-badge-warning"
+                  : "bg-muted text-muted-foreground"
+                }`}>
+                  {step.status === "pass" && <CheckCircle className="w-2.5 h-2.5 inline mr-0.5" />}
+                  {step.label}
+                </div>
+                {i < steps.length - 1 && (
+                  <div className={`w-6 h-px ${step.status === "pass" || step.status === "active" ? "bg-foreground/30" : "bg-border"}`} />
+                )}
               </div>
-              {i < steps.length - 1 && (
-                <span className={`text-[10px] ${step.status === "pass" || step.status === "active" ? "text-primary" : "text-muted-foreground"}`}>
-                  →
-                </span>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
+          {/* Segment bar */}
+          <div className="flex items-center gap-0.5 mt-2.5">
+            {steps.map((step, i) => (
+              <div
+                key={i}
+                className="flex-1 h-1 rounded-full transition-all duration-200"
+                style={{
+                  background: step.status === "pass" ? "hsl(142, 71%, 45%)"
+                    : step.status === "active" ? "hsl(217, 91%, 60%)"
+                    : step.status === "fail" ? "hsl(0, 84%, 60%)"
+                    : "hsl(0, 0%, 18%)",
+                  opacity: step.status === "pending" ? 0.3 : 1,
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Input */}
-        <div className="ide-panel rounded-sm">
+        <div className="vercel-card">
           <div className="ide-header flex items-center justify-between">
             <span>Входные данные</span>
-            <div className="flex gap-1 normal-case tracking-normal">
+            <div className="flex gap-0.5 bg-muted rounded-md p-0.5 normal-case tracking-normal">
               <button
                 onClick={() => setViewMode("structured")}
-                className={`px-1.5 py-0.5 rounded-sm text-[9px] ${viewMode === "structured" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                className={`px-2 py-0.5 rounded-md text-[9px] font-medium transition-all ${viewMode === "structured" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
               >
-                <Sliders className="w-3 h-3 inline-block mr-0.5" />
-                Поля
+                <Sliders className="w-3 h-3 inline-block mr-0.5" />Поля
               </button>
               <button
                 onClick={() => setViewMode("json")}
-                className={`px-1.5 py-0.5 rounded-sm text-[9px] ${viewMode === "json" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                className={`px-2 py-0.5 rounded-md text-[9px] font-medium transition-all ${viewMode === "json" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
               >
-                <Code className="w-3 h-3 inline-block mr-0.5" />
-                JSON
+                <Code className="w-3 h-3 inline-block mr-0.5" />JSON
               </button>
             </div>
           </div>
           {viewMode === "structured" ? (
             <div className="p-3 space-y-2">
               {fields.map((field, i) => (
-                <div key={i} className="text-xs flex items-center justify-end gap-0">
+                <div key={i} className="text-xs flex items-center gap-0">
                   <label className="w-24 text-muted-foreground truncate">{field.name}</label>
                   {field.type === "select" ? (
                     <select
                       value={field.value}
                       onChange={(e) => updateField(i, e.target.value)}
-                      className="flex-1 bg-background border border-border rounded-sm px-2 py-1 text-xs text-foreground focus:border-primary focus:outline-none"
+                      className="flex-1 bg-background border border-border rounded-lg px-2 py-1.5 text-xs text-foreground focus:border-foreground/30 focus:outline-none transition-colors"
                     >
-                      {field.options?.map((o) => (
-                        <option key={o} value={o}>
-                          {o}
-                        </option>
-                      ))}
+                      {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
                     </select>
                   ) : (
                     <input
                       type="text"
                       value={field.value}
                       onChange={(e) => updateField(i, e.target.value)}
-                      className="flex-1 bg-background border border-border rounded-sm px-2 py-1 text-xs font-mono text-foreground focus:border-primary focus:outline-none"
+                      className="flex-1 bg-background border border-border rounded-lg px-2 py-1.5 text-xs font-mono text-foreground focus:border-foreground/30 focus:outline-none transition-colors"
                     />
                   )}
-                  {field.unit && <span className="text-[10px] text-muted-foreground w-10 mx-0 px-[8px]">{field.unit}</span>}
+                  {field.unit && <span className="text-[10px] text-muted-foreground w-10 px-2">{field.unit}</span>}
                 </div>
               ))}
             </div>
@@ -276,7 +247,7 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
         </div>
 
         {/* Output */}
-        <div className="ide-panel rounded-sm">
+        <div className="vercel-card">
           <div className="ide-header">Результат</div>
           <div className="h-40 overflow-auto">
             {output ? (
@@ -291,13 +262,13 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
       </div>
 
       {/* Signal Ghost Mode */}
-      <div className="ide-panel rounded-sm">
+      <div className="vercel-card">
         <div className="ide-header flex items-center justify-between">
           <span>Прогноз сигнала</span>
           <button
             onClick={() => setShowGhost(!showGhost)}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded-sm text-[9px] normal-case tracking-normal transition-all ${
-              showGhost ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-medium normal-case tracking-normal transition-all ${
+              showGhost ? "bg-foreground/10 text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {showGhost ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
@@ -307,12 +278,12 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
         <div className="p-3">
           <GhostSparkline actual={ghost.actual} predicted={ghost.predicted} showGhost={showGhost} />
           <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-0.5 bg-primary inline-block rounded-full" /> Фактическое
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5 bg-foreground/70 inline-block rounded-full" /> Фактическое
             </span>
             {showGhost && (
-              <span className="flex items-center gap-1 animate-fade-in">
-                <span className="w-3 h-0.5 inline-block rounded-full" style={{ background: "hsl(185, 70%, 50%)", opacity: 0.4 }} /> Прогноз
+              <span className="flex items-center gap-1.5 animate-fade-in">
+                <span className="w-3 h-0.5 inline-block rounded-full border-t border-dashed border-foreground/40" /> Прогноз
               </span>
             )}
           </div>
@@ -320,29 +291,20 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-2 glass-controls rounded-md px-3 py-2 w-fit">
+      <div className="flex items-center gap-2">
         <button
           onClick={runFullSimulation}
           disabled={running}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-xs font-medium rounded-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="btn-primary rounded-lg disabled:opacity-50"
         >
           <Play className="w-3.5 h-3.5" />
           {running ? "Выполняется..." : "Запустить"}
         </button>
-        <button
-          onClick={runStep}
-          disabled={running}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors"
-        >
-          <SkipForward className="w-3.5 h-3.5" />
-          Шаг
+        <button onClick={runStep} disabled={running} className="btn-secondary rounded-lg">
+          <SkipForward className="w-3.5 h-3.5" /> Шаг
         </button>
-        <button
-          onClick={resetSimulation}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          Сброс
+        <button onClick={resetSimulation} className="btn-secondary rounded-lg">
+          <RotateCcw className="w-3.5 h-3.5" /> Сброс
         </button>
       </div>
 
@@ -360,11 +322,11 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
 
       {/* Evaluation Trace */}
       {traces.length > 0 && (
-        <div className="ide-panel rounded-sm">
+        <div className="vercel-card">
           <div className="ide-header">Трассировка вычислений</div>
           <div className="p-2 space-y-0.5 text-xs font-mono">
             {traces.map((trace, i) => (
-              <div key={i} className={`flex items-start gap-1.5 py-0.5 ${trace.pass ? "text-muted-foreground" : "text-destructive"}`}>
+              <div key={i} className={`flex items-start gap-1.5 py-1 px-2 rounded-md ${trace.pass ? "text-muted-foreground" : "text-destructive bg-destructive/5"}`}>
                 {trace.pass ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0 text-success" /> : <XCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />}
                 <span className="text-foreground">{trace.expression}</span>
                 <span className="ml-auto text-[10px]">→ {trace.result}</span>
@@ -386,13 +348,10 @@ function GhostSparkline({ actual, predicted, showGhost }: { actual: number[]; pr
   const h = 48;
 
   const toPoints = (data: number[]) =>
-    data
-      .map((v, i) => ({
-        x: (i / (data.length - 1)) * w,
-        y: h - ((v - min) / range) * (h - 8) - 4,
-      }))
-      .map((p) => `${p.x},${p.y}`)
-      .join(" ");
+    data.map((v, i) => ({
+      x: (i / (data.length - 1)) * w,
+      y: h - ((v - min) / range) * (h - 8) - 4,
+    })).map((p) => `${p.x},${p.y}`).join(" ");
 
   const actualLine = toPoints(actual);
   const predictedLine = toPoints(predicted);
@@ -401,44 +360,31 @@ function GhostSparkline({ actual, predicted, showGhost }: { actual: number[]; pr
   return (
     <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} className="w-full">
       <defs>
-        <linearGradient id="ghostActualArea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0" />
+        <linearGradient id="ghostArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.08" />
+          <stop offset="100%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0" />
         </linearGradient>
-        <linearGradient id="ghostActualLine" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="1" />
-        </linearGradient>
-        <filter id="ghostGlow">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
-      <polygon points={areaPoints} fill="url(#ghostActualArea)" />
-      <polyline points={actualLine} fill="none" stroke="url(#ghostActualLine)" strokeWidth="2" strokeLinejoin="round" filter="url(#ghostGlow)" />
+      <polygon points={areaPoints} fill="url(#ghostArea)" />
+      <polyline points={actualLine} fill="none" stroke="hsl(0, 0%, 70%)" strokeWidth="1.5" strokeLinejoin="round" />
 
-      {/* Ghost predicted line */}
       {showGhost && (
         <polyline
           points={predictedLine}
           fill="none"
-          stroke="hsl(185, 70%, 50%)"
+          stroke="hsl(0, 0%, 50%)"
           strokeWidth="1.5"
           strokeDasharray="4 3"
-          opacity="0.4"
+          opacity="0.5"
           strokeLinejoin="round"
           className="animate-fade-in"
         />
       )}
 
-      {/* Value dots */}
       {actual.map((v, i) => {
         const x = (i / (actual.length - 1)) * w;
         const y = h - ((v - min) / range) * (h - 8) - 4;
-        return <circle key={i} cx={x} cy={y} r="2" fill="hsl(185, 70%, 50%)" />;
+        return <circle key={i} cx={x} cy={y} r="2" fill="hsl(0, 0%, 93%)" opacity="0.6" />;
       })}
     </svg>
   );

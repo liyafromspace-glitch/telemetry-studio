@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { GraphTimeline, type TimePoint } from "./GraphTimeline";
+import { CheckCircle, AlertTriangle, XCircle, Loader2, Clock } from "lucide-react";
 
 interface DependencyGraphProps {
   rule: Rule;
@@ -23,9 +24,28 @@ interface GraphNode {
   x: number;
   y: number;
   tooltip: string;
-  lastRun?: string;
-  errorCount?: number;
+  connColor: "blue" | "orange" | "pink" | "green";
 }
+
+interface GraphEdge {
+  from: string;
+  to: string;
+  color: "blue" | "orange" | "pink" | "green";
+  dashed: boolean;
+}
+
+const connColors = {
+  blue: "hsl(217, 91%, 60%)",
+  orange: "hsl(38, 92%, 50%)",
+  pink: "hsl(330, 81%, 60%)",
+  green: "hsl(142, 71%, 45%)",
+};
+
+const statusBadgeLabel: Record<string, string> = {
+  success: "Complete",
+  warning: "Warning",
+  error: "Error",
+};
 
 export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps) {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -39,32 +59,47 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
 
   const nodesByMode: Record<GraphMode, GraphNode[]> = {
     modules: [
-      { id: "sig", label: "Сигналы", type: "signal", status: "success", x: 80, y: 160, tooltip: `Модуль сигналов\nТип: Модуль\nСтатус: Активен`, lastRun: "14:32", errorCount: 0 },
-      { id: "fn", label: "Функции", type: "function", status: ruleStatus, x: 300, y: 160, tooltip: `Модуль функций\nТип: Модуль`, lastRun: rule.lastCheck, errorCount: rule.errorCount },
-      { id: "mx", label: "Матрицы", type: "matrix", status: "success", x: 520, y: 160, tooltip: `Модуль матриц\nТип: Модуль`, lastRun: "10:15", errorCount: 0 },
-      { id: "rp", label: "Отчёты", type: "report", status: "success", x: 720, y: 160, tooltip: `Модуль отчётов\nТип: Модуль`, lastRun: "06:00", errorCount: 0 },
+      { id: "sig", label: "Сигналы", type: "signal", status: "success", x: 100, y: 140, tooltip: "Модуль сигналов\nТип: Модуль\nСтатус: Активен", connColor: "blue" },
+      { id: "fn", label: "Функции", type: "function", status: ruleStatus, x: 300, y: 140, tooltip: "Модуль функций\nТип: Модуль", connColor: "orange" },
+      { id: "mx", label: "Матрицы", type: "matrix", status: "success", x: 500, y: 140, tooltip: "Модуль матриц\nТип: Модуль", connColor: "pink" },
+      { id: "rp", label: "Отчёты", type: "report", status: "success", x: 680, y: 140, tooltip: "Модуль отчётов\nТип: Модуль", connColor: "green" },
     ],
     functions: [
-      { id: "src", label: rule.parameterType, type: "signal", status: "success", x: 80, y: 160, tooltip: `${rule.parameterType}\nТип: Сигнал`, lastRun: "14:32", errorCount: 0 },
-      { id: "rule", label: rule.name, type: "function", status: ruleStatus, x: 300, y: 160, tooltip: `${rule.name}\nТип: Функция`, lastRun: rule.lastCheck, errorCount: rule.errorCount },
-      { id: "mx", label: "Матрица СИ", type: "matrix", status: rule.warningCount > 0 ? "warning" : "success", x: 300, y: 60, tooltip: `Матрица зависимостей СИ`, lastRun: "10:15", errorCount: 0 },
-      { id: "r1", label: "Отчёт #1", type: "report", status: "success", x: 540, y: 100, tooltip: "Отчёт #1", lastRun: "06:00", errorCount: 0 },
-      { id: "r2", label: "Отчёт #2", type: "report", status: rule.warningCount > 0 ? "warning" : "success", x: 540, y: 220, tooltip: "Отчёт #2", lastRun: "06:00", errorCount: 0 },
+      { id: "src", label: rule.parameterType, type: "signal", status: "success", x: 100, y: 140, tooltip: `${rule.parameterType}\nТип: Сигнал`, connColor: "blue" },
+      { id: "rule", label: rule.name, type: "function", status: ruleStatus, x: 320, y: 140, tooltip: `${rule.name}\nТип: Функция`, connColor: "orange" },
+      { id: "mx", label: "Матрица СИ", type: "matrix", status: rule.warningCount > 0 ? "warning" : "success", x: 320, y: 50, tooltip: "Матрица зависимостей СИ", connColor: "pink" },
+      { id: "r1", label: "Отчёт #1", type: "report", status: "success", x: 560, y: 90, tooltip: "Отчёт #1", connColor: "green" },
+      { id: "r2", label: "Отчёт #2", type: "report", status: rule.warningCount > 0 ? "warning" : "success", x: 560, y: 190, tooltip: "Отчёт #2", connColor: "green" },
     ],
     signals: [
-      { id: "s1", label: "TI03025.PV", type: "signal", status: "error", x: 80, y: 80, tooltip: "TI03025.PV\nПотеря", lastRun: "14:32", errorCount: 1 },
-      { id: "s2", label: "PT02012.PV", type: "signal", status: "error", x: 80, y: 160, tooltip: "PT02012.PV\nПревышение", lastRun: "14:31", errorCount: 1 },
-      { id: "s3", label: "FT01007.PV", type: "signal", status: "warning", x: 80, y: 240, tooltip: "FT01007.PV\nАномалия", lastRun: "14:30", errorCount: 0 },
-      { id: "fn", label: rule.name, type: "function", status: ruleStatus, x: 360, y: 160, tooltip: `${rule.name}`, lastRun: rule.lastCheck, errorCount: rule.errorCount },
-      { id: "inc", label: "INC-2989", type: "incident", status: "error", x: 600, y: 80, tooltip: "INC-2989\nВ работе", lastRun: "14:35", errorCount: 1 },
-      { id: "r1", label: "Отчёт #1", type: "report", status: "success", x: 600, y: 240, tooltip: "Отчёт #1", lastRun: "06:00", errorCount: 0 },
+      { id: "s1", label: "TI03025.PV", type: "signal", status: "error", x: 80, y: 60, tooltip: "TI03025.PV\nПотеря", connColor: "blue" },
+      { id: "s2", label: "PT02012.PV", type: "signal", status: "error", x: 80, y: 140, tooltip: "PT02012.PV\nПревышение", connColor: "blue" },
+      { id: "s3", label: "FT01007.PV", type: "signal", status: "warning", x: 80, y: 220, tooltip: "FT01007.PV\nАномалия", connColor: "orange" },
+      { id: "fn", label: rule.name, type: "function", status: ruleStatus, x: 360, y: 140, tooltip: rule.name, connColor: "pink" },
+      { id: "inc", label: "INC-2989", type: "incident", status: "error", x: 600, y: 80, tooltip: "INC-2989\nВ работе", connColor: "pink" },
+      { id: "r1", label: "Отчёт #1", type: "report", status: "success", x: 600, y: 200, tooltip: "Отчёт #1", connColor: "green" },
     ],
   };
 
-  const edgesByMode: Record<GraphMode, [string, string, number][]> = {
-    modules: [["sig", "fn", 1], ["fn", "mx", 1], ["mx", "rp", 1]],
-    functions: [["src", "rule", 2], ["mx", "rule", 1], ["rule", "r1", 1], ["rule", "r2", 1]],
-    signals: [["s1", "fn", 3], ["s2", "fn", 3], ["s3", "fn", 2], ["fn", "inc", 3], ["fn", "r1", 1]],
+  const edgesByMode: Record<GraphMode, GraphEdge[]> = {
+    modules: [
+      { from: "sig", to: "fn", color: "blue", dashed: true },
+      { from: "fn", to: "mx", color: "orange", dashed: true },
+      { from: "mx", to: "rp", color: "pink", dashed: true },
+    ],
+    functions: [
+      { from: "src", to: "rule", color: "blue", dashed: false },
+      { from: "mx", to: "rule", color: "pink", dashed: true },
+      { from: "rule", to: "r1", color: "orange", dashed: true },
+      { from: "rule", to: "r2", color: "orange", dashed: true },
+    ],
+    signals: [
+      { from: "s1", to: "fn", color: "blue", dashed: false },
+      { from: "s2", to: "fn", color: "blue", dashed: false },
+      { from: "s3", to: "fn", color: "orange", dashed: true },
+      { from: "fn", to: "inc", color: "pink", dashed: false },
+      { from: "fn", to: "r1", color: "green", dashed: true },
+    ],
   };
 
   const nodes = nodesByMode[graphMode].map(n => ({
@@ -74,19 +109,10 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
   const edges = edgesByMode[graphMode];
   const getNode = (id: string) => nodes.find((n) => n.id === id)!;
 
-  const statusColor = (s: string) =>
-    s === "success" ? "hsl(160 55% 48%)" : s === "warning" ? "hsl(39 74% 48%)" : "hsl(2 93% 63%)";
-
-  const statusBg = (s: string, hovered: boolean) => {
-    const alpha = hovered ? 0.25 : 0.12;
-    return s === "success" ? `hsl(160 55% 48% / ${alpha})` : s === "warning" ? `hsl(39 74% 48% / ${alpha})` : `hsl(2 93% 63% / ${alpha})`;
-  };
-
-  // Focus lens: dim nodes not in neighborhood
   const isInFocus = (nodeId: string) => {
     if (!focusedNode) return true;
     if (nodeId === focusedNode) return true;
-    return edges.some(([a, b]) => (a === focusedNode && b === nodeId) || (b === focusedNode && a === nodeId));
+    return edges.some(e => (e.from === focusedNode && e.to === nodeId) || (e.to === focusedNode && e.from === nodeId));
   };
 
   const handleTimeChange = useCallback((point: TimePoint) => {
@@ -98,57 +124,35 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
   }, []);
 
   const handleNodeClick = (nodeId: string) => {
-    if (focusedNode === nodeId) {
-      setFocusedNode(null);
-    } else {
-      setFocusedNode(nodeId);
-    }
+    setFocusedNode(focusedNode === nodeId ? null : nodeId);
   };
 
-  const renderNodeShape = (node: GraphNode, isHovered: boolean) => {
-    const color = statusColor(node.status);
-    const bg = statusBg(node.status, isHovered);
-    const sw = isHovered ? 2 : 1.5;
-
-    switch (node.type) {
-      case "signal":
-        return <circle cx={node.x} cy={node.y} r={28} fill={bg} stroke={color} strokeWidth={sw} filter={isHovered ? "url(#depNodeGlow)" : undefined} className="transition-all duration-220" />;
-      case "function":
-        return <HexagonShape cx={node.x} cy={node.y} r={32} fill={bg} stroke={color} strokeWidth={sw} />;
-      case "matrix":
-        return <rect x={node.x - 28} y={node.y - 24} width={56} height={48} rx={3} fill={bg} stroke={color} strokeWidth={sw} filter={isHovered ? "url(#depNodeGlow)" : undefined} className="transition-all duration-220" />;
-      case "incident":
-        return <TriangleShape cx={node.x} cy={node.y} r={28} fill={bg} stroke={color} strokeWidth={sw} />;
-      case "report":
-        return <rect x={node.x - 40} y={node.y - 20} width={80} height={40} rx={3} fill={bg} stroke={color} strokeWidth={sw} filter={isHovered ? "url(#depNodeGlow)" : undefined} className="transition-all duration-220" />;
-      default:
-        return <rect x={node.x - 40} y={node.y - 20} width={80} height={40} rx={3} fill={bg} stroke={color} strokeWidth={sw} filter={isHovered ? "url(#depNodeGlow)" : undefined} className="transition-all duration-220" />;
-    }
-  };
+  // Card dimensions
+  const cardW = 140;
+  const cardH = 52;
 
   return (
     <div className="p-4 animate-fade-in">
-      <div className="ide-panel-glow rounded-sm">
+      <div className="vercel-card">
         <div className="ide-header flex items-center justify-between">
           <span>Граф зависимостей</span>
           <div className="flex gap-1 normal-case tracking-normal">
-            {/* Time Travel toggle */}
             <button
               onClick={() => setShowTimeline(!showTimeline)}
-              className={`px-2 py-0.5 rounded-sm text-[9px] transition-all duration-150 ${
-                showTimeline ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"
+              className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-all duration-150 ${
+                showTimeline ? "bg-foreground/10 text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               ⏱ Time Travel
             </button>
-            <div className="w-px bg-border mx-0.5" />
-            <div className="glass-controls rounded-md px-1 py-0.5 flex gap-0.5">
+            <div className="w-px bg-border mx-1" />
+            <div className="flex gap-0.5 bg-muted rounded-md p-0.5">
               {(["modules", "functions", "signals"] as GraphMode[]).map(mode => (
                 <button
                   key={mode}
                   onClick={() => { setGraphMode(mode); setFocusedNode(null); }}
-                  className={`px-2 py-0.5 rounded-sm text-[9px] transition-all duration-150 ${
-                    graphMode === mode ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-all duration-150 ${
+                    graphMode === mode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {mode === "modules" ? "Модули" : mode === "functions" ? "Функции" : "Сигналы"}
@@ -158,7 +162,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
           </div>
         </div>
 
-        {/* Graph Time Travel */}
         {showTimeline && (
           <GraphTimeline
             onTimeChange={handleTimeChange}
@@ -169,77 +172,132 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
 
         <div className="p-4 overflow-x-auto">
           <TooltipProvider delayDuration={200}>
-            <svg width="700" height="320" viewBox="0 0 700 320" className="w-full max-w-[700px]">
+            <svg width="740" height="280" viewBox="0 0 740 280" className="w-full max-w-[740px]">
               <defs>
-                <filter id="edgeGlow">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                </filter>
-                <filter id="depNodeGlow">
-                  <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="hsl(185 70% 50%)" floodOpacity="0.2" />
-                </filter>
-                <linearGradient id="depEdgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="hsl(271 60% 55%)" stopOpacity="0.6" />
-                  <stop offset="100%" stopColor="hsl(185 70% 50%)" stopOpacity="0.5" />
-                </linearGradient>
-                {/* Flow animation marker */}
-                <marker id="flowDot" viewBox="0 0 4 4" refX="2" refY="2" markerWidth="4" markerHeight="4">
-                  <circle cx="2" cy="2" r="2" fill="hsl(185 70% 50%)" />
-                </marker>
+                {Object.entries(connColors).map(([key, color]) => (
+                  <marker key={key} id={`arrow-${key}`} viewBox="0 0 6 6" refX="6" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M0,0 L6,3 L0,6" fill="none" stroke={color} strokeWidth="1" opacity="0.6" />
+                  </marker>
+                ))}
               </defs>
 
-              {edges.map(([from, to, criticality]) => {
-                const a = getNode(from);
-                const b = getNode(to);
+              {/* Edges */}
+              {edges.map((edge) => {
+                const a = getNode(edge.from);
+                const b = getNode(edge.to);
                 if (!a || !b) return null;
-                const isHighlighted = hoveredNode === from || hoveredNode === to;
-                const inFocus = isInFocus(from) && isInFocus(to);
+                const isHighlighted = hoveredNode === edge.from || hoveredNode === edge.to;
+                const inFocus = isInFocus(edge.from) && isInFocus(edge.to);
+                const color = connColors[edge.color];
+
+                // Calculate edge points from card borders
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const angle = Math.atan2(dy, dx);
+                const ax = a.x + Math.cos(angle) * (cardW / 2 + 4);
+                const ay = a.y + Math.sin(angle) * (cardH / 2 + 4);
+                const bx = b.x - Math.cos(angle) * (cardW / 2 + 4);
+                const by = b.y - Math.sin(angle) * (cardH / 2 + 4);
+
                 return (
-                  <line
-                    key={`${from}-${to}`}
-                    x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-                    stroke={isHighlighted ? "url(#depEdgeGrad)" : "hsl(228 8% 22%)"}
-                    strokeWidth={isHighlighted ? criticality + 1.5 : criticality}
-                    strokeDasharray={criticality >= 3 ? "none" : "4 2"}
-                    filter={isHighlighted ? "url(#edgeGlow)" : undefined}
-                    opacity={inFocus ? 1 : 0.15}
-                    className="transition-all duration-220"
-                  />
+                  <g key={`${edge.from}-${edge.to}`} opacity={inFocus ? 1 : 0.12} className="transition-all duration-200">
+                    <line
+                      x1={ax} y1={ay} x2={bx} y2={by}
+                      stroke={color}
+                      strokeWidth={isHighlighted ? 2 : 1.5}
+                      strokeDasharray={edge.dashed ? "6 4" : "none"}
+                      opacity={isHighlighted ? 0.9 : 0.45}
+                      markerEnd={`url(#arrow-${edge.color})`}
+                    />
+                    {/* Connection dot at start */}
+                    <circle cx={ax} cy={ay} r={3.5} fill={color} opacity={isHighlighted ? 1 : 0.7} />
+                    {/* Connection dot at end */}
+                    <circle cx={bx} cy={by} r={3.5} fill={color} opacity={isHighlighted ? 1 : 0.7} />
+                  </g>
                 );
               })}
 
+              {/* Nodes as Vercel-style cards */}
               {nodes.map((node) => {
                 const isHovered = hoveredNode === node.id;
                 const inFocus = isInFocus(node.id);
+                const borderColor = connColors[node.connColor];
+
                 return (
                   <Tooltip key={node.id}>
                     <TooltipTrigger asChild>
                       <g
                         className="graph-node"
-                        style={{ opacity: inFocus ? 1 : 0.2, transition: "opacity 220ms ease" }}
+                        style={{ opacity: inFocus ? 1 : 0.15, transition: "opacity 220ms ease" }}
                         onMouseEnter={() => setHoveredNode(node.id)}
                         onMouseLeave={() => setHoveredNode(null)}
                         onClick={() => handleNodeClick(node.id)}
                       >
-                        {isHovered && (
-                          <circle cx={node.x} cy={node.y} r={20} fill="none"
-                            stroke={statusColor(node.status)} strokeWidth="1"
-                            opacity="0.3" className="animate-ripple" />
-                        )}
-                        {renderNodeShape(node, isHovered)}
-                        <text x={node.x} y={node.y - 2} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="9" fontFamily="Inter, sans-serif">
-                          {node.label.length > 14 ? node.label.slice(0, 13) + "…" : node.label}
+                        {/* Card background */}
+                        <rect
+                          x={node.x - cardW / 2}
+                          y={node.y - cardH / 2}
+                          width={cardW}
+                          height={cardH}
+                          rx={8}
+                          fill="hsl(0, 0%, 10%)"
+                          stroke={isHovered ? borderColor : "hsl(0, 0%, 18%)"}
+                          strokeWidth={isHovered ? 1.5 : 1}
+                          strokeDasharray={node.type === "matrix" || node.type === "report" ? "4 3" : "none"}
+                          className="transition-all duration-200"
+                        />
+
+                        {/* Node label */}
+                        <text
+                          x={node.x - cardW / 2 + 12}
+                          y={node.y - 2}
+                          fill="hsl(0, 0%, 90%)"
+                          fontSize="10"
+                          fontFamily="Inter, sans-serif"
+                          fontWeight="500"
+                        >
+                          {node.label.length > 15 ? node.label.slice(0, 14) + "…" : node.label}
                         </text>
-                        <text x={node.x} y={node.y + 10} textAnchor="middle" fill="hsl(220, 8%, 50%)" fontSize="7" fontFamily="Inter, sans-serif">
+
+                        {/* Type sublabel */}
+                        <text
+                          x={node.x - cardW / 2 + 12}
+                          y={node.y + 12}
+                          fill="hsl(0, 0%, 45%)"
+                          fontSize="8"
+                          fontFamily="Inter, sans-serif"
+                        >
                           {node.type === "signal" ? "Сигнал" : node.type === "function" ? "Функция" : node.type === "matrix" ? "Матрица" : node.type === "incident" ? "Инцидент" : "Отчёт"}
                         </text>
+
+                        {/* Connection dot on left edge */}
+                        <circle
+                          cx={node.x - cardW / 2}
+                          cy={node.y}
+                          r={4}
+                          fill={borderColor}
+                        />
                       </g>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs whitespace-pre-line max-w-[220px] animate-scale-in">
+                    <TooltipContent side="top" className="text-xs whitespace-pre-line max-w-[220px]">
                       {node.tooltip}
                       {focusedNode === node.id && "\n🔍 Фокус: нажмите ещё раз для сброса"}
                     </TooltipContent>
                   </Tooltip>
+                );
+              })}
+
+              {/* Status badges rendered on top */}
+              {nodes.map((node) => {
+                const inFocus = isInFocus(node.id);
+                return (
+                  <g key={`badge-${node.id}`} style={{ opacity: inFocus ? 1 : 0.15 }}>
+                    <StatusBadgeSvg
+                      x={node.x + cardW / 2 - 60}
+                      y={node.y - cardH / 2 + 8}
+                      status={node.status}
+                    />
+                  </g>
                 );
               })}
             </svg>
@@ -247,25 +305,20 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
         </div>
       </div>
 
+      {/* Legend */}
       <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground px-1">
-        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-success inline-block" /> Успешно</span>
-        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-warning inline-block" /> Предупреждения</span>
-        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-destructive inline-block" /> Ошибки</span>
+        <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-blue" style={{ width: 6, height: 6 }} /> Сигналы</span>
+        <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-orange" style={{ width: 6, height: 6 }} /> Функции</span>
+        <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-pink" style={{ width: 6, height: 6 }} /> Матрицы</span>
+        <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-green" style={{ width: 6, height: 6 }} /> Отчёты</span>
         <span className="text-border">|</span>
-        <span className="flex items-center gap-1">
-          <svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="none" stroke="hsl(220,8%,50%)" strokeWidth="1" /></svg> Сигнал
-        </span>
-        <span className="flex items-center gap-1">
-          <svg width="12" height="12"><rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="hsl(220,8%,50%)" strokeWidth="1" /></svg> Матрица
-        </span>
-        <span className="flex items-center gap-1">
-          <svg width="14" height="12"><polygon points="7,1 13,6 7,11 1,6" fill="none" stroke="hsl(220,8%,50%)" strokeWidth="1" /></svg> Функция
-        </span>
+        <span>— сплошная: прямая связь</span>
+        <span>- - - пунктир: зависимость</span>
         {focusedNode && (
           <>
             <span className="text-border">|</span>
-            <button onClick={() => setFocusedNode(null)} className="text-primary hover:underline">
-              🔍 Сбросить фокус
+            <button onClick={() => setFocusedNode(null)} className="text-foreground hover:underline">
+              Сбросить фокус
             </button>
           </>
         )}
@@ -274,15 +327,23 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
   );
 }
 
-function HexagonShape({ cx, cy, r, fill, stroke, strokeWidth }: { cx: number; cy: number; r: number; fill: string; stroke: string; strokeWidth: number }) {
-  const points = Array.from({ length: 6 }, (_, i) => {
-    const angle = (Math.PI / 3) * i - Math.PI / 2;
-    return `${cx + r * Math.cos(angle)},${cy + r * 0.8 * Math.sin(angle)}`;
-  }).join(" ");
-  return <polygon points={points} fill={fill} stroke={stroke} strokeWidth={strokeWidth} className="transition-all duration-220" />;
-}
+function StatusBadgeSvg({ x, y, status }: { x: number; y: number; status: string }) {
+  const colors = {
+    success: { bg: "hsl(142, 71%, 45%)", text: "hsl(142, 71%, 45%)", label: "✓" },
+    warning: { bg: "hsl(38, 92%, 50%)", text: "hsl(38, 92%, 50%)", label: "!" },
+    error: { bg: "hsl(0, 84%, 60%)", text: "hsl(0, 84%, 60%)", label: "✕" },
+  };
+  const c = colors[status as keyof typeof colors] || colors.success;
+  const w = 48;
+  const h = 18;
 
-function TriangleShape({ cx, cy, r, fill, stroke, strokeWidth }: { cx: number; cy: number; r: number; fill: string; stroke: string; strokeWidth: number }) {
-  const points = `${cx},${cy - r * 0.9} ${cx + r},${cy + r * 0.6} ${cx - r},${cy + r * 0.6}`;
-  return <polygon points={points} fill={fill} stroke={stroke} strokeWidth={strokeWidth} className="transition-all duration-220" />;
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={h} rx={9} fill={c.bg} opacity={0.12} />
+      <circle cx={x + 10} cy={y + h / 2} r={3} fill={c.bg} opacity={0.8} />
+      <text x={x + 18} y={y + h / 2 + 3} fill={c.text} fontSize="8" fontWeight="500" fontFamily="Inter, sans-serif">
+        {statusBadgeLabel[status] || "OK"}
+      </text>
+    </g>
+  );
 }

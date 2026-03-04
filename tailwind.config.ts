@@ -48,6 +48,12 @@ export default {
           soft: "hsl(var(--glow-soft))",
           bright: "hsl(var(--glow-bright))",
         },
+        conn: {
+          blue: "hsl(var(--conn-blue))",
+          orange: "hsl(var(--conn-orange))",
+          pink: "hsl(var(--conn-pink))",
+          green: "hsl(var(--conn-green))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
