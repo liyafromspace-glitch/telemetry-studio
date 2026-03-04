@@ -100,12 +100,12 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
       <div className="ide-panel-glow rounded-sm">
         <div className="ide-header flex items-center justify-between">
           <span>Граф зависимостей</span>
-          <div className="flex gap-0.5 normal-case tracking-normal">
+          <div className="flex gap-0.5 normal-case tracking-normal glass-controls rounded-md px-1 py-0.5">
             {(["modules", "functions", "signals"] as GraphMode[]).map(mode => (
               <button
                 key={mode}
                 onClick={() => setGraphMode(mode)}
-                className={`px-2 py-0.5 rounded-sm text-[9px] transition-colors ${
+                className={`px-2 py-0.5 rounded-sm text-[9px] transition-all duration-150 ${
                   graphMode === mode ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
