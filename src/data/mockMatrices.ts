@@ -40,38 +40,41 @@ export const matrices: Matrix[] = [
   {
     id: "matrix-001",
     name: "Матрица зависимостей СИ",
-    matrixType: "Зависимости СИ",
+    matrixType: "Зависимости",
     status: "active",
-    version: 4,
-    author: "Андреева А.Н.",
-    lastCheck: "2024-02-18 10:15",
-    reportsUsed: 12,
-    parametersLinked: 67,
-    functionsLinked: 4,
+    version: 2,
+    author: "Андреев А.Н.",
+    lastCheck: "2024-02-20",
+    reportsUsed: 5,
+    parametersLinked: 12,
+    functionsLinked: 3,
     errorCount: 0,
-    warningCount: 3,
+    warningCount: 2,
     createdAt: "2023-10-05",
-    description: "Матрица определяет зависимости между температурными датчиками в пределах одного материального потока.",
+    description: "Матрица определяет допустимые зависимости между датчиками в пределах выбранной области действия.",
     rows: [
       { id: "r1", source: "Датчик температуры #1", target: "Датчик температуры #2", dependencyType: "Корреляция", deviation: 2.5, unit: "°C", status: "ok" },
       { id: "r2", source: "Датчик температуры #1", target: "Датчик давления #1", dependencyType: "Компенсация", deviation: 0.8, unit: "бар", status: "warning", statusMessage: "Несоответствие единиц измерения" },
       { id: "r3", source: "Датчик давления #1", target: "Датчик давления #2", dependencyType: "Резервирование", deviation: 1.2, unit: "бар", status: "ok" },
       { id: "r4", source: "Датчик уровня #1", target: "Датчик плотности #1", dependencyType: "Расчётная", deviation: 5.0, unit: "кг/м³", status: "warning", statusMessage: "Превышен диапазон допустимого отклонения" },
-      { id: "r5", source: "Датчик температуры #2", target: "Датчик уровня #1", dependencyType: "Косвенная", deviation: 3.1, unit: "°C", status: "ok" },
     ],
     assets: [
       {
-        id: "a1", label: "Резервуар 1", children: [
-          { id: "a1-1", label: "Датчик температуры #1" },
-          { id: "a1-2", label: "Датчик температуры #2" },
-          { id: "a1-3", label: "Датчик давления #1" },
-        ]
-      },
-      {
-        id: "a2", label: "Резервуар 2", children: [
-          { id: "a2-1", label: "Датчик давления #2" },
-          { id: "a2-2", label: "Датчик уровня #1" },
-          { id: "a2-3", label: "Датчик плотности #1" },
+        id: "a0", label: "Северное месторождение", children: [
+          {
+            id: "a1", label: "Резервуар 1", children: [
+              { id: "a1-1", label: "Датчик температуры #1" },
+              { id: "a1-2", label: "Датчик температуры #2" },
+              { id: "a1-3", label: "Датчик давления #1" },
+              { id: "a1-4", label: "Датчик уровня #1" },
+            ]
+          },
+          {
+            id: "a2", label: "Резервуар 2", children: [
+              { id: "a2-1", label: "Датчик давления #2" },
+              { id: "a2-2", label: "Датчик плотности #1" },
+            ]
+          },
         ]
       },
     ],
@@ -108,8 +111,8 @@ export const matrices: Matrix[] = [
   },
   {
     id: "matrix-003",
-    name: "Матрица плановых и фактических тегов",
-    matrixType: "Теги план/факт",
+    name: "Матрица плановых и фактических значений",
+    matrixType: "План/факт",
     status: "draft",
     version: 2,
     author: "Смирнов И.И.",
@@ -120,18 +123,18 @@ export const matrices: Matrix[] = [
     errorCount: 0,
     warningCount: 1,
     createdAt: "2024-01-15",
-    description: "Матрица сопоставляет плановые теги SCADA с фактическими тегами телеметрии.",
+    description: "Матрица сопоставляет плановые значения параметров с фактическими показаниями телеметрии.",
     rows: [
-      { id: "r1", source: "TAG_T_001_PLAN", target: "TAG_T_001_FACT", dependencyType: "Сопоставление", deviation: 0, unit: "—", status: "ok" },
-      { id: "r2", source: "TAG_P_002_PLAN", target: "TAG_P_002_FACT", dependencyType: "Сопоставление", deviation: 0, unit: "—", status: "warning", statusMessage: "Тег не подтверждён" },
-      { id: "r3", source: "TAG_L_003_PLAN", target: "TAG_L_003_FACT", dependencyType: "Сопоставление", deviation: 0, unit: "—", status: "ok" },
+      { id: "r1", source: "Температура план", target: "Температура факт", dependencyType: "Сопоставление", deviation: 0, unit: "°C", status: "ok" },
+      { id: "r2", source: "Давление план", target: "Давление факт", dependencyType: "Сопоставление", deviation: 0, unit: "бар", status: "warning", statusMessage: "Значение не подтверждено" },
+      { id: "r3", source: "Уровень план", target: "Уровень факт", dependencyType: "Сопоставление", deviation: 0, unit: "м", status: "ok" },
     ],
     assets: [
       {
-        id: "a1", label: "SCADA", children: [
-          { id: "a1-1", label: "TAG_T_001_PLAN" },
-          { id: "a1-2", label: "TAG_P_002_PLAN" },
-          { id: "a1-3", label: "TAG_L_003_PLAN" },
+        id: "a1", label: "Плановые показатели", children: [
+          { id: "a1-1", label: "Температура план" },
+          { id: "a1-2", label: "Давление план" },
+          { id: "a1-3", label: "Уровень план" },
         ]
       },
     ],
@@ -239,7 +242,3 @@ export const matrices: Matrix[] = [
     ],
   },
 ];
-
-export const matrixCategories = [
-  "Структура и матрицы",
-] as const;

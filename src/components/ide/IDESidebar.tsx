@@ -20,7 +20,6 @@ function FunctionIcon({ className }: { className?: string }) {
   );
 }
 
-// Mini sparkline for sidebar categories
 function MiniSparkline({ seed }: { seed: number }) {
   const data = Array.from({ length: 12 }, (_, i) => 
     Math.sin(i * 0.8 + seed) * 0.4 + Math.cos(i * 0.3 + seed * 2) * 0.3 + 0.5
@@ -45,7 +44,7 @@ function MiniSparkline({ seed }: { seed: number }) {
 export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
   const [search, setSearch] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set([...categories, "Структура и матрицы"])
+    new Set([...categories, "МАТРИЦЫ"])
   );
   const [viewMode, setViewMode] = useState<"projects" | "statuses">("projects");
 
@@ -104,6 +103,13 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
 
   return (
     <div className="w-[260px] min-w-[260px] bg-sidebar border-r border-sidebar-border flex flex-col h-full">
+      {/* Header */}
+      <div className="px-3 py-2 border-b border-sidebar-border">
+        <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+          Конфигурация
+        </div>
+      </div>
+
       {/* Search */}
       <div className="p-2 border-b border-sidebar-border">
         <div className="relative">
@@ -146,8 +152,9 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
       <div className="flex-1 overflow-y-auto py-1">
         {viewMode === "projects" ? (
           <>
+            {/* ПРАВИЛА section */}
             <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
-              Производственная среда
+              Правила
             </div>
 
             {rulesByCategory.map(({ category, rules: catRules }, ci) => (
@@ -186,21 +193,25 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
               </div>
             ))}
 
-            {/* Matrix section */}
+            {/* МАТРИЦЫ section */}
+            <div className="px-3 py-1.5 mt-2 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+              Матрицы
+            </div>
+
             <div>
               <button
-                onClick={() => toggleCategory("Структура и матрицы")}
+                onClick={() => toggleCategory("МАТРИЦЫ")}
                 className="w-full flex items-center gap-1.5 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors"
               >
-                {expandedCategories.has("Структура и матрицы") ? (
+                {expandedCategories.has("МАТРИЦЫ") ? (
                   <ChevronDown className="w-3 h-3 text-muted-foreground" />
                 ) : (
                   <ChevronRight className="w-3 h-3 text-muted-foreground" />
                 )}
                 <FolderOpen className="w-3.5 h-3.5 text-primary/70" />
-                <span className="font-medium">Структура и матрицы</span>
+                <span className="font-medium">Все матрицы</span>
               </button>
-              {expandedCategories.has("Структура и матрицы") &&
+              {expandedCategories.has("МАТРИЦЫ") &&
                 filteredMatrices.map((matrix) => (
                   <button
                     key={matrix.id}
