@@ -15,12 +15,8 @@ const stages = [
   { id: "production", label: "Продакшн" },
 ];
 
-const mockDiff = {
-  before: "Температура > 90",
-  after: "Температура > 95",
-};
+const mockDiff = { before: "Температура > 90", after: "Температура > 95" };
 
-// Risk analysis mock data
 const riskAnalysis = {
   affectedSignals: 18,
   affectedObjects: 4,
@@ -35,72 +31,71 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-      <div className="ide-panel rounded-sm w-full max-w-lg shadow-2xl animate-scale-in">
+      <div className="vercel-card w-full max-w-lg shadow-2xl animate-scale-in">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-          <Shield className="w-4 h-4 text-primary" />
+          <Shield className="w-4 h-4 text-foreground" />
           <span className="text-sm font-medium text-foreground">Активация правила</span>
         </div>
 
         <div className="p-4 space-y-4">
           {/* Staged deployment pipeline */}
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
-              Этап развёртывания
-            </div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Этап развёртывания</div>
             <div className="flex items-center gap-0.5">
               {stages.map((stage, i) => (
                 <div key={stage.id} className="flex items-center gap-0.5">
-                  <div className={`px-2 py-1 rounded-sm text-[10px] font-medium border ${
-                    i < currentStageIndex ? "border-success/50 bg-success/10 text-success" :
-                    i === currentStageIndex ? "border-primary bg-primary/10 text-primary" :
-                    "border-border bg-secondary text-muted-foreground"
+                  <div className={`px-2.5 py-1 rounded-full text-[10px] font-medium ${
+                    i < currentStageIndex ? "status-badge-success"
+                    : i === currentStageIndex ? "bg-foreground text-background"
+                    : "bg-muted text-muted-foreground"
                   }`}>
                     {i < currentStageIndex && <CheckCircle className="w-2.5 h-2.5 inline mr-0.5" />}
                     {stage.label}
                   </div>
-                  {i < stages.length - 1 && (
-                    <ArrowRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                  )}
+                  {i < stages.length - 1 && <div className="w-4 h-px bg-border" />}
                 </div>
+              ))}
+            </div>
+            {/* Pipeline segment bar */}
+            <div className="flex items-center gap-0.5 mt-2">
+              {stages.map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 h-1 rounded-full transition-all"
+                  style={{
+                    background: i < currentStageIndex ? "hsl(142, 71%, 45%)"
+                      : i === currentStageIndex ? "hsl(217, 91%, 60%)"
+                      : "hsl(0, 0%, 18%)",
+                    opacity: i > currentStageIndex ? 0.3 : 1,
+                  }}
+                />
               ))}
             </div>
           </div>
 
           {/* Validation results */}
           <div className="space-y-1.5 text-xs font-mono">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
-              Проверка выполнена:
-            </div>
-            <div className="flex items-center gap-2 text-success">
-              <CheckCircle className="w-3 h-3" /> Синтаксис корректен
-            </div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Проверка выполнена:</div>
+            <div className="flex items-center gap-2 text-success"><CheckCircle className="w-3 h-3" /> Синтаксис корректен</div>
             {rule.errorCount > 0 ? (
-              <div className="flex items-center gap-2 text-destructive">
-                <XCircle className="w-3 h-3" /> {rule.errorCount} критических ошибок
-              </div>
+              <div className="flex items-center gap-2 text-destructive"><XCircle className="w-3 h-3" /> {rule.errorCount} критических ошибок</div>
             ) : (
-              <div className="flex items-center gap-2 text-success">
-                <CheckCircle className="w-3 h-3" /> Нет критических ошибок
-              </div>
+              <div className="flex items-center gap-2 text-success"><CheckCircle className="w-3 h-3" /> Нет критических ошибок</div>
             )}
             {rule.warningCount > 0 && (
-              <div className="flex items-center gap-2 text-warning">
-                <AlertTriangle className="w-3 h-3" /> {rule.warningCount} предупреждений
-              </div>
+              <div className="flex items-center gap-2 text-warning"><AlertTriangle className="w-3 h-3" /> {rule.warningCount} предупреждений</div>
             )}
           </div>
 
           {/* Change diff */}
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
-              Изменения:
-            </div>
-            <div className="ide-panel rounded-sm p-2 text-xs font-mono space-y-1">
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Изменения:</div>
+            <div className="bg-background rounded-lg border border-border p-2 text-xs font-mono space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-sm line-through">{mockDiff.before}</span>
+                <span className="text-destructive bg-destructive/8 px-2 py-0.5 rounded-md line-through">{mockDiff.before}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-success bg-success/10 px-1.5 py-0.5 rounded-sm">{mockDiff.after}</span>
+                <span className="text-success bg-success/8 px-2 py-0.5 rounded-md">{mockDiff.after}</span>
               </div>
             </div>
           </div>
@@ -110,7 +105,7 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
               <TrendingUp className="w-3 h-3" /> Анализ риска
             </div>
-            <div className={`ide-panel rounded-sm p-3 text-xs space-y-2 border-l-2 ${
+            <div className={`vercel-card p-3 text-xs space-y-2 border-l-2 ${
               riskAnalysis.riskLevel === "high" ? "border-l-destructive" :
               riskAnalysis.riskLevel === "medium" ? "border-l-warning" : "border-l-success"
             }`}>
@@ -127,45 +122,27 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
                 <span className={`font-mono font-medium ${
                   riskAnalysis.riskLevel === "high" ? "text-destructive" :
                   riskAnalysis.riskLevel === "medium" ? "text-warning" : "text-success"
-                }`}>
-                  {riskAnalysis.potentialIncidents}
-                </span>
+                }`}>{riskAnalysis.potentialIncidents}</span>
               </div>
-              {/* Risk mini graph */}
-              <div className="mt-1">
-                <RiskHeatBar level={riskAnalysis.riskLevel} />
-              </div>
+              <RiskHeatBar level={riskAnalysis.riskLevel} />
               <div className="flex flex-wrap gap-1 mt-1">
                 {riskAnalysis.affectedNodes.map((n) => (
-                  <span key={n} className="px-1.5 py-0.5 text-[9px] font-mono bg-accent rounded-sm border border-border text-muted-foreground">
-                    {n}
-                  </span>
+                  <span key={n} className="px-2 py-0.5 text-[9px] font-mono bg-muted rounded-full text-muted-foreground">{n}</span>
                 ))}
               </div>
             </div>
           </div>
 
           {/* Impact */}
-          <div className="ide-panel rounded-sm p-3 text-xs space-y-1.5">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
-              Будет затронуто:
-            </div>
-            <div className="flex justify-between text-foreground">
-              <span>Параметров</span>
-              <span className="font-mono">{rule.parametersLinked}</span>
-            </div>
-            <div className="flex justify-between text-foreground">
-              <span>Функций</span>
-              <span className="font-mono">2</span>
-            </div>
-            <div className="flex justify-between text-foreground">
-              <span>Активных отчётов</span>
-              <span className="font-mono">{rule.reportsUsed}</span>
-            </div>
+          <div className="vercel-card p-3 text-xs space-y-1.5">
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Будет затронуто:</div>
+            <div className="flex justify-between text-foreground"><span>Параметров</span><span className="font-mono">{rule.parametersLinked}</span></div>
+            <div className="flex justify-between text-foreground"><span>Функций</span><span className="font-mono">2</span></div>
+            <div className="flex justify-between text-foreground"><span>Активных отчётов</span><span className="font-mono">{rule.reportsUsed}</span></div>
             <div className="flex justify-between text-foreground">
               <span>Версия изменится</span>
               <span className="font-mono flex items-center gap-1">
-                <GitBranch className="w-3 h-3 text-primary" />
+                <GitBranch className="w-3 h-3 text-muted-foreground" />
                 v{rule.version} → v{rule.version + 1}
               </span>
             </div>
@@ -173,42 +150,48 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
 
           {/* Mini dependency preview */}
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
-              Граф зависимостей:
-            </div>
-            <svg width="100%" height="40" viewBox="0 0 400 40" className="rounded-sm bg-background p-1">
-              <circle cx={40} cy={20} r={8} fill="hsl(127, 50%, 49%, 0.15)" stroke="hsl(127, 50%, 49%)" strokeWidth={1} />
-              <text x={40} y={23} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="6">SIG</text>
-              <line x1={50} y1={20} x2={140} y2={20} stroke="hsl(228, 8%, 30%)" strokeWidth={1} strokeDasharray="3 2" />
-              <polygon points="150,8 170,20 150,32 130,20" fill="hsl(212, 92%, 58%, 0.15)" stroke="hsl(212, 92%, 58%)" strokeWidth={1} />
-              <text x={150} y={23} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="6">FN</text>
-              <line x1={170} y1={20} x2={230} y2={12} stroke="hsl(228, 8%, 30%)" strokeWidth={1} strokeDasharray="3 2" />
-              <line x1={170} y1={20} x2={230} y2={28} stroke="hsl(228, 8%, 30%)" strokeWidth={1} strokeDasharray="3 2" />
-              <rect x={230} y={4} width={40} height={16} rx={8} fill="hsl(127, 50%, 49%, 0.1)" stroke="hsl(127, 50%, 49%)" strokeWidth={1} />
-              <text x={250} y={15} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="5">Отч.1</text>
-              <rect x={230} y={22} width={40} height={16} rx={8} fill="hsl(39, 74%, 48%, 0.1)" stroke="hsl(39, 74%, 48%)" strokeWidth={1} />
-              <text x={250} y={33} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="5">Отч.2</text>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Граф зависимостей:</div>
+            <svg width="100%" height="40" viewBox="0 0 400 40" className="rounded-lg bg-background border border-border p-1">
+              {/* Signal node */}
+              <rect x={10} y={8} width={60} height={24} rx={6} fill="hsl(0, 0%, 10%)" stroke="hsl(0, 0%, 18%)" strokeWidth={1} />
+              <circle cx={10} cy={20} r={3} fill="hsl(217, 91%, 60%)" />
+              <text x={40} y={23} textAnchor="middle" fill="hsl(0, 0%, 90%)" fontSize="7" fontFamily="Inter">SIG</text>
+              {/* Edge */}
+              <line x1={74} y1={20} x2={136} y2={20} stroke="hsl(0, 0%, 25%)" strokeWidth={1} strokeDasharray="4 3" />
+              <circle cx={74} cy={20} r={2.5} fill="hsl(217, 91%, 60%)" />
+              <circle cx={136} cy={20} r={2.5} fill="hsl(38, 92%, 50%)" />
+              {/* Function node */}
+              <rect x={140} y={8} width={60} height={24} rx={6} fill="hsl(0, 0%, 10%)" stroke="hsl(0, 0%, 18%)" strokeWidth={1} />
+              <circle cx={140} cy={20} r={3} fill="hsl(38, 92%, 50%)" />
+              <text x={170} y={23} textAnchor="middle" fill="hsl(0, 0%, 90%)" fontSize="7" fontFamily="Inter">FN</text>
+              {/* Edges to reports */}
+              <line x1={204} y1={16} x2={250} y2={12} stroke="hsl(0, 0%, 25%)" strokeWidth={1} strokeDasharray="4 3" />
+              <line x1={204} y1={24} x2={250} y2={28} stroke="hsl(0, 0%, 25%)" strokeWidth={1} strokeDasharray="4 3" />
+              <circle cx={250} cy={12} r={2.5} fill="hsl(142, 71%, 45%)" />
+              <circle cx={250} cy={28} r={2.5} fill="hsl(142, 71%, 45%)" />
+              {/* Report nodes */}
+              <rect x={254} y={2} width={50} height={20} rx={6} fill="hsl(0, 0%, 10%)" stroke="hsl(0, 0%, 18%)" strokeWidth={1} strokeDasharray="3 2" />
+              <text x={279} y={15} textAnchor="middle" fill="hsl(0, 0%, 90%)" fontSize="6" fontFamily="Inter">Отч.1</text>
+              <rect x={254} y={24} width={50} height={14} rx={6} fill="hsl(0, 0%, 10%)" stroke="hsl(38, 92%, 50%)" strokeWidth={1} strokeDasharray="3 2" opacity="0.6" />
+              <text x={279} y={33} textAnchor="middle" fill="hsl(0, 0%, 90%)" fontSize="6" fontFamily="Inter">Отч.2</text>
             </svg>
           </div>
 
           {!canActivate && (
-            <div className="text-xs text-destructive bg-destructive/10 p-2 rounded-sm">
+            <div className="text-xs text-destructive bg-destructive/8 p-2.5 rounded-lg border border-destructive/20">
               Невозможно активировать: имеются критические ошибки
             </div>
           )}
         </div>
 
         <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border">
-          <button
-            onClick={onClose}
-            className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
+          <button onClick={onClose} className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-lg">
             Отмена
           </button>
           <button
             onClick={() => { onActivate(); onClose(); }}
             disabled={!canActivate}
-            className="px-4 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+            className="btn-primary rounded-lg disabled:opacity-30 disabled:cursor-not-allowed"
           >
             Активировать
           </button>
@@ -221,17 +204,18 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
 function RiskHeatBar({ level }: { level: "low" | "medium" | "high" }) {
   const segments = 5;
   const active = level === "low" ? 1 : level === "medium" ? 3 : 5;
-
   return (
     <div className="flex gap-0.5">
       {Array.from({ length: segments }, (_, i) => (
         <div
           key={i}
-          className={`h-1.5 flex-1 rounded-full transition-all duration-220 ${
-            i < active
-              ? i < 2 ? "bg-success" : i < 4 ? "bg-warning" : "bg-destructive"
-              : "bg-muted"
-          }`}
+          className="h-1.5 flex-1 rounded-full transition-all"
+          style={{
+            background: i < active
+              ? i < 2 ? "hsl(142, 71%, 45%)" : i < 4 ? "hsl(38, 92%, 50%)" : "hsl(0, 84%, 60%)"
+              : "hsl(0, 0%, 18%)",
+            opacity: i < active ? 1 : 0.3,
+          }}
         />
       ))}
     </div>

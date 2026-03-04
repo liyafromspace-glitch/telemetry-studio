@@ -57,25 +57,18 @@ const typeIcons: Record<string, React.ReactNode> = {
   resolved: <CheckCircle className="w-3.5 h-3.5" />,
 };
 
-const severityStyles: Record<string, string> = {
-  info: "border-l-primary/40 bg-primary/5",
-  warning: "border-l-warning/60 bg-warning/5",
-  critical: "border-l-destructive/60 bg-destructive/5",
-  success: "border-l-success/60 bg-success/5",
-};
-
-const severityDotStyles: Record<string, string> = {
-  info: "bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.4)]",
-  warning: "bg-warning shadow-[0_0_6px_hsl(var(--warning)/0.4)]",
-  critical: "bg-destructive shadow-[0_0_6px_hsl(var(--destructive)/0.4)]",
-  success: "bg-success shadow-[0_0_6px_hsl(var(--success)/0.4)]",
+const severityConnDot: Record<string, string> = {
+  info: "bg-conn-blue",
+  warning: "bg-conn-orange",
+  critical: "bg-conn-pink",
+  success: "bg-conn-green",
 };
 
 const severityIconColor: Record<string, string> = {
-  info: "text-primary",
-  warning: "text-warning",
-  critical: "text-destructive",
-  success: "text-success",
+  info: "text-conn-blue",
+  warning: "text-conn-orange",
+  critical: "text-conn-pink",
+  success: "text-conn-green",
 };
 
 export function SystemStory({ incident }: SystemStoryProps) {
@@ -92,28 +85,28 @@ export function SystemStory({ incident }: SystemStoryProps) {
   };
 
   return (
-    <div className="ide-panel-glow rounded-sm">
+    <div className="vercel-card">
       <div className="ide-header flex items-center gap-1.5">
-        <BookOpen className="w-3.5 h-3.5 text-primary" />
+        <BookOpen className="w-3.5 h-3.5 text-foreground" />
         <span>Хронология системы</span>
       </div>
       <div className="p-3 relative">
         {/* Vertical timeline line */}
         <div className="absolute left-[2.05rem] top-3 bottom-3 w-px bg-border" />
 
-        <div className="space-y-0.5 stagger-children">
+        <div className="space-y-0 stagger-children">
           {events.map((event, i) => (
             <button
               key={i}
               onClick={() => toggle(i)}
-              className={`w-full text-left relative pl-10 pr-3 py-2 rounded-sm border-l-2 transition-all duration-180 hover:translate-x-0.5 ${severityStyles[event.severity]}`}
+              className="w-full text-left relative pl-10 pr-3 py-2.5 rounded-lg transition-all duration-180 hover:bg-muted/50"
             >
               {/* Timeline dot */}
-              <div className={`absolute left-[1.55rem] top-3 w-2.5 h-2.5 rounded-full z-10 transition-all duration-220 ${severityDotStyles[event.severity]}`} />
+              <div className={`absolute left-[1.55rem] top-3.5 w-2.5 h-2.5 rounded-full z-10 transition-all duration-200 ${severityConnDot[event.severity]}`} />
 
               <div className="flex items-center gap-2 text-xs">
                 <span className="font-mono text-[10px] text-muted-foreground w-10">{event.time}</span>
-                <span className={`${severityIconColor[event.severity]}`}>{typeIcons[event.type]}</span>
+                <span className={severityIconColor[event.severity]}>{typeIcons[event.type]}</span>
                 <span className="text-foreground font-medium flex-1">{event.title}</span>
                 <ChevronRight className={`w-3 h-3 text-muted-foreground transition-transform duration-150 ${expanded.has(i) ? "rotate-90" : ""}`} />
               </div>

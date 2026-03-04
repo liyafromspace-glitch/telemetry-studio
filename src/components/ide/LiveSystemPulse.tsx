@@ -14,7 +14,6 @@ export function LiveSystemPulse() {
     activeIncidents: 3,
   });
 
-  // Simulate live fluctuation
   useEffect(() => {
     const interval = setInterval(() => {
       setPulse({
@@ -27,32 +26,32 @@ export function LiveSystemPulse() {
   }, []);
 
   return (
-    <div className="flex items-center gap-3 glass-controls rounded-lg px-3 py-1.5 animate-fade-in">
-      {/* Pulse wave */}
-      <div className="relative flex items-center gap-1.5">
+    <div className="flex items-center gap-3 bg-muted rounded-lg px-3 py-1.5 animate-fade-in">
+      {/* Live indicator */}
+      <div className="flex items-center gap-1.5">
         <div className="relative">
-          <Activity className="w-3.5 h-3.5 text-primary" />
-          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-success animate-[status-pulse_1.5s_ease-in-out_infinite]" />
+          <div className="w-2 h-2 rounded-full bg-success" />
+          <div className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping opacity-75" />
         </div>
-        <span className="text-[10px] font-medium text-foreground">PULSE</span>
+        <span className="text-[10px] font-medium text-foreground uppercase tracking-wider">Live</span>
       </div>
 
-      <div className="w-px h-4 bg-border" />
+      <div className="w-px h-3.5 bg-border" />
 
-      {/* Mini telemetry wave SVG */}
+      {/* Mini telemetry wave */}
       <PulseWave value={pulse.signalsPerSec} />
 
       <div className="flex items-center gap-3 text-[10px]">
         <span className="flex items-center gap-1 text-muted-foreground">
-          <span className="font-mono text-foreground">{pulse.signalsPerSec}</span> сиг/с
+          <span className="font-mono text-foreground font-medium">{pulse.signalsPerSec}</span> сиг/с
         </span>
         <span className="flex items-center gap-1 text-muted-foreground">
-          <Zap className="w-2.5 h-2.5 text-primary" />
-          <span className="font-mono text-foreground">{pulse.rulesPerSec}</span> прав/с
+          <Zap className="w-2.5 h-2.5 text-conn-orange" />
+          <span className="font-mono text-foreground font-medium">{pulse.rulesPerSec}</span> прав/с
         </span>
         <span className="flex items-center gap-1 text-muted-foreground">
           <AlertTriangle className="w-2.5 h-2.5 text-warning" />
-          <span className="font-mono text-foreground">{pulse.activeIncidents}</span>
+          <span className="font-mono text-foreground font-medium">{pulse.activeIncidents}</span>
         </span>
       </div>
     </div>
@@ -82,16 +81,9 @@ function PulseWave({ value }: { value: number }) {
     <svg width={w} height={h} className="inline-block">
       <defs>
         <linearGradient id="pulseGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.8" />
+          <stop offset="0%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.7" />
         </linearGradient>
-        <filter id="pulseGlow">
-          <feGaussianBlur stdDeviation="1.5" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
       <polyline
         points={line}
@@ -99,7 +91,6 @@ function PulseWave({ value }: { value: number }) {
         stroke="url(#pulseGrad)"
         strokeWidth="1.5"
         strokeLinejoin="round"
-        filter="url(#pulseGlow)"
       />
     </svg>
   );
