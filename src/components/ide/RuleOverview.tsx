@@ -73,14 +73,6 @@ function GlowDiagram() {
           <stop offset="50%" stopColor="hsl(240 50% 55%)" stopOpacity="0.6" />
           <stop offset="100%" stopColor="hsl(185 70% 50%)" stopOpacity="0.7" />
         </linearGradient>
-        <filter id="lineGlowStrong">
-          <feGaussianBlur stdDeviation="4" result="blur" />
-          <feComposite in="blur" in2="SourceGraphic" operator="over" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-        <filter id="nodeGlowTeal">
-          <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="hsl(185 70% 50%)" floodOpacity="0.25" />
-        </filter>
       </defs>
       {/* Edges with glow */}
       {edges.map(([from, to], i) => {
@@ -90,17 +82,15 @@ function GlowDiagram() {
         return (
           <g key={i}>
             <line x1={f.x} y1={f.y} x2={t.x} y2={t.y}
-              stroke="url(#edgeGradPurpleTeal)" strokeWidth="2.5"
-              filter="url(#lineGlowStrong)" opacity="0.9"
+              stroke="url(#edgeGradPurpleTeal)" strokeWidth="1.5"
+              opacity="0.7"
             />
-            {/* Flow dot indicator */}
-            <circle cx={mx} cy={my} r="2" fill="hsl(185 70% 60%)" opacity="0.7" />
           </g>
         );
       })}
       {/* Nodes */}
       {nodes.map((n, i) => (
-        <g key={i} filter="url(#nodeGlowTeal)" className="graph-node">
+        <g key={i} className="graph-node">
           {/* Outer rect */}
           <rect
             x={n.x - 20} y={n.y - 16} width={40} height={32} rx={3}
@@ -126,9 +116,9 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
   const [structureOpen, setStructureOpen] = useState(true);
 
   return (
-    <div className="p-4 space-y-4 animate-fade-in">
+    <div className="p-4 space-y-4">
       {/* Status cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 stagger-children">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="stat-card">
           <div className="stat-card-label">
             <span className={`status-dot ${

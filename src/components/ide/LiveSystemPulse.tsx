@@ -26,12 +26,12 @@ export function LiveSystemPulse() {
   }, []);
 
   return (
-    <div className="flex items-center gap-3 bg-muted rounded-lg px-3 py-1.5 animate-fade-in">
-      {/* Live indicator */}
+    <div className="flex items-center gap-3 bg-muted rounded-lg px-3 py-1.5">
+      {/* Live indicator — keeps pulse as the only animated dot */}
       <div className="flex items-center gap-1.5">
         <div className="relative">
           <div className="w-2 h-2 rounded-full bg-success" />
-          <div className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping opacity-75" />
+          <div className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping opacity-60" />
         </div>
         <span className="text-[10px] font-medium text-foreground uppercase tracking-wider">Live</span>
       </div>

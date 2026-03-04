@@ -128,30 +128,28 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
       <div className="flex border-b border-sidebar-border text-[11px]">
         <button
           onClick={() => setViewMode("projects")}
-          className={`flex-1 py-1.5 text-center font-medium transition-all duration-150 relative ${
+          className={`flex-1 py-1.5 text-center font-medium transition-colors duration-150 relative ${
             viewMode === "projects"
               ? "text-foreground"
-              : "text-muted-foreground hover:text-foreground hover:bg-accent/30"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Проекты
           {viewMode === "projects" && (
-            <div className="absolute bottom-0 left-2 right-2 h-[2px] bg-primary animate-scale-in"
-              style={{ transformOrigin: 'center bottom' }} />
+            <div className="absolute bottom-0 left-2 right-2 h-[1.5px] bg-foreground" />
           )}
         </button>
         <button
           onClick={() => setViewMode("statuses")}
-          className={`flex-1 py-1.5 text-center font-medium transition-all duration-150 relative ${
+          className={`flex-1 py-1.5 text-center font-medium transition-colors duration-150 relative ${
             viewMode === "statuses"
               ? "text-foreground"
-              : "text-muted-foreground hover:text-foreground hover:bg-accent/30"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Статусы
           {viewMode === "statuses" && (
-            <div className="absolute bottom-0 left-2 right-2 h-[2px] bg-primary animate-scale-in"
-              style={{ transformOrigin: 'center bottom' }} />
+            <div className="absolute bottom-0 left-2 right-2 h-[1.5px] bg-foreground" />
           )}
         </button>
       </div>
