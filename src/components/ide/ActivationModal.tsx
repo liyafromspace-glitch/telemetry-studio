@@ -1,5 +1,5 @@
 import { Rule } from "@/data/mockRules";
-import { CheckCircle, AlertTriangle, XCircle, Shield, ArrowRight, GitBranch } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, Shield, ArrowRight, GitBranch, TrendingUp } from "lucide-react";
 
 interface ActivationModalProps {
   rule: Rule;
@@ -15,15 +15,22 @@ const stages = [
   { id: "production", label: "Продакшн" },
 ];
 
-// Mock diff
 const mockDiff = {
   before: "Температура > 90",
   after: "Температура > 95",
 };
 
+// Risk analysis mock data
+const riskAnalysis = {
+  affectedSignals: 18,
+  affectedObjects: 4,
+  potentialIncidents: "+12%",
+  riskLevel: "medium" as "low" | "medium" | "high",
+  affectedNodes: ["TI03025.PV", "PT02012.PV", "HT06002.PV", "FT01007.PV"],
+};
+
 export function ActivationModal({ rule, onClose, onActivate }: ActivationModalProps) {
   const canActivate = rule.errorCount === 0;
-  // Simulate current stage based on rule status
   const currentStageIndex = rule.status === "draft" ? 0 : rule.status === "error" ? 1 : 3;
 
   return (
@@ -98,6 +105,46 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
             </div>
           </div>
 
+          {/* Activation Risk Simulator */}
+          <div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" /> Анализ риска
+            </div>
+            <div className={`ide-panel rounded-sm p-3 text-xs space-y-2 border-l-2 ${
+              riskAnalysis.riskLevel === "high" ? "border-l-destructive" :
+              riskAnalysis.riskLevel === "medium" ? "border-l-warning" : "border-l-success"
+            }`}>
+              <div className="flex justify-between text-foreground">
+                <span>Затронуто сигналов</span>
+                <span className="font-mono font-medium">{riskAnalysis.affectedSignals}</span>
+              </div>
+              <div className="flex justify-between text-foreground">
+                <span>Затронуто объектов</span>
+                <span className="font-mono font-medium">{riskAnalysis.affectedObjects}</span>
+              </div>
+              <div className="flex justify-between text-foreground">
+                <span>Потенциал инцидентов</span>
+                <span className={`font-mono font-medium ${
+                  riskAnalysis.riskLevel === "high" ? "text-destructive" :
+                  riskAnalysis.riskLevel === "medium" ? "text-warning" : "text-success"
+                }`}>
+                  {riskAnalysis.potentialIncidents}
+                </span>
+              </div>
+              {/* Risk mini graph */}
+              <div className="mt-1">
+                <RiskHeatBar level={riskAnalysis.riskLevel} />
+              </div>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {riskAnalysis.affectedNodes.map((n) => (
+                  <span key={n} className="px-1.5 py-0.5 text-[9px] font-mono bg-accent rounded-sm border border-border text-muted-foreground">
+                    {n}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Impact */}
           <div className="ide-panel rounded-sm p-3 text-xs space-y-1.5">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
@@ -133,12 +180,10 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
               <circle cx={40} cy={20} r={8} fill="hsl(127, 50%, 49%, 0.15)" stroke="hsl(127, 50%, 49%)" strokeWidth={1} />
               <text x={40} y={23} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="6">SIG</text>
               <line x1={50} y1={20} x2={140} y2={20} stroke="hsl(228, 8%, 30%)" strokeWidth={1} strokeDasharray="3 2" />
-
               <polygon points="150,8 170,20 150,32 130,20" fill="hsl(212, 92%, 58%, 0.15)" stroke="hsl(212, 92%, 58%)" strokeWidth={1} />
               <text x={150} y={23} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="6">FN</text>
               <line x1={170} y1={20} x2={230} y2={12} stroke="hsl(228, 8%, 30%)" strokeWidth={1} strokeDasharray="3 2" />
               <line x1={170} y1={20} x2={230} y2={28} stroke="hsl(228, 8%, 30%)" strokeWidth={1} strokeDasharray="3 2" />
-
               <rect x={230} y={4} width={40} height={16} rx={8} fill="hsl(127, 50%, 49%, 0.1)" stroke="hsl(127, 50%, 49%)" strokeWidth={1} />
               <text x={250} y={15} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="5">Отч.1</text>
               <rect x={230} y={22} width={40} height={16} rx={8} fill="hsl(39, 74%, 48%, 0.1)" stroke="hsl(39, 74%, 48%)" strokeWidth={1} />
@@ -169,6 +214,26 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function RiskHeatBar({ level }: { level: "low" | "medium" | "high" }) {
+  const segments = 5;
+  const active = level === "low" ? 1 : level === "medium" ? 3 : 5;
+
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: segments }, (_, i) => (
+        <div
+          key={i}
+          className={`h-1.5 flex-1 rounded-full transition-all duration-220 ${
+            i < active
+              ? i < 2 ? "bg-success" : i < 4 ? "bg-warning" : "bg-destructive"
+              : "bg-muted"
+          }`}
+        />
+      ))}
     </div>
   );
 }

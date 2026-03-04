@@ -1,5 +1,6 @@
 import { liveSignals, type LiveSignal } from "@/data/mockPlatform";
 import { AlertTriangle, Radio, XCircle, CheckCircle, Clock, ArrowRight } from "lucide-react";
+import { LiveSystemPulse } from "@/components/ide/LiveSystemPulse";
 
 interface LiveViewProps {
   onNavigateToInvestigate: (signalParam: string) => void;
@@ -55,9 +56,13 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
-        <div className="flex items-center gap-2 text-xs">
-          <Radio className="w-3.5 h-3.5 text-destructive animate-pulse" />
-          <span className="font-medium text-foreground">Мониторинг в реальном времени</span>
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <Radio className="w-3.5 h-3.5 text-destructive animate-pulse" />
+            <span className="font-medium text-foreground">Мониторинг в реальном времени</span>
+          </div>
+          {/* Live System Pulse */}
+          <LiveSystemPulse />
         </div>
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
           <span className="flex items-center gap-1">

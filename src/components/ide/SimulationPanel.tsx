@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, SkipForward, RotateCcw, CheckCircle, AlertTriangle, XCircle, Code, Sliders } from "lucide-react";
+import { Play, SkipForward, RotateCcw, CheckCircle, AlertTriangle, XCircle, Code, Sliders, Eye, EyeOff } from "lucide-react";
 import { Rule } from "@/data/mockRules";
 import { CausalChain, buildSimulationChain } from "@/components/ide/CausalChain";
 
@@ -17,21 +17,41 @@ interface SignalField {
 
 const defaultFields: Record<string, SignalField[]> = {
   "Влажность": [
-  { name: "Температура", value: "22", unit: "°C", type: "number" },
-  { name: "Влажность", value: "75", unit: "%RH", type: "number" }],
-
+    { name: "Температура", value: "22", unit: "°C", type: "number" },
+    { name: "Влажность", value: "75", unit: "%RH", type: "number" },
+  ],
   "Температура": [
-  { name: "sensor1", value: "95", unit: "°C", type: "number" },
-  { name: "sensor2", value: "80", unit: "°C", type: "number" }],
-
+    { name: "sensor1", value: "95", unit: "°C", type: "number" },
+    { name: "sensor2", value: "80", unit: "°C", type: "number" },
+  ],
   "Давление": [
-  { name: "Давление", value: "412", unit: "бар", type: "number" },
-  { name: "Клапан", value: "ОТКРЫТ", unit: "", type: "select", options: ["ОТКРЫТ", "ЗАКРЫТ"] }],
-
+    { name: "Давление", value: "412", unit: "бар", type: "number" },
+    { name: "Клапан", value: "ОТКРЫТ", unit: "", type: "select", options: ["ОТКРЫТ", "ЗАКРЫТ"] },
+  ],
   "default": [
-  { name: "value", value: "100", unit: "", type: "number" },
-  { name: "temperature", value: "20", unit: "°C", type: "number" }]
+    { name: "value", value: "100", unit: "", type: "number" },
+    { name: "temperature", value: "20", unit: "°C", type: "number" },
+  ],
+};
 
+// Ghost prediction data per parameter type
+const ghostData: Record<string, { actual: number[]; predicted: number[] }> = {
+  "Влажность": {
+    actual: [72, 74, 74, 75, 78, 76, 76],
+    predicted: [73, 74, 75, 76, 77, 77, 78],
+  },
+  "Температура": {
+    actual: [82, 84, 85, 88, 92, 95, 96],
+    predicted: [82, 83, 84, 85, 86, 87, 87],
+  },
+  "Давление": {
+    actual: [340, 355, 370, 390, 400, 412, 413],
+    predicted: [340, 350, 358, 365, 370, 375, 378],
+  },
+  "default": {
+    actual: [50, 55, 52, 58, 54, 56, 53],
+    predicted: [51, 53, 54, 55, 55, 56, 56],
+  },
 };
 
 type EvalStep = {
@@ -53,12 +73,15 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
   const [running, setRunning] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
   const [traces, setTraces] = useState<TraceEntry[]>([]);
+  const [showGhost, setShowGhost] = useState(false);
   const [steps, setSteps] = useState<EvalStep[]>([
-  { label: "Сигнал", status: "pending" },
-  { label: "Условие", status: "pending" },
-  { label: "Матрица", status: "pending" },
-  { label: "Результат", status: "pending" }]
-  );
+    { label: "Сигнал", status: "pending" },
+    { label: "Условие", status: "pending" },
+    { label: "Матрица", status: "pending" },
+    { label: "Результат", status: "pending" },
+  ]);
+
+  const ghost = ghostData[rule.parameterType] || ghostData["default"];
 
   const jsonFromFields = () => {
     const obj: Record<string, unknown> = {};
@@ -71,7 +94,7 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
   };
 
   const updateField = (index: number, value: string) => {
-    setFields((prev) => prev.map((f, i) => i === index ? { ...f, value } : f));
+    setFields((prev) => prev.map((f, i) => (i === index ? { ...f, value } : f)));
   };
 
   const resetSimulation = () => {
@@ -86,44 +109,51 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
     const next = currentStep + 1;
     if (next >= steps.length) return;
     setCurrentStep(next);
-    setSteps((s) => s.map((st, i) => ({
-      ...st,
-      status: i < next ? "pass" : i === next ? "active" : "pending"
-    })));
-
+    setSteps((s) =>
+      s.map((st, i) => ({
+        ...st,
+        status: i < next ? "pass" : i === next ? "active" : "pending",
+      }))
+    );
     if (next === steps.length - 1) {
-      // Final step — produce result
-      setTimeout(() => {
-        finishSimulation();
-      }, 300);
+      setTimeout(() => finishSimulation(), 300);
     }
   };
 
   const finishSimulation = () => {
-    const mockTraces: TraceEntry[] = rule.parameterType === "Температура" ?
-    [
-    { expression: "sensor1 = 95", result: "получено", pass: true },
-    { expression: "sensor2 = 80", result: "получено", pass: true },
-    { expression: "delta = |95 - 80| = 15", result: "15°C", pass: true },
-    { expression: "delta > MAX_DELTA (15)", result: rule.errorCount > 0 ? "ИСТИНА" : "ЛОЖЬ", pass: rule.errorCount === 0 },
-    { expression: `Функция: ${rule.name}`, result: rule.errorCount > 0 ? "ТРЕВОГА" : "НОРМА", pass: rule.errorCount === 0 }] :
-
-    [
-    { expression: `${fields[0]?.name} = ${fields[0]?.value}`, result: "получено", pass: true },
-    { expression: `Проверка диапазона`, result: rule.warningCount > 0 ? "ПРЕДУПРЕЖДЕНИЕ" : "OK", pass: rule.warningCount === 0 },
-    { expression: `Функция: ${rule.name}`, result: "выполнена", pass: true }];
-
+    const mockTraces: TraceEntry[] =
+      rule.parameterType === "Температура"
+        ? [
+            { expression: "sensor1 = 95", result: "получено", pass: true },
+            { expression: "sensor2 = 80", result: "получено", pass: true },
+            { expression: "delta = |95 - 80| = 15", result: "15°C", pass: true },
+            { expression: "delta > MAX_DELTA (15)", result: rule.errorCount > 0 ? "ИСТИНА" : "ЛОЖЬ", pass: rule.errorCount === 0 },
+            { expression: `Функция: ${rule.name}`, result: rule.errorCount > 0 ? "ТРЕВОГА" : "НОРМА", pass: rule.errorCount === 0 },
+          ]
+        : [
+            { expression: `${fields[0]?.name} = ${fields[0]?.value}`, result: "получено", pass: true },
+            { expression: `Проверка диапазона`, result: rule.warningCount > 0 ? "ПРЕДУПРЕЖДЕНИЕ" : "OK", pass: rule.warningCount === 0 },
+            { expression: `Функция: ${rule.name}`, result: "выполнена", pass: true },
+          ];
 
     setTraces(mockTraces);
-    setOutput(JSON.stringify({
-      processed: true,
-      result: rule.errorCount > 0 ? "alarm" : "ok",
-      timestamp: "2024-02-20T10:00:00Z"
-    }, null, 2));
-    setSteps((s) => s.map((st) => ({
-      ...st,
-      status: rule.errorCount > 0 ? st.label === "Результат" ? "fail" : "pass" : "pass"
-    })));
+    setOutput(
+      JSON.stringify(
+        {
+          processed: true,
+          result: rule.errorCount > 0 ? "alarm" : "ok",
+          timestamp: "2024-02-20T10:00:00Z",
+        },
+        null,
+        2
+      )
+    );
+    setSteps((s) =>
+      s.map((st) => ({
+        ...st,
+        status: rule.errorCount > 0 ? (st.label === "Результат" ? "fail" : "pass") : "pass",
+      }))
+    );
     setCurrentStep(steps.length);
   };
 
@@ -142,10 +172,12 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
         return;
       }
       setCurrentStep(step);
-      setSteps((s) => s.map((st, i) => ({
-        ...st,
-        status: i < step ? "pass" : i === step ? "active" : "pending"
-      })));
+      setSteps((s) =>
+        s.map((st, i) => ({
+          ...st,
+          status: i < step ? "pass" : i === step ? "active" : "pending",
+        }))
+      );
     }, 400);
   };
 
@@ -155,22 +187,30 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
       <div className="ide-panel rounded-sm">
         <div className="ide-header">Поток выполнения</div>
         <div className="p-3 flex items-center gap-1">
-          {steps.map((step, i) =>
-          <div key={i} className="flex items-center gap-1">
-              <div className={`px-2 py-1 rounded-sm text-[10px] font-medium border transition-colors ${
-            step.status === "active" ? "border-primary bg-primary/10 text-primary" :
-            step.status === "pass" ? "border-success/50 bg-success/10 text-success" :
-            step.status === "fail" ? "border-destructive/50 bg-destructive/10 text-destructive" :
-            step.status === "warning" ? "border-warning/50 bg-warning/10 text-warning" :
-            "border-border bg-secondary text-muted-foreground"}`
-            }>
+          {steps.map((step, i) => (
+            <div key={i} className="flex items-center gap-1">
+              <div
+                className={`px-2 py-1 rounded-sm text-[10px] font-medium border transition-colors ${
+                  step.status === "active"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : step.status === "pass"
+                    ? "border-success/50 bg-success/10 text-success"
+                    : step.status === "fail"
+                    ? "border-destructive/50 bg-destructive/10 text-destructive"
+                    : step.status === "warning"
+                    ? "border-warning/50 bg-warning/10 text-warning"
+                    : "border-border bg-secondary text-muted-foreground"
+                }`}
+              >
                 {step.label}
               </div>
-              {i < steps.length - 1 &&
-            <span className={`text-[10px] ${step.status === "pass" || step.status === "active" ? "text-primary" : "text-muted-foreground"}`}>→</span>
-            }
+              {i < steps.length - 1 && (
+                <span className={`text-[10px] ${step.status === "pass" || step.status === "active" ? "text-primary" : "text-muted-foreground"}`}>
+                  →
+                </span>
+              )}
             </div>
-          )}
+          ))}
         </div>
       </div>
 
@@ -182,66 +222,99 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
             <div className="flex gap-1 normal-case tracking-normal">
               <button
                 onClick={() => setViewMode("structured")}
-                className={`px-1.5 py-0.5 rounded-sm text-[9px] ${viewMode === "structured" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-                
-                <Sliders className="w-3 h-3 inline-block mr-0.5" />Поля
+                className={`px-1.5 py-0.5 rounded-sm text-[9px] ${viewMode === "structured" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Sliders className="w-3 h-3 inline-block mr-0.5" />
+                Поля
               </button>
               <button
                 onClick={() => setViewMode("json")}
-                className={`px-1.5 py-0.5 rounded-sm text-[9px] ${viewMode === "json" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-                
-                <Code className="w-3 h-3 inline-block mr-0.5" />JSON
+                className={`px-1.5 py-0.5 rounded-sm text-[9px] ${viewMode === "json" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Code className="w-3 h-3 inline-block mr-0.5" />
+                JSON
               </button>
             </div>
           </div>
-          {viewMode === "structured" ?
-          <div className="p-3 space-y-2">
-              {fields.map((field, i) =>
-            <div key={i} className="text-xs flex items-center justify-end gap-0">
+          {viewMode === "structured" ? (
+            <div className="p-3 space-y-2">
+              {fields.map((field, i) => (
+                <div key={i} className="text-xs flex items-center justify-end gap-0">
                   <label className="w-24 text-muted-foreground truncate">{field.name}</label>
-                  {field.type === "select" ?
-              <select
-                value={field.value}
-                onChange={(e) => updateField(i, e.target.value)}
-                className="flex-1 bg-background border border-border rounded-sm px-2 py-1 text-xs text-foreground focus:border-primary focus:outline-none">
-                
-                      {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
-                    </select> :
-
-              <input
-                type="text"
-                value={field.value}
-                onChange={(e) => updateField(i, e.target.value)}
-                className="flex-1 bg-background border border-border rounded-sm px-2 py-1 text-xs font-mono text-foreground focus:border-primary focus:outline-none" />
-
-              }
-                  {field.unit &&
-              <span className="text-[10px] text-muted-foreground w-10 mx-0 px-[8px]">{field.unit}</span>
-              }
+                  {field.type === "select" ? (
+                    <select
+                      value={field.value}
+                      onChange={(e) => updateField(i, e.target.value)}
+                      className="flex-1 bg-background border border-border rounded-sm px-2 py-1 text-xs text-foreground focus:border-primary focus:outline-none"
+                    >
+                      {field.options?.map((o) => (
+                        <option key={o} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={field.value}
+                      onChange={(e) => updateField(i, e.target.value)}
+                      className="flex-1 bg-background border border-border rounded-sm px-2 py-1 text-xs font-mono text-foreground focus:border-primary focus:outline-none"
+                    />
+                  )}
+                  {field.unit && <span className="text-[10px] text-muted-foreground w-10 mx-0 px-[8px]">{field.unit}</span>}
                 </div>
-            )}
-            </div> :
-
-          <textarea
-            value={jsonFromFields()}
-            readOnly
-            className="w-full h-40 bg-background text-foreground text-xs font-mono p-3 resize-none focus:outline-none border-none"
-            spellCheck={false} />
-
-          }
+              ))}
+            </div>
+          ) : (
+            <textarea
+              value={jsonFromFields()}
+              readOnly
+              className="w-full h-40 bg-background text-foreground text-xs font-mono p-3 resize-none focus:outline-none border-none"
+              spellCheck={false}
+            />
+          )}
         </div>
 
         {/* Output */}
         <div className="ide-panel rounded-sm">
           <div className="ide-header">Результат</div>
           <div className="h-40 overflow-auto">
-            {output ?
-            <pre className="p-3 text-xs font-mono text-success">{output}</pre> :
-
-            <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
+            {output ? (
+              <pre className="p-3 text-xs font-mono text-success">{output}</pre>
+            ) : (
+              <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
                 Запустите тест для просмотра результата
               </div>
-            }
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Signal Ghost Mode */}
+      <div className="ide-panel rounded-sm">
+        <div className="ide-header flex items-center justify-between">
+          <span>Прогноз сигнала</span>
+          <button
+            onClick={() => setShowGhost(!showGhost)}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded-sm text-[9px] normal-case tracking-normal transition-all ${
+              showGhost ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {showGhost ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+            {showGhost ? "Прогноз вкл" : "Показать прогноз"}
+          </button>
+        </div>
+        <div className="p-3">
+          <GhostSparkline actual={ghost.actual} predicted={ghost.predicted} showGhost={showGhost} />
+          <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-0.5 bg-primary inline-block rounded-full" /> Фактическое
+            </span>
+            {showGhost && (
+              <span className="flex items-center gap-1 animate-fade-in">
+                <span className="w-3 h-0.5 inline-block rounded-full" style={{ background: "hsl(185, 70%, 50%)", opacity: 0.4 }} /> Прогноз
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -251,61 +324,122 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
         <button
           onClick={runFullSimulation}
           disabled={running}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-xs font-medium rounded-sm hover:opacity-90 transition-opacity disabled:opacity-50">
-          
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-xs font-medium rounded-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
           <Play className="w-3.5 h-3.5" />
           {running ? "Выполняется..." : "Запустить"}
         </button>
         <button
           onClick={runStep}
           disabled={running}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors">
-          
+          className="flex items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors"
+        >
           <SkipForward className="w-3.5 h-3.5" />
           Шаг
         </button>
         <button
           onClick={resetSimulation}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors">
-          
+          className="flex items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground bg-secondary rounded-sm transition-colors"
+        >
           <RotateCcw className="w-3.5 h-3.5" />
           Сброс
         </button>
       </div>
 
       {/* Causal Chain */}
-      {traces.length > 0 &&
-      <CausalChain
-        title="Как работает функция"
-        steps={buildSimulationChain(
-          fields.map((f) => ({ name: f.name, value: f.value })),
-          rule.name,
-          rule.errorCount > 0
-        )} />
-
-      }
+      {traces.length > 0 && (
+        <CausalChain
+          title="Как работает функция"
+          steps={buildSimulationChain(
+            fields.map((f) => ({ name: f.name, value: f.value })),
+            rule.name,
+            rule.errorCount > 0
+          )}
+        />
+      )}
 
       {/* Evaluation Trace */}
-      {traces.length > 0 &&
-      <div className="ide-panel rounded-sm">
+      {traces.length > 0 && (
+        <div className="ide-panel rounded-sm">
           <div className="ide-header">Трассировка вычислений</div>
           <div className="p-2 space-y-0.5 text-xs font-mono">
-            {traces.map((trace, i) =>
-          <div key={i} className={`flex items-start gap-1.5 py-0.5 ${
-          trace.pass ? "text-muted-foreground" : "text-destructive"}`
-          }>
-                {trace.pass ?
-            <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0 text-success" /> :
-
-            <XCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-            }
+            {traces.map((trace, i) => (
+              <div key={i} className={`flex items-start gap-1.5 py-0.5 ${trace.pass ? "text-muted-foreground" : "text-destructive"}`}>
+                {trace.pass ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0 text-success" /> : <XCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />}
                 <span className="text-foreground">{trace.expression}</span>
                 <span className="ml-auto text-[10px]">→ {trace.result}</span>
               </div>
-          )}
+            ))}
           </div>
         </div>
-      }
-    </div>);
+      )}
+    </div>
+  );
+}
 
+function GhostSparkline({ actual, predicted, showGhost }: { actual: number[]; predicted: number[]; showGhost: boolean }) {
+  const all = [...actual, ...predicted];
+  const min = Math.min(...all);
+  const max = Math.max(...all);
+  const range = max - min || 1;
+  const w = 320;
+  const h = 48;
+
+  const toPoints = (data: number[]) =>
+    data
+      .map((v, i) => ({
+        x: (i / (data.length - 1)) * w,
+        y: h - ((v - min) / range) * (h - 8) - 4,
+      }))
+      .map((p) => `${p.x},${p.y}`)
+      .join(" ");
+
+  const actualLine = toPoints(actual);
+  const predictedLine = toPoints(predicted);
+  const areaPoints = `0,${h} ${actualLine} ${w},${h}`;
+
+  return (
+    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} className="w-full">
+      <defs>
+        <linearGradient id="ghostActualArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="ghostActualLine" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="1" />
+        </linearGradient>
+        <filter id="ghostGlow">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <polygon points={areaPoints} fill="url(#ghostActualArea)" />
+      <polyline points={actualLine} fill="none" stroke="url(#ghostActualLine)" strokeWidth="2" strokeLinejoin="round" filter="url(#ghostGlow)" />
+
+      {/* Ghost predicted line */}
+      {showGhost && (
+        <polyline
+          points={predictedLine}
+          fill="none"
+          stroke="hsl(185, 70%, 50%)"
+          strokeWidth="1.5"
+          strokeDasharray="4 3"
+          opacity="0.4"
+          strokeLinejoin="round"
+          className="animate-fade-in"
+        />
+      )}
+
+      {/* Value dots */}
+      {actual.map((v, i) => {
+        const x = (i / (actual.length - 1)) * w;
+        const y = h - ((v - min) / range) * (h - 8) - 4;
+        return <circle key={i} cx={x} cy={y} r="2" fill="hsl(185, 70%, 50%)" />;
+      })}
+    </svg>
+  );
 }
