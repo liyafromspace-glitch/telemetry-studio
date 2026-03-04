@@ -63,26 +63,29 @@ export function CenterPanel({ rule }: CenterPanelProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-xs font-medium transition-colors relative ${
+            className={`px-4 py-2 text-xs font-medium transition-all duration-150 relative ${
               activeTab === tab.id
                 ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/30"
             }`}
           >
             {tab.label}
             {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary animate-scale-in" 
+                style={{ transformOrigin: 'center bottom' }} />
             )}
           </button>
         ))}
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto bg-background">
-        {activeTab === "overview" && <RuleOverview rule={rule} />}
-        {activeTab === "dependencies" && <DependencyGraph rule={rule} />}
-        {activeTab === "simulation" && <SimulationPanel rule={rule} />}
-        {activeTab === "history" && <VersionHistory rule={rule} />}
+      <div className="flex-1 overflow-y-auto bg-background" key={activeTab}>
+        <div className="tab-content-enter">
+          {activeTab === "overview" && <RuleOverview rule={rule} />}
+          {activeTab === "dependencies" && <DependencyGraph rule={rule} />}
+          {activeTab === "simulation" && <SimulationPanel rule={rule} />}
+          {activeTab === "history" && <VersionHistory rule={rule} />}
+        </div>
       </div>
 
       {showActivation && (

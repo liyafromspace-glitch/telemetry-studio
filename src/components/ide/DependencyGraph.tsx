@@ -154,13 +154,19 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                   <Tooltip key={node.id}>
                     <TooltipTrigger asChild>
                       <g
-                        className="cursor-pointer"
+                        className="graph-node"
                         onMouseEnter={() => setHoveredNode(node.id)}
                         onMouseLeave={() => setHoveredNode(null)}
                         onClick={() => {
                           if (node.type === "function" && onNavigateToRule) onNavigateToRule();
                         }}
                       >
+                        {/* Ripple effect on hover */}
+                        {isHovered && (
+                          <circle cx={node.x} cy={node.y} r={20} fill="none" 
+                            stroke={statusColor(node.status)} strokeWidth="1" 
+                            opacity="0.3" className="animate-ripple" />
+                        )}
                         {renderNodeShape(node, isHovered)}
                         <text x={node.x} y={node.y - 2} textAnchor="middle" fill="hsl(220, 10%, 85%)" fontSize="9" fontFamily="Inter, sans-serif">
                           {node.label.length > 14 ? node.label.slice(0, 13) + "…" : node.label}
@@ -170,7 +176,7 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                         </text>
                       </g>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs whitespace-pre-line max-w-[220px]">
+                    <TooltipContent side="top" className="text-xs whitespace-pre-line max-w-[220px] animate-scale-in">
                       {node.tooltip}
                     </TooltipContent>
                   </Tooltip>
