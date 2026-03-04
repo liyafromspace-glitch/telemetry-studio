@@ -41,12 +41,6 @@ export function GlobalNav({ activeState, onStateChange }: GlobalNavProps) {
             }`}
             title={label}
           >
-            {isActive && (
-              <div
-                className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r"
-                style={{ backgroundColor: accentColor }}
-              />
-            )}
             <Icon className="w-4 h-4" style={isActive ? { color: accentColor } : undefined} />
             <span
               className="text-[7px] font-semibold tracking-wider"
