@@ -82,37 +82,40 @@ export function MatrixCenterPanel({ matrix }: MatrixCenterPanelProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-xs font-medium transition-colors relative ${
+            className={`px-4 py-2 text-xs font-medium transition-all duration-150 relative ${
               activeTab === tab.id
                 ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/30"
             }`}
           >
             {tab.label}
             {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary animate-scale-in"
+                style={{ transformOrigin: 'center bottom' }} />
             )}
           </button>
         ))}
       </div>
 
       {/* Tab content */}
-      <div className={`flex-1 ${activeTab === "links" ? "flex" : "overflow-y-auto"} bg-background`}>
-        {activeTab === "overview" && <MatrixOverview matrix={matrix} />}
-        {activeTab === "links" && (
-          <>
-            <MatrixScopePanel
-              assets={matrix.assets}
-              selectedAsset={selectedAsset}
-              onSelectAsset={setSelectedAsset}
-              collapsed={scopeCollapsed}
-              onToggleCollapse={() => setScopeCollapsed(!scopeCollapsed)}
-            />
-            <MatrixLinksTable rows={matrix.rows} selectedAsset={selectedAsset} />
-          </>
-        )}
-        {activeTab === "simulation" && <SimulationPanel rule={ruleAdapter} />}
-        {activeTab === "history" && <VersionHistory rule={ruleAdapter} />}
+      <div className={`flex-1 ${activeTab === "links" ? "flex" : "overflow-y-auto"} bg-background`} key={activeTab}>
+        <div className={`${activeTab === "links" ? "contents" : "tab-content-enter"}`}>
+          {activeTab === "overview" && <MatrixOverview matrix={matrix} />}
+          {activeTab === "links" && (
+            <>
+              <MatrixScopePanel
+                assets={matrix.assets}
+                selectedAsset={selectedAsset}
+                onSelectAsset={setSelectedAsset}
+                collapsed={scopeCollapsed}
+                onToggleCollapse={() => setScopeCollapsed(!scopeCollapsed)}
+              />
+              <MatrixLinksTable rows={matrix.rows} selectedAsset={selectedAsset} />
+            </>
+          )}
+          {activeTab === "simulation" && <SimulationPanel rule={ruleAdapter} />}
+          {activeTab === "history" && <VersionHistory rule={ruleAdapter} />}
+        </div>
       </div>
 
       {/* Activation modal */}

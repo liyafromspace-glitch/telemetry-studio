@@ -100,7 +100,7 @@ function GlowDiagram() {
       })}
       {/* Nodes */}
       {nodes.map((n, i) => (
-        <g key={i} filter="url(#nodeGlowTeal)">
+        <g key={i} filter="url(#nodeGlowTeal)" className="graph-node">
           {/* Outer rect */}
           <rect
             x={n.x - 20} y={n.y - 16} width={40} height={32} rx={3}
@@ -128,7 +128,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
   return (
     <div className="p-4 space-y-4 animate-fade-in">
       {/* Status cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 stagger-children">
         <div className="stat-card">
           <div className="stat-card-label">
             <span className={`status-dot ${

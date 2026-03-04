@@ -27,8 +27,8 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
   const currentStageIndex = rule.status === "draft" ? 0 : rule.status === "error" ? 1 : 3;
 
   return (
-    <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50 animate-fade-in">
-      <div className="ide-panel rounded-sm w-full max-w-lg shadow-2xl">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+      <div className="ide-panel rounded-sm w-full max-w-lg shadow-2xl animate-scale-in">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
           <Shield className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-foreground">Активация правила</span>

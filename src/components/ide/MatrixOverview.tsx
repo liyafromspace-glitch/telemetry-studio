@@ -10,7 +10,7 @@ export function MatrixOverview({ matrix }: MatrixOverviewProps) {
   return (
     <div className="p-4 space-y-4 animate-fade-in">
       {/* Status cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 stagger-children">
         <StatCard
           label="Статус"
           value={statusLabels[matrix.status]}

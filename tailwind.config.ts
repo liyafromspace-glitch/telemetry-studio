@@ -90,14 +90,58 @@ export default {
           to: { height: "0" },
         },
         "fade-in": {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
+          "0%": { opacity: "0", transform: "translateY(6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-in-fast": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "slide-up": {
+          "0%": { opacity: "0", transform: "translateY(12px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-in-left": {
+          "0%": { opacity: "0", transform: "translateX(-8px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "scale-in": {
+          "0%": { opacity: "0", transform: "scale(0.96)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { opacity: "0.4" },
+          "50%": { opacity: "1" },
+        },
+        "ripple": {
+          "0%": { transform: "scale(0.8)", opacity: "1" },
+          "100%": { transform: "scale(2.4)", opacity: "0" },
+        },
+        "tab-slide": {
+          "0%": { opacity: "0", transform: "translateX(4px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "flow-dot": {
+          "0%": { offsetDistance: "0%" },
+          "100%": { offsetDistance: "100%" },
+        },
+        "status-pulse": {
+          "0%, 100%": { boxShadow: "0 0 0 0 currentColor" },
+          "50%": { boxShadow: "0 0 0 4px transparent" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 120ms ease-out",
+        "fade-in": "fade-in 150ms ease-out",
+        "fade-in-fast": "fade-in-fast 100ms ease-out",
+        "slide-up": "slide-up 200ms ease-out",
+        "slide-in-left": "slide-in-left 150ms ease-out",
+        "scale-in": "scale-in 150ms ease-out",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "ripple": "ripple 500ms ease-out forwards",
+        "tab-slide": "tab-slide 150ms ease-out",
+        "status-pulse": "status-pulse 2s ease-in-out infinite",
       },
     },
   },
