@@ -27,29 +27,31 @@ export function GlobalNav({ activeState, onStateChange }: GlobalNavProps) {
     <div className="w-12 min-w-12 bg-card border-r border-border flex flex-col items-center py-2 gap-0.5">
       {navItems.map(({ state, icon: Icon, label }) => {
         const isActive = activeState === state;
+        const accentColor = state === "govern"
+          ? `hsl(${stateAccentColors[state]})`
+          : `hsl(${stateAccentColors[state]})`;
         return (
           <button
             key={state}
             onClick={() => onStateChange(state)}
             className={`relative w-10 h-11 flex flex-col items-center justify-center gap-0.5 rounded-sm transition-all ${
               isActive
-                ? "bg-accent text-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                ? ""
+                : "text-muted-foreground hover:text-foreground"
             }`}
             title={label}
           >
             {isActive && (
               <div
                 className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r"
-                style={{
-                  backgroundColor: state === "govern"
-                    ? `hsl(${stateAccentColors[state]})`
-                    : `hsl(${stateAccentColors[state]})`
-                }}
+                style={{ backgroundColor: accentColor }}
               />
             )}
-            <Icon className="w-4 h-4" />
-            <span className="text-[7px] font-semibold tracking-wider">{label}</span>
+            <Icon className="w-4 h-4" style={isActive ? { color: accentColor } : undefined} />
+            <span
+              className="text-[7px] font-semibold tracking-wider"
+              style={isActive ? { color: accentColor } : undefined}
+            >{label}</span>
           </button>
         );
       })}

@@ -48,36 +48,63 @@ function highlightCode(code: string) {
   });
 }
 
-// Structure diagram with glow
-function GlowDiagram({ variant }: { variant: number }) {
-  const sizes = [
-    { outer: 70, inner: 35 },
-    { outer: 60, inner: 30 },
-    { outer: 55, inner: 28 },
+// Structure node-graph diagram matching reference screenshot
+function GlowDiagram() {
+  // Node positions for a flow-chart style graph
+  const nodes = [
+    { x: 60, y: 30 }, { x: 160, y: 30 }, { x: 260, y: 30 },
+    { x: 110, y: 90 }, { x: 210, y: 90 },
+    { x: 60, y: 150 }, { x: 160, y: 150 }, { x: 260, y: 150 },
   ];
-  const s = sizes[variant % 3];
-  
+  const edges: [number, number][] = [
+    [0, 3], [1, 3], [1, 4], [2, 4],
+    [3, 5], [3, 6], [4, 6], [4, 7],
+  ];
+
   return (
-    <div className="aspect-[4/3] bg-background/30 rounded-sm border border-border flex items-center justify-center relative overflow-hidden">
-      {/* Background glow */}
-      <div 
-        className="absolute inset-0 opacity-20"
-        style={{
-          background: 'radial-gradient(circle at center, hsl(185 70% 50% / 0.15) 0%, transparent 70%)'
-        }}
-      />
-      <div 
-        className="rounded-full border-2 glow-ring flex items-center justify-center"
-        style={{ width: s.outer, height: s.outer }}
-      >
-        <div 
-          className="rounded-full border glow-ring-inner"
-          style={{ width: s.inner, height: s.inner }}
+    <svg viewBox="0 0 320 180" className="w-full h-full">
+      <defs>
+        <linearGradient id="edgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="hsl(270 60% 55%)" stopOpacity="0.7" />
+          <stop offset="100%" stopColor="hsl(185 70% 50%)" stopOpacity="0.5" />
+        </linearGradient>
+        <filter id="lineGlow">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        <filter id="nodeGlow">
+          <feGaussianBlur stdDeviation="4" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+      {/* Edges */}
+      {edges.map(([from, to], i) => (
+        <line
+          key={i}
+          x1={nodes[from].x} y1={nodes[from].y}
+          x2={nodes[to].x} y2={nodes[to].y}
+          stroke="url(#edgeGrad)" strokeWidth="2"
+          filter="url(#lineGlow)"
         />
-      </div>
-    </div>
+      ))}
+      {/* Nodes */}
+      {nodes.map((n, i) => (
+        <g key={i}>
+          <rect
+            x={n.x - 16} y={n.y - 14} width={32} height={28} rx={4}
+            fill="hsl(228 10% 16%)" stroke="hsl(185 70% 50%)" strokeWidth="1.2"
+            filter="url(#nodeGlow)"
+          />
+          <rect
+            x={n.x - 12} y={n.y - 10} width={24} height={20} rx={2}
+            fill="hsl(228 10% 20%)" stroke="hsl(185 60% 40%)" strokeWidth="0.5"
+          />
+        </g>
+      ))}
+    </svg>
   );
 }
+
 
 export function RuleOverview({ rule }: RuleOverviewProps) {
   const [structureOpen, setStructureOpen] = useState(true);
@@ -184,10 +211,14 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
           <ChevronUp className={`w-3.5 h-3.5 transition-transform ${structureOpen ? '' : 'rotate-180'}`} />
         </button>
         {structureOpen && (
-          <div className="p-4 grid grid-cols-3 gap-4">
-            {[0, 1, 2].map(i => (
-              <GlowDiagram key={i} variant={i} />
-            ))}
+          <div className="p-4">
+            <div className="aspect-[3/1.2] bg-background/30 rounded-sm border border-border overflow-hidden relative">
+              <div 
+                className="absolute inset-0 opacity-30"
+                style={{ background: 'radial-gradient(ellipse at center, hsl(270 50% 40% / 0.2) 0%, transparent 70%)' }}
+              />
+              <GlowDiagram />
+            </div>
           </div>
         )}
       </div>
