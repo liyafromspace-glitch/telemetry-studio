@@ -29,11 +29,7 @@ function MiniSparkline({ seed }: {seed: number;}) {
   const h = 14;
   const points = data.map((v, i) => `${i / (data.length - 1) * w},${h - v * h}`).join(" ");
 
-  return (
-    <svg width={w} height={h} className="inline-block sidebar-sparkline ml-auto flex-shrink-0">
-      <polyline points={points} fill="none" stroke="hsl(0, 0%, 40%)" strokeWidth="1" strokeLinejoin="round" />
-    </svg>
-  );
+  return;
 
 
 
