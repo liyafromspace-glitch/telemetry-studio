@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { versionAuditLog, type VersionAuditEntry } from "@/data/mockPlatform";
 import {
-  Shield, GitBranch, Clock, User, FileText, Link2, Cpu, ArrowRight, ChevronDown } from
+  GitBranch, Clock, User, FileText, Link2, Cpu, ArrowRight, ChevronDown } from
 "lucide-react";
 import { StatusBadge } from "@/components/ui/status-badge";
 
@@ -17,7 +17,7 @@ export function GovernView({ onNavigateToAnalyze }: GovernViewProps) {
     <div className="flex-1 flex flex-col min-h-0">
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-2 text-xs">
-          <Shield className="w-3.5 h-3.5 text-primary" />
+          
           
         </div>
         <button onClick={onNavigateToAnalyze} className="btn-secondary">
