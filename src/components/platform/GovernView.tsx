@@ -24,20 +24,26 @@ export function GovernView({ onNavigateToAnalyze }: GovernViewProps) {
         </button>
       </div>
 
-      <div className="flex border-b border-border bg-card">
+      <div className="flex gap-0.5 p-1 border-b border-border bg-card text-[11px]">
         <button
           onClick={() => setActiveTab("log")}
-          className={`px-4 py-2 text-xs font-medium relative ${activeTab === "log" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          className={`flex-1 py-1 px-3 text-center font-medium rounded-md transition-colors duration-150 ${
+            activeTab === "log"
+              ? "bg-accent text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
         >
           Журнал активаций
-          {activeTab === "log" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />}
         </button>
         <button
           onClick={() => setActiveTab("compare")}
-          className={`px-4 py-2 text-xs font-medium relative ${activeTab === "compare" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          className={`flex-1 py-1 px-3 text-center font-medium rounded-md transition-colors duration-150 ${
+            activeTab === "compare"
+              ? "bg-accent text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
         >
           Сравнение версий
-          {activeTab === "compare" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />}
         </button>
       </div>
 
