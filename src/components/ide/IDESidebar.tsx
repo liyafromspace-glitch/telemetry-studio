@@ -5,41 +5,41 @@ import { matrices, type Matrix } from "@/data/mockMatrices";
 import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 
 export type SelectedItem =
-  | { type: "rule"; item: Rule }
-  | { type: "matrix"; item: Matrix };
+{type: "rule";item: Rule;} |
+{type: "matrix";item: Matrix;};
 
 interface IDESidebarProps {
   selected: SelectedItem | null;
   onSelect: (item: SelectedItem) => void;
 }
 
-function FunctionIcon({ className }: { className?: string }) {
+function FunctionIcon({ className }: {className?: string;}) {
   return (
     <svg className={className} viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
       <text x="1" y="10" fontSize="10" fontFamily="serif" fontStyle="italic" fill="currentColor">λ</text>
-    </svg>
-  );
+    </svg>);
+
 }
 
-function MiniSparkline({ seed }: { seed: number }) {
-  const data = Array.from({ length: 12 }, (_, i) => 
-    Math.sin(i * 0.8 + seed) * 0.4 + Math.cos(i * 0.3 + seed * 2) * 0.3 + 0.5
+function MiniSparkline({ seed }: {seed: number;}) {
+  const data = Array.from({ length: 12 }, (_, i) =>
+  Math.sin(i * 0.8 + seed) * 0.4 + Math.cos(i * 0.3 + seed * 2) * 0.3 + 0.5
   );
   const w = 48;
   const h = 14;
-  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - v * h}`).join(" ");
+  const points = data.map((v, i) => `${i / (data.length - 1) * w},${h - v * h}`).join(" ");
 
-  return (
-    <svg width={w} height={h} className="sidebar-sparkline ml-auto flex-shrink-0">
-      <defs>
-        <linearGradient id={`sg-${seed}`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.8" />
-        </linearGradient>
-      </defs>
-      <polyline points={points} fill="none" stroke={`url(#sg-${seed})`} strokeWidth="1.2" strokeLinejoin="round" />
-    </svg>
-  );
+  return;
+
+
+
+
+
+
+
+
+
+
 }
 
 export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
@@ -50,39 +50,39 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
   const [viewMode, setViewMode] = useState<"projects" | "statuses">("projects");
 
   const filteredRules = rules.filter((r) =>
-    r.name.toLowerCase().includes(search.toLowerCase())
+  r.name.toLowerCase().includes(search.toLowerCase())
   );
   const filteredMatrices = matrices.filter((m) =>
-    m.name.toLowerCase().includes(search.toLowerCase())
+  m.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const toggleCategory = (cat: string) => {
     setExpandedCategories((prev) => {
       const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat);
-      else next.add(cat);
+      if (next.has(cat)) next.delete(cat);else
+      next.add(cat);
       return next;
     });
   };
 
   const rulesByCategory = categories.map((cat) => ({
     category: cat,
-    rules: filteredRules.filter((r) => r.category === cat),
+    rules: filteredRules.filter((r) => r.category === cat)
   }));
 
   const allItems = [
-    ...rules.map((r) => ({ id: r.id, name: r.name, status: r.status, type: "rule" as const, item: r })),
-    ...matrices.map((m) => ({ id: m.id, name: m.name, status: m.status, type: "matrix" as const, item: m })),
-  ];
+  ...rules.map((r) => ({ id: r.id, name: r.name, status: r.status, type: "rule" as const, item: r })),
+  ...matrices.map((m) => ({ id: m.id, name: m.name, status: m.status, type: "matrix" as const, item: m }))];
+
 
   const filteredAllItems = allItems.filter((i) =>
-    i.name.toLowerCase().includes(search.toLowerCase())
+  i.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const rulesByStatus = (["active", "draft", "scheduled", "error"] as RuleStatus[]).map(
     (status) => ({
       status,
-      items: filteredAllItems.filter((i) => i.status === status),
+      items: filteredAllItems.filter((i) => i.status === status)
     })
   );
 
@@ -98,7 +98,7 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
     active: "Активные",
     draft: "Черновики",
     scheduled: "По расписанию",
-    error: "С ошибками",
+    error: "С ошибками"
   };
 
   return (
@@ -119,8 +119,8 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
             placeholder="Поиск правил и матриц... ⌘K"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-input text-foreground text-xs pl-7 pr-2 py-1.5 rounded-sm border border-border focus:border-primary focus:outline-none placeholder:text-muted-foreground"
-          />
+            className="w-full bg-input text-foreground text-xs pl-7 pr-2 py-1.5 rounded-sm border border-border focus:border-primary focus:outline-none placeholder:text-muted-foreground" />
+          
         </div>
       </div>
 
@@ -128,64 +128,64 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
         <button
           onClick={() => setViewMode("projects")}
           className={`flex-1 py-1 text-center font-medium rounded-md transition-colors duration-150 ${
-            viewMode === "projects"
-              ? "bg-accent text-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
+          viewMode === "projects" ?
+          "bg-accent text-foreground" :
+          "text-muted-foreground hover:text-foreground"}`
+          }>
+          
           Проекты
         </button>
         <button
           onClick={() => setViewMode("statuses")}
           className={`flex-1 py-1 text-center font-medium rounded-md transition-colors duration-150 ${
-            viewMode === "statuses"
-              ? "bg-accent text-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
+          viewMode === "statuses" ?
+          "bg-accent text-foreground" :
+          "text-muted-foreground hover:text-foreground"}`
+          }>
+          
           Статусы
         </button>
       </div>
 
       {/* Tree */}
       <div className="flex-1 overflow-y-auto py-1">
-        {viewMode === "projects" ? (
-          <>
+        {viewMode === "projects" ?
+        <>
             <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
               Правила
             </div>
 
-            {rulesByCategory.map(({ category, rules: catRules }, ci) => (
-              <div key={category}>
+            {rulesByCategory.map(({ category, rules: catRules }, ci) =>
+          <div key={category}>
                 <button
-                  onClick={() => toggleCategory(category)}
-                  className="w-full flex items-center gap-1.5 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors"
-                >
-                  {expandedCategories.has(category) ? (
-                    <ChevronDown className="w-3 h-3 text-muted-foreground" />
-                  ) : (
-                    <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                  )}
+              onClick={() => toggleCategory(category)}
+              className="w-full flex items-center gap-1.5 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors">
+              
+                  {expandedCategories.has(category) ?
+              <ChevronDown className="w-3 h-3 text-muted-foreground" /> :
+
+              <ChevronRight className="w-3 h-3 text-muted-foreground" />
+              }
                   <FolderOpen className="w-3.5 h-3.5 text-muted-foreground" />
                   <span className="font-medium">{category}</span>
                   <MiniSparkline seed={ci + 1} />
                 </button>
                 {expandedCategories.has(category) &&
-                  catRules.map((rule) => (
-                    <button
-                      key={rule.id}
-                      onClick={() => onSelect({ type: "rule", item: rule })}
-                      className={`tree-item pl-8 ${
-                        isSelected(rule.id) ? "tree-item-active" : "tree-item-inactive"
-                      }`}
-                    >
+            catRules.map((rule) =>
+            <button
+              key={rule.id}
+              onClick={() => onSelect({ type: "rule", item: rule })}
+              className={`tree-item pl-8 ${
+              isSelected(rule.id) ? "tree-item-active" : "tree-item-inactive"}`
+              }>
+              
                       <FunctionIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                       <span className="truncate">{rule.name}</span>
                       <StatusBadge variant={ruleStatusToVariant(rule.status)} size="xs" dot className="ml-auto flex-shrink-0" />
                     </button>
-                  ))}
+            )}
               </div>
-            ))}
+          )}
 
             <div className="px-3 py-1.5 mt-2 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
               Матрицы
@@ -193,37 +193,37 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
 
             <div>
               <button
-                onClick={() => toggleCategory("МАТРИЦЫ")}
-                className="w-full flex items-center gap-1.5 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors"
-              >
-                {expandedCategories.has("МАТРИЦЫ") ? (
-                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                )}
+              onClick={() => toggleCategory("МАТРИЦЫ")}
+              className="w-full flex items-center gap-1.5 px-2 py-1 text-xs text-secondary-foreground hover:bg-accent transition-colors">
+              
+                {expandedCategories.has("МАТРИЦЫ") ?
+              <ChevronDown className="w-3 h-3 text-muted-foreground" /> :
+
+              <ChevronRight className="w-3 h-3 text-muted-foreground" />
+              }
                 <FolderOpen className="w-3.5 h-3.5 text-primary/70" />
                 <span className="font-medium">Все матрицы</span>
               </button>
               {expandedCategories.has("МАТРИЦЫ") &&
-                filteredMatrices.map((matrix) => (
-                  <button
-                    key={matrix.id}
-                    onClick={() => onSelect({ type: "matrix", item: matrix })}
-                    className={`tree-item pl-8 ${
-                      isSelected(matrix.id) ? "tree-item-active" : "tree-item-inactive"
-                    }`}
-                  >
+            filteredMatrices.map((matrix) =>
+            <button
+              key={matrix.id}
+              onClick={() => onSelect({ type: "matrix", item: matrix })}
+              className={`tree-item pl-8 ${
+              isSelected(matrix.id) ? "tree-item-active" : "tree-item-inactive"}`
+              }>
+              
                     <Grid3X3 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                     <span className="truncate">{matrix.name}</span>
                     <StatusBadge variant={ruleStatusToVariant(matrix.status)} size="xs" dot className="ml-auto flex-shrink-0" />
                   </button>
-                ))}
+            )}
             </div>
-          </>
-        ) : (
-          <>
-            {rulesByStatus.map(({ status, items }) => (
-              <div key={status}>
+          </> :
+
+        <>
+            {rulesByStatus.map(({ status, items }) =>
+          <div key={status}>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-secondary-foreground">
                   <StatusBadge variant={ruleStatusToVariant(status)} size="xs">
                     {statusLabelMap[status]}
@@ -232,36 +232,36 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
                     {items.length}
                   </span>
                 </div>
-                {items.map((entry) => (
-                  <button
-                    key={entry.id}
-                    onClick={() => onSelect(
-                      entry.type === "rule"
-                        ? { type: "rule", item: entry.item as Rule }
-                        : { type: "matrix", item: entry.item as Matrix }
-                    )}
-                    className={`tree-item pl-7 ${
-                      isSelected(entry.id) ? "tree-item-active" : "tree-item-inactive"
-                    }`}
-                  >
-                    {entry.type === "rule" ? (
-                      <FunctionIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                    ) : (
-                      <Grid3X3 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                    )}
+                {items.map((entry) =>
+            <button
+              key={entry.id}
+              onClick={() => onSelect(
+                entry.type === "rule" ?
+                { type: "rule", item: entry.item as Rule } :
+                { type: "matrix", item: entry.item as Matrix }
+              )}
+              className={`tree-item pl-7 ${
+              isSelected(entry.id) ? "tree-item-active" : "tree-item-inactive"}`
+              }>
+              
+                    {entry.type === "rule" ?
+              <FunctionIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" /> :
+
+              <Grid3X3 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+              }
                     <span className="truncate">{entry.name}</span>
                   </button>
-                ))}
+            )}
               </div>
-            ))}
+          )}
           </>
-        )}
+        }
       </div>
 
       {/* Footer */}
       <div className="border-t border-sidebar-border px-3 py-2 text-[10px] text-muted-foreground">
         {totalCount} элементов · {activeCount} активных
       </div>
-    </div>
-  );
+    </div>);
+
 }
