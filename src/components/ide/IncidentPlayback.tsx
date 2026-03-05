@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { Play, Pause, RotateCcw, CheckCircle, AlertTriangle, XCircle, Loader2 } from "lucide-react";
+import { Play, Pause, RotateCcw, CheckCircle, Loader2 } from "lucide-react";
 import { type Incident } from "@/data/mockPlatform";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface PlaybackStep {
   nodeId: string;
@@ -37,22 +38,6 @@ const defaultPlayback: PlaybackStep[] = [
   { nodeId: "fn", label: "Функция", type: "function", description: "Обработка" },
   { nodeId: "inc", label: "Инцидент", type: "incident", description: "Создан" },
 ];
-
-const typeConnColor: Record<string, string> = {
-  signal: "conn-dot-blue",
-  condition: "conn-dot-orange",
-  function: "conn-dot-pink",
-  matrix: "conn-dot-orange",
-  incident: "conn-dot-pink",
-};
-
-const typeBadgeStyle: Record<string, string> = {
-  signal: "status-badge-success",
-  condition: "status-badge-warning",
-  function: "status-badge-error",
-  matrix: "status-badge-warning",
-  incident: "status-badge-error",
-};
 
 interface IncidentPlaybackProps {
   incident: Incident;
@@ -109,16 +94,13 @@ export function IncidentPlayback({ incident }: IncidentPlaybackProps) {
       </div>
 
       <div className="p-3 space-y-3">
-        {/* Vercel-style chain visualization */}
         <div className="space-y-0">
           {steps.map((step, i) => {
             const isActive = i === currentStep;
             const isDone = i < currentStep;
-            const isPending = i > currentStep && currentStep >= 0;
 
             return (
               <div key={i} className="flex items-stretch gap-0">
-                {/* Vertical connection line + dot */}
                 <div className="flex flex-col items-center w-6 flex-shrink-0">
                   {i > 0 && (
                     <div className={`w-px flex-1 transition-all duration-200 ${isDone || isActive ? "bg-foreground/30" : "bg-border"}`} />
@@ -134,17 +116,18 @@ export function IncidentPlayback({ incident }: IncidentPlaybackProps) {
                   )}
                 </div>
 
-                {/* Step card */}
                 <div className={`flex-1 ml-2 py-1.5 transition-all duration-200 ${isActive ? "opacity-100" : isDone ? "opacity-60" : "opacity-30"}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-medium text-foreground">
                       {step.label.length > 20 ? step.label.slice(0, 19) + "…" : step.label}
                     </span>
-                    <span className={`text-[9px] px-2 py-0.5 rounded-full ${
-                      isDone ? "status-badge-success" : isActive ? "bg-foreground/10 text-foreground" : "status-badge-idle"
-                    }`}>
+                    <StatusBadge
+                      variant={isDone ? "success" : isActive ? "neutral" : "idle"}
+                      size="xs"
+                      dot={false}
+                    >
                       {isDone ? "Complete" : isActive ? "Active" : "Idle"}
-                    </span>
+                    </StatusBadge>
                   </div>
                   {(isActive || isDone) && (
                     <div className="text-[11px] text-muted-foreground mt-0.5 animate-fade-in">
@@ -157,7 +140,7 @@ export function IncidentPlayback({ incident }: IncidentPlaybackProps) {
           })}
         </div>
 
-        {/* Vercel-style timeline segment bar */}
+        {/* Segment bar */}
         <div className="flex items-center gap-0.5">
           {steps.map((step, i) => {
             const isDone = i < currentStep;
@@ -189,7 +172,6 @@ export function IncidentPlayback({ incident }: IncidentPlaybackProps) {
           })}
         </div>
 
-        {/* Play button */}
         <button
           onClick={playing ? () => setPlaying(false) : startPlayback}
           className="btn-primary w-full justify-center rounded-lg"

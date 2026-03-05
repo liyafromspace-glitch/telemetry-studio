@@ -7,6 +7,7 @@ import {
 import { CausalChain, buildIncidentChain } from "@/components/ide/CausalChain";
 import { SystemStory } from "@/components/ide/SystemStory";
 import { IncidentPlayback } from "@/components/ide/IncidentPlayback";
+import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 
 interface InvestigateViewProps {
   onNavigateToConfigure: () => void;
@@ -22,16 +23,6 @@ export function InvestigateView({ onNavigateToConfigure, initialSignal }: Invest
 
   const [selectedId, setSelectedId] = useState<string>(findIncidentBySignal(initialSignal));
   const selected = incidents.find((i) => i.id === selectedId) || incidents[0];
-
-  const priorityColor = (p: string) =>
-    p === "critical" ? "text-destructive" : p === "high" ? "text-warning" : "text-muted-foreground";
-
-  const statusIcon = (s: IncidentStatus) => {
-    if (s === "resolved") return <CheckCircle className="w-3 h-3 text-success" />;
-    if (s === "in_progress") return <Clock className="w-3 h-3 text-primary" />;
-    if (s === "monitoring") return <AlertTriangle className="w-3 h-3 text-warning" />;
-    return <XCircle className="w-3 h-3 text-destructive" />;
-  };
 
   return (
     <div className="flex-1 flex min-h-0">
@@ -52,15 +43,21 @@ export function InvestigateView({ onNavigateToConfigure, initialSignal }: Invest
               }`}
             >
               <div className="flex items-center gap-1.5 text-xs">
-                {statusIcon(inc.status)}
-                <span className="font-mono text-[10px] text-muted-foreground">{inc.code}</span>
-                <span className={`ml-auto text-[9px] uppercase tracking-wider ${priorityColor(inc.priority)}`}>
-                  {inc.priority}
-                </span>
+                <StatusBadge variant={ruleStatusToVariant(inc.status)} size="xs" dot={false}>
+                  {incidentStatusLabels[inc.status]}
+                </StatusBadge>
+                <span className="font-mono text-[10px] text-muted-foreground ml-auto">{inc.code}</span>
               </div>
               <div className="text-xs text-foreground mt-0.5 truncate">{inc.title}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">
-                {incidentStatusLabels[inc.status]} · {inc.updatedAt}
+              <div className="flex items-center gap-2 mt-0.5">
+                <StatusBadge
+                  variant={inc.priority === "critical" ? "error" : inc.priority === "high" ? "warning" : "idle"}
+                  size="xs"
+                  dot={false}
+                >
+                  {inc.priority}
+                </StatusBadge>
+                <span className="text-[10px] text-muted-foreground">{inc.updatedAt}</span>
               </div>
             </button>
           ))}
@@ -98,12 +95,21 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         </button>
       </div>
 
-      <div className="flex items-center gap-4 px-4 py-1.5 border-b border-border bg-card text-[10px]">
-        <span className="flex items-center gap-1 text-muted-foreground">
-          Статус: <span className="text-foreground">{incidentStatusLabels[incident.status]}</span>
+      <div className="flex items-center gap-3 px-4 py-1.5 border-b border-border bg-card text-[10px]">
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          Статус:
+          <StatusBadge variant={ruleStatusToVariant(incident.status)} size="xs">
+            {incidentStatusLabels[incident.status]}
+          </StatusBadge>
         </span>
-        <span className="flex items-center gap-1 text-muted-foreground">
-          Приоритет: <span className={incident.priority === "critical" ? "text-destructive" : "text-warning"}>{incident.priority}</span>
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          Приоритет:
+          <StatusBadge
+            variant={incident.priority === "critical" ? "error" : incident.priority === "high" ? "warning" : "idle"}
+            size="xs"
+          >
+            {incident.priority}
+          </StatusBadge>
         </span>
         {incident.assignee && (
           <span className="flex items-center gap-1 text-muted-foreground">
@@ -134,7 +140,6 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
               <div className="p-3 text-xs text-foreground leading-relaxed">{incident.description}</div>
             </div>
 
-            {/* Incident Playback */}
             <IncidentPlayback incident={incident} />
 
             <CausalChain

@@ -2,6 +2,7 @@ import { Rule, statusLabels } from "@/data/mockRules";
 import { CheckCircle, AlertTriangle, XCircle, Keyboard, ChevronDown, Cpu, Link2, FileText, Zap } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
+import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 
 interface RightPanelProps {
   rule: Rule;
@@ -18,12 +19,12 @@ const mockSparklineData: Record<string, number[]> = {
 };
 
 const templates = [
-{ id: "t1", name: "Контроль перегрева", icon: "🔥" },
-{ id: "t2", name: "Аномалия давления", icon: "⚡" },
-{ id: "t3", name: "Отказ клапана", icon: "🔧" }];
+  { id: "t1", name: "Контроль перегрева", icon: "🔥" },
+  { id: "t2", name: "Аномалия давления", icon: "⚡" },
+  { id: "t3", name: "Отказ клапана", icon: "🔧" },
+];
 
-
-function Sparkline({ data }: {data: number[];}) {
+function Sparkline({ data }: { data: number[] }) {
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
@@ -34,7 +35,6 @@ function Sparkline({ data }: {data: number[];}) {
     y: h - (v - min) / range * (h - 6) - 3
   }));
   const linePoints = pts.map((p) => `${p.x},${p.y}`).join(" ");
-  // Area fill
   const areaPoints = `0,${h} ${linePoints} ${w},${h}`;
 
   return (
@@ -49,18 +49,11 @@ function Sparkline({ data }: {data: number[];}) {
           <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.15" />
           <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0" />
         </linearGradient>
-        <filter id="glowFilter">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
       <polygon points={areaPoints} fill="url(#sparkGlowArea)" />
-      <polyline points={linePoints} fill="none" stroke="url(#sparkGlowLine)" strokeWidth="1.5" strokeLinejoin="round" filter="url(#glowFilter)" />
-    </svg>);
-
+      <polyline points={linePoints} fill="none" stroke="url(#sparkGlowLine)" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 export function RightPanel({ rule }: RightPanelProps) {
@@ -71,7 +64,7 @@ export function RightPanel({ rule }: RightPanelProps) {
   const toggleSection = (id: string) => {
     setOpenSections((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);else next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   };
@@ -86,11 +79,14 @@ export function RightPanel({ rule }: RightPanelProps) {
         title="Логика"
         open={openSections.has("logic")}
         onToggle={() => toggleSection("logic")}>
-        
         <div className="p-3 space-y-2 text-xs">
           <PropRow label="Название" value={rule.name} />
           <PropRow label="Тип" value={rule.parameterType} />
-          <PropRow label="Статус" value={statusLabels[rule.status]} badge={rule.status} />
+          <PropRow label="Статус">
+            <StatusBadge variant={ruleStatusToVariant(rule.status)}>
+              {statusLabels[rule.status]}
+            </StatusBadge>
+          </PropRow>
           <PropRow label="Версия" value={`v${rule.version}`} />
         </div>
       </CollapsibleSection>
@@ -101,7 +97,6 @@ export function RightPanel({ rule }: RightPanelProps) {
         title="Входные сигналы"
         open={openSections.has("signals")}
         onToggle={() => toggleSection("signals")}>
-        
         <div className="p-3 space-y-2.5 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Тип параметра</span>
@@ -111,15 +106,13 @@ export function RightPanel({ rule }: RightPanelProps) {
             <span className="text-muted-foreground">Последние значения</span>
             <Sparkline data={sparkData} />
           </div>
-          {/* Colored value dots */}
           <div className="flex gap-1 flex-wrap justify-end">
             {sparkData.map((v, i) =>
-            <span key={i} className="sparkline-value">{v}</span>
+              <span key={i} className="sparkline-value">{v}</span>
             )}
           </div>
-          {/* Inline validation */}
           {(rule.parameterType === "Давление" || rule.parameterType === "Влажность") &&
-          <div className="flex items-start gap-1.5 text-warning bg-warning/10 p-2 rounded-sm border border-warning/20">
+            <div className="flex items-start gap-1.5 text-warning bg-warning/10 p-2 rounded-sm border border-warning/20">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
               <span className="text-[10px] font-medium">Допустимый диапазон: 0–100 %RH</span>
             </div>
@@ -133,20 +126,19 @@ export function RightPanel({ rule }: RightPanelProps) {
         title="Консоль проверки"
         open={openSections.has("validation")}
         onToggle={() => toggleSection("validation")}>
-        
         <div className="p-3 space-y-1 text-[11px] font-mono">
           <div className="flex items-center gap-1.5 text-success">
             <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
             Синтаксис OK
           </div>
           {rule.warningCount > 0 &&
-          <div className="flex items-center gap-1.5 text-warning">
+            <div className="flex items-center gap-1.5 text-warning">
               <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
               {rule.warningCount} предупр.
             </div>
           }
           {rule.errorCount > 0 &&
-          <div className="flex items-center gap-1.5 text-destructive">
+            <div className="flex items-center gap-1.5 text-destructive">
               <XCircle className="w-3.5 h-3.5 flex-shrink-0" />
               {rule.errorCount} ошибок
             </div>
@@ -160,7 +152,6 @@ export function RightPanel({ rule }: RightPanelProps) {
         title="Зависимости"
         open={openSections.has("deps")}
         onToggle={() => toggleSection("deps")}>
-        
         <div className="p-3 space-y-1.5 text-xs">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Link2 className="w-3 h-3" />
@@ -183,7 +174,6 @@ export function RightPanel({ rule }: RightPanelProps) {
         title="Метаданные"
         open={openSections.has("metadata")}
         onToggle={() => toggleSection("metadata")}>
-        
         <div className="p-3 space-y-2 text-xs">
           <PropRow label="Автор" value={rule.author} />
           <PropRow label="Создано" value={rule.createdAt} />
@@ -198,13 +188,11 @@ export function RightPanel({ rule }: RightPanelProps) {
         title="Шаблоны"
         open={openSections.has("templates")}
         onToggle={() => toggleSection("templates")}>
-        
         <div className="p-2 space-y-0.5">
           {templates.map((t) =>
-          <button
-            key={t.id}
-            className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
-            
+            <button
+              key={t.id}
+              className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
               <Zap className="w-3 h-3" />
               <span>{t.name}</span>
             </button>
@@ -219,8 +207,8 @@ export function RightPanel({ rule }: RightPanelProps) {
           <span>⌘Enter проверить · ⌘⇧S активировать · ESC закрыть</span>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 function CollapsibleSection({
@@ -228,14 +216,8 @@ function CollapsibleSection({
   title,
   open,
   onToggle,
-  children
-
-
-
-
-
-
-}: {id: string;title: string;open: boolean;onToggle: () => void;children: React.ReactNode;}) {
+  children,
+}: { id: string; title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
     <Collapsible open={open} onOpenChange={onToggle}>
       <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2 border-b border-border text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors">
@@ -245,26 +227,19 @@ function CollapsibleSection({
       <CollapsibleContent className="panel-section">
         {children}
       </CollapsibleContent>
-    </Collapsible>);
-
+    </Collapsible>
+  );
 }
 
-function PropRow({ label, value, badge, mono }: {label: string;value: string;badge?: string;mono?: boolean;}) {
+function PropRow({ label, value, mono, children }: { label: string; value?: string; mono?: boolean; children?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{label}</span>
-      <span className={`text-foreground flex items-center gap-1.5 ${mono ? "font-mono text-[10px]" : "font-medium"}`}>
-        {badge &&
-        <span
-          className={`status-dot ${
-          badge === "active" ? "status-active" :
-          badge === "error" ? "status-error" :
-          badge === "draft" ? "status-draft" : "status-scheduled"}`
-          } />
-
-        }
-        {value}
-      </span>
-    </div>);
-
+      {children ? children : (
+        <span className={`text-foreground ${mono ? "font-mono text-[10px]" : "font-medium"}`}>
+          {value}
+        </span>
+      )}
+    </div>
+  );
 }

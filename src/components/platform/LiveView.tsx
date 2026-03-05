@@ -1,6 +1,7 @@
 import { liveSignals, type LiveSignal } from "@/data/mockPlatform";
-import { AlertTriangle, Radio, XCircle, CheckCircle, Clock, ArrowRight } from "lucide-react";
+import { Radio, Clock, ArrowRight } from "lucide-react";
 import { LiveSystemPulse } from "@/components/ide/LiveSystemPulse";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface LiveViewProps {
   onNavigateToInvestigate: (signalParam: string) => void;
@@ -55,14 +56,12 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
           <LiveSystemPulse />
         </div>
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <span className="conn-dot conn-dot-pink" style={{ width: 6, height: 6 }} />
+          <StatusBadge variant="error" size="xs">
             {criticalCount} критических
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="conn-dot conn-dot-orange" style={{ width: 6, height: 6 }} />
+          </StatusBadge>
+          <StatusBadge variant="warning" size="xs">
             {warningCount} предупреждений
-          </span>
+          </StatusBadge>
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3" /> Обновлено: только что
           </span>
@@ -102,11 +101,12 @@ function SignalRow({ signal, onInvestigate }: { signal: LiveSignal; onInvestigat
   return (
     <tr className="border-b border-border transition-colors hover:bg-muted/30">
       <td className="px-4 py-2.5">
-        <span className={`status-badge text-[9px] py-0.5 px-2 ${
-          signal.status === "critical" ? "status-badge-error" : signal.status === "warning" ? "status-badge-warning" : "status-badge-success"
-        }`}>
+        <StatusBadge
+          variant={signal.status === "critical" ? "error" : signal.status === "warning" ? "warning" : "success"}
+          size="xs"
+        >
           {signal.status === "critical" ? "Error" : signal.status === "warning" ? "Warning" : "OK"}
-        </span>
+        </StatusBadge>
       </td>
       <td className="px-4 py-2.5 font-mono text-[11px] text-foreground font-medium">{signal.parameter}</td>
       <td className={`px-4 py-2.5 text-right font-mono text-[11px] ${

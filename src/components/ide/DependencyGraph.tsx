@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { GraphTimeline, type TimePoint } from "./GraphTimeline";
-import { CheckCircle, AlertTriangle, XCircle, Loader2, Clock } from "lucide-react";
+import { StatusBadgeSvg } from "@/components/ui/status-badge";
 
 interface DependencyGraphProps {
   rule: Rule;
@@ -39,12 +39,6 @@ const connColors = {
   orange: "hsl(38, 92%, 50%)",
   pink: "hsl(330, 81%, 60%)",
   green: "hsl(142, 71%, 45%)",
-};
-
-const statusBadgeLabel: Record<string, string> = {
-  success: "Complete",
-  warning: "Warning",
-  error: "Error",
 };
 
 export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps) {
@@ -127,7 +121,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
     setFocusedNode(focusedNode === nodeId ? null : nodeId);
   };
 
-  // Card dimensions
   const cardW = 140;
   const cardH = 52;
 
@@ -181,7 +174,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                 ))}
               </defs>
 
-              {/* Edges */}
               {edges.map((edge) => {
                 const a = getNode(edge.from);
                 const b = getNode(edge.to);
@@ -189,8 +181,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                 const isHighlighted = hoveredNode === edge.from || hoveredNode === edge.to;
                 const inFocus = isInFocus(edge.from) && isInFocus(edge.to);
                 const color = connColors[edge.color];
-
-                // Calculate edge points from card borders
                 const dx = b.x - a.x;
                 const dy = b.y - a.y;
                 const angle = Math.atan2(dy, dx);
@@ -209,15 +199,12 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                       opacity={isHighlighted ? 0.9 : 0.45}
                       markerEnd={`url(#arrow-${edge.color})`}
                     />
-                    {/* Connection dot at start */}
                     <circle cx={ax} cy={ay} r={3.5} fill={color} opacity={isHighlighted ? 1 : 0.7} />
-                    {/* Connection dot at end */}
                     <circle cx={bx} cy={by} r={3.5} fill={color} opacity={isHighlighted ? 1 : 0.7} />
                   </g>
                 );
               })}
 
-              {/* Nodes as Vercel-style cards */}
               {nodes.map((node) => {
                 const isHovered = hoveredNode === node.id;
                 const inFocus = isInFocus(node.id);
@@ -233,7 +220,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                         onMouseLeave={() => setHoveredNode(null)}
                         onClick={() => handleNodeClick(node.id)}
                       >
-                        {/* Card background */}
                         <rect
                           x={node.x - cardW / 2}
                           y={node.y - cardH / 2}
@@ -246,8 +232,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                           strokeDasharray={node.type === "matrix" || node.type === "report" ? "4 3" : "none"}
                           className="transition-all duration-200"
                         />
-
-                        {/* Node label */}
                         <text
                           x={node.x - cardW / 2 + 12}
                           y={node.y - 2}
@@ -258,8 +242,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                         >
                           {node.label.length > 15 ? node.label.slice(0, 14) + "…" : node.label}
                         </text>
-
-                        {/* Type sublabel */}
                         <text
                           x={node.x - cardW / 2 + 12}
                           y={node.y + 12}
@@ -269,8 +251,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                         >
                           {node.type === "signal" ? "Сигнал" : node.type === "function" ? "Функция" : node.type === "matrix" ? "Матрица" : node.type === "incident" ? "Инцидент" : "Отчёт"}
                         </text>
-
-                        {/* Connection dot on left edge */}
                         <circle
                           cx={node.x - cardW / 2}
                           cy={node.y}
@@ -324,26 +304,5 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
         )}
       </div>
     </div>
-  );
-}
-
-function StatusBadgeSvg({ x, y, status }: { x: number; y: number; status: string }) {
-  const colors = {
-    success: { bg: "hsl(142, 71%, 45%)", text: "hsl(142, 71%, 45%)", label: "✓" },
-    warning: { bg: "hsl(38, 92%, 50%)", text: "hsl(38, 92%, 50%)", label: "!" },
-    error: { bg: "hsl(0, 84%, 60%)", text: "hsl(0, 84%, 60%)", label: "✕" },
-  };
-  const c = colors[status as keyof typeof colors] || colors.success;
-  const w = 48;
-  const h = 18;
-
-  return (
-    <g>
-      <rect x={x} y={y} width={w} height={h} rx={9} fill={c.bg} opacity={0.12} />
-      <circle cx={x + 10} cy={y + h / 2} r={3} fill={c.bg} opacity={0.8} />
-      <text x={x + 18} y={y + h / 2 + 3} fill={c.text} fontSize="8" fontWeight="500" fontFamily="Inter, sans-serif">
-        {statusBadgeLabel[status] || "OK"}
-      </text>
-    </g>
   );
 }

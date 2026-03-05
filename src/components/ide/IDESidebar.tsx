@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Search, ChevronDown, ChevronRight, FolderOpen, AlertCircle, Clock, FileEdit, CheckCircle, Grid3X3 } from "lucide-react";
-import { rules, categories, statusLabels, type Rule, type RuleStatus } from "@/data/mockRules";
+import { rules, categories, type Rule, type RuleStatus } from "@/data/mockRules";
 import { matrices, type Matrix } from "@/data/mockMatrices";
+import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 
 export type SelectedItem =
   | { type: "rule"; item: Rule }
@@ -81,17 +82,9 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
   const rulesByStatus = (["active", "draft", "scheduled", "error"] as RuleStatus[]).map(
     (status) => ({
       status,
-      label: statusLabels[status],
       items: filteredAllItems.filter((i) => i.status === status),
     })
   );
-
-  const statusIcons: Record<RuleStatus, React.ReactNode> = {
-    active: <CheckCircle className="w-3.5 h-3.5 text-success" />,
-    draft: <FileEdit className="w-3.5 h-3.5 text-muted-foreground" />,
-    scheduled: <Clock className="w-3.5 h-3.5 text-primary" />,
-    error: <AlertCircle className="w-3.5 h-3.5 text-destructive" />,
-  };
 
   const isSelected = (id: string) => {
     if (!selected) return false;
@@ -100,6 +93,13 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
 
   const totalCount = rules.length + matrices.length;
   const activeCount = rules.filter((r) => r.status === "active").length + matrices.filter((m) => m.status === "active").length;
+
+  const statusLabelMap: Record<RuleStatus, string> = {
+    active: "Активные",
+    draft: "Черновики",
+    scheduled: "По расписанию",
+    error: "С ошибками",
+  };
 
   return (
     <div className="w-[260px] min-w-[260px] bg-sidebar border-r border-sidebar-border flex flex-col h-full">
@@ -151,7 +151,6 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
       <div className="flex-1 overflow-y-auto py-1">
         {viewMode === "projects" ? (
           <>
-            {/* ПРАВИЛА section */}
             <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
               Правила
             </div>
@@ -182,17 +181,12 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
                     >
                       <FunctionIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                       <span className="truncate">{rule.name}</span>
-                      <span className={`status-dot ml-auto flex-shrink-0 ${
-                        rule.status === "active" ? "status-active" :
-                        rule.status === "error" ? "status-error" :
-                        rule.status === "draft" ? "status-draft" : "status-scheduled"
-                      }`} />
+                      <StatusBadge variant={ruleStatusToVariant(rule.status)} size="xs" dot className="ml-auto flex-shrink-0" />
                     </button>
                   ))}
               </div>
             ))}
 
-            {/* МАТРИЦЫ section */}
             <div className="px-3 py-1.5 mt-2 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
               Матрицы
             </div>
@@ -221,22 +215,19 @@ export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
                   >
                     <Grid3X3 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                     <span className="truncate">{matrix.name}</span>
-                    <span className={`status-dot ml-auto flex-shrink-0 ${
-                      matrix.status === "active" ? "status-active" :
-                      matrix.status === "error" ? "status-error" :
-                      matrix.status === "draft" ? "status-draft" : "status-scheduled"
-                    }`} />
+                    <StatusBadge variant={ruleStatusToVariant(matrix.status)} size="xs" dot className="ml-auto flex-shrink-0" />
                   </button>
                 ))}
             </div>
           </>
         ) : (
           <>
-            {rulesByStatus.map(({ status, label, items }) => (
+            {rulesByStatus.map(({ status, items }) => (
               <div key={status}>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-secondary-foreground">
-                  {statusIcons[status]}
-                  <span className="font-medium">{label}</span>
+                  <StatusBadge variant={ruleStatusToVariant(status)} size="xs">
+                    {statusLabelMap[status]}
+                  </StatusBadge>
                   <span className="ml-auto text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                     {items.length}
                   </span>
