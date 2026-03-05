@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Play, Pause, RotateCcw, CheckCircle, Loader2 } from "lucide-react";
 import { type Incident } from "@/data/mockPlatform";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { SegmentBar } from "@/components/ui/segment-bar";
 
 interface PlaybackStep {
   nodeId: string;
@@ -38,6 +39,15 @@ const defaultPlayback: PlaybackStep[] = [
   { nodeId: "fn", label: "Функция", type: "function", description: "Обработка" },
   { nodeId: "inc", label: "Инцидент", type: "incident", description: "Создан" },
 ];
+
+const stepTypeColor = (type: string) => {
+  switch (type) {
+    case "signal": return "hsl(217, 91%, 60%)";
+    case "incident": return "hsl(330, 81%, 60%)";
+    case "condition": return "hsl(38, 92%, 50%)";
+    default: return "hsl(142, 71%, 45%)";
+  }
+};
 
 interface IncidentPlaybackProps {
   incident: Incident;
@@ -94,83 +104,58 @@ export function IncidentPlayback({ incident }: IncidentPlaybackProps) {
       </div>
 
       <div className="p-3 space-y-3">
-        <div className="space-y-0">
-          {steps.map((step, i) => {
-            const isActive = i === currentStep;
-            const isDone = i < currentStep;
+        {/* Vertical timeline steps */}
+        <div className="relative">
+          <div className="absolute left-[0.55rem] top-2 bottom-2 w-px bg-border" />
+          <div className="space-y-0">
+            {steps.map((step, i) => {
+              const isActive = i === currentStep;
+              const isDone = i < currentStep;
 
-            return (
-              <div key={i} className="flex items-stretch gap-0">
-                <div className="flex flex-col items-center w-6 flex-shrink-0">
-                  {i > 0 && (
-                    <div className={`w-px flex-1 transition-all duration-200 ${isDone || isActive ? "bg-foreground/30" : "bg-border"}`} />
-                  )}
-                  <div className={`w-3 h-3 rounded-full flex-shrink-0 transition-all duration-200 ${
-                    isDone ? "bg-success" : isActive ? "bg-foreground shadow-[0_0_8px_hsl(0,0%,100%/0.3)]" : "bg-muted"
-                  }`}>
-                    {isDone && <CheckCircle className="w-3 h-3 text-background" />}
-                    {isActive && playing && <Loader2 className="w-3 h-3 text-background animate-spin" />}
-                  </div>
-                  {i < steps.length - 1 && (
-                    <div className={`w-px flex-1 transition-all duration-200 ${isDone ? "bg-foreground/30" : "bg-border"}`} />
-                  )}
-                </div>
-
-                <div className={`flex-1 ml-2 py-1.5 transition-all duration-200 ${isActive ? "opacity-100" : isDone ? "opacity-60" : "opacity-30"}`}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-foreground">
-                      {step.label.length > 20 ? step.label.slice(0, 19) + "…" : step.label}
-                    </span>
-                    <StatusBadge
-                      variant={isDone ? "success" : isActive ? "neutral" : "idle"}
-                      size="xs"
-                      dot={false}
-                    >
-                      {isDone ? "Complete" : isActive ? "Active" : "Idle"}
-                    </StatusBadge>
-                  </div>
-                  {(isActive || isDone) && (
-                    <div className="text-[11px] text-muted-foreground mt-0.5 animate-fade-in">
-                      {step.description}
+              return (
+                <div key={i} className="relative pl-7 py-1.5">
+                  {/* Dot */}
+                  <div className="absolute left-0 top-2.5 flex items-center justify-center">
+                    <div className={`w-3 h-3 rounded-full flex-shrink-0 z-10 transition-all duration-200 flex items-center justify-center ${
+                      isDone ? "bg-success" : isActive ? "bg-foreground" : "bg-muted"
+                    }`}>
+                      {isDone && <CheckCircle className="w-3 h-3 text-background" />}
+                      {isActive && playing && <Loader2 className="w-3 h-3 text-background animate-spin" />}
                     </div>
-                  )}
+                  </div>
+
+                  <div className={`transition-all duration-200 ${isActive ? "opacity-100" : isDone ? "opacity-60" : "opacity-30"}`}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-foreground">
+                        {step.label.length > 20 ? step.label.slice(0, 19) + "…" : step.label}
+                      </span>
+                      <StatusBadge
+                        variant={isDone ? "success" : isActive ? "neutral" : "idle"}
+                        size="xs"
+                        dot={false}
+                      >
+                        {isDone ? "Complete" : isActive ? "Active" : "Idle"}
+                      </StatusBadge>
+                    </div>
+                    {(isActive || isDone) && (
+                      <div className="text-[11px] text-muted-foreground mt-0.5 animate-fade-in">
+                        {step.description}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {/* Segment bar */}
-        <div className="flex items-center gap-0.5">
-          {steps.map((step, i) => {
-            const isDone = i < currentStep;
-            const isActive = i === currentStep;
-            const color = step.type === "signal" ? "hsl(217, 91%, 60%)" :
-                         step.type === "incident" ? "hsl(330, 81%, 60%)" :
-                         step.type === "condition" ? "hsl(38, 92%, 50%)" :
-                         "hsl(142, 71%, 45%)";
-            return (
-              <div key={i} className="flex-1 flex gap-0.5">
-                <div
-                  className="flex-1 h-1.5 rounded-full transition-all duration-200"
-                  style={{
-                    background: isDone || isActive ? color : "hsl(0, 0%, 18%)",
-                    opacity: isDone ? 1 : isActive ? 0.7 : 0.3,
-                  }}
-                />
-                {i < steps.length - 1 && (
-                  <div
-                    className="w-2 h-1.5 rounded-full"
-                    style={{
-                      background: isDone ? color : "hsl(0, 0%, 18%)",
-                      opacity: isDone ? 0.4 : 0.15,
-                    }}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <SegmentBar
+          segments={steps.map((step, i) => ({
+            color: stepTypeColor(step.type),
+            active: i <= currentStep,
+          }))}
+        />
 
         <button
           onClick={playing ? () => setPlaying(false) : startPlayback}

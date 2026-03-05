@@ -1,8 +1,8 @@
 import { Rule, statusLabels } from "@/data/mockRules";
 import { CheckCircle, AlertTriangle, XCircle, Keyboard, ChevronDown, Cpu, Link2, FileText, Zap } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
+import { CollapsibleSection, PropRow } from "@/components/ui/collapsible-section";
 
 interface RightPanelProps {
   rule: Rule;
@@ -73,12 +73,7 @@ export function RightPanel({ rule }: RightPanelProps) {
 
   return (
     <div className="w-[300px] min-w-[300px] border-l border-border flex flex-col h-full bg-card overflow-y-auto">
-      {/* Logic */}
-      <CollapsibleSection
-        id="logic"
-        title="Логика"
-        open={openSections.has("logic")}
-        onToggle={() => toggleSection("logic")}>
+      <CollapsibleSection title="Логика" open={openSections.has("logic")} onToggle={() => toggleSection("logic")}>
         <div className="p-3 space-y-2 text-xs">
           <PropRow label="Название" value={rule.name} />
           <PropRow label="Тип" value={rule.parameterType} />
@@ -91,12 +86,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Input Signals */}
-      <CollapsibleSection
-        id="signals"
-        title="Входные сигналы"
-        open={openSections.has("signals")}
-        onToggle={() => toggleSection("signals")}>
+      <CollapsibleSection title="Входные сигналы" open={openSections.has("signals")} onToggle={() => toggleSection("signals")}>
         <div className="p-3 space-y-2.5 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Тип параметра</span>
@@ -112,7 +102,7 @@ export function RightPanel({ rule }: RightPanelProps) {
             )}
           </div>
           {(rule.parameterType === "Давление" || rule.parameterType === "Влажность") &&
-            <div className="flex items-start gap-1.5 text-warning bg-warning/10 p-2 rounded-sm border border-warning/20">
+            <div className="flex items-start gap-1.5 text-warning bg-warning/10 p-2 rounded-md border border-warning/20">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
               <span className="text-[10px] font-medium">Допустимый диапазон: 0–100 %RH</span>
             </div>
@@ -120,12 +110,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Validation Console */}
-      <CollapsibleSection
-        id="validation"
-        title="Консоль проверки"
-        open={openSections.has("validation")}
-        onToggle={() => toggleSection("validation")}>
+      <CollapsibleSection title="Консоль проверки" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
         <div className="p-3 space-y-1 text-[11px] font-mono">
           <div className="flex items-center gap-1.5 text-success">
             <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
@@ -146,12 +131,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Dependencies */}
-      <CollapsibleSection
-        id="deps"
-        title="Зависимости"
-        open={openSections.has("deps")}
-        onToggle={() => toggleSection("deps")}>
+      <CollapsibleSection title="Зависимости" open={openSections.has("deps")} onToggle={() => toggleSection("deps")}>
         <div className="p-3 space-y-1.5 text-xs">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Link2 className="w-3 h-3" />
@@ -168,12 +148,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Metadata */}
-      <CollapsibleSection
-        id="metadata"
-        title="Метаданные"
-        open={openSections.has("metadata")}
-        onToggle={() => toggleSection("metadata")}>
+      <CollapsibleSection title="Метаданные" open={openSections.has("metadata")} onToggle={() => toggleSection("metadata")}>
         <div className="p-3 space-y-2 text-xs">
           <PropRow label="Автор" value={rule.author} />
           <PropRow label="Создано" value={rule.createdAt} />
@@ -182,17 +157,12 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Templates */}
-      <CollapsibleSection
-        id="templates"
-        title="Шаблоны"
-        open={openSections.has("templates")}
-        onToggle={() => toggleSection("templates")}>
+      <CollapsibleSection title="Шаблоны" open={openSections.has("templates")} onToggle={() => toggleSection("templates")}>
         <div className="p-2 space-y-0.5">
           {templates.map((t) =>
             <button
               key={t.id}
-              className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+              className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors">
               <Zap className="w-3 h-3" />
               <span>{t.name}</span>
             </button>
@@ -200,46 +170,12 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Shortcuts */}
       <div className="p-2.5 border-t border-border mt-auto">
         <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
           <Keyboard className="w-2.5 h-2.5" />
           <span>⌘Enter проверить · ⌘⇧S активировать · ESC закрыть</span>
         </div>
       </div>
-    </div>
-  );
-}
-
-function CollapsibleSection({
-  id,
-  title,
-  open,
-  onToggle,
-  children,
-}: { id: string; title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
-  return (
-    <Collapsible open={open} onOpenChange={onToggle}>
-      <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2 border-b border-border text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors">
-        <span>{title}</span>
-        <ChevronDown className={`w-3 h-3 transition-transform ${open ? "" : "-rotate-90"}`} />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="panel-section">
-        {children}
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}
-
-function PropRow({ label, value, mono, children }: { label: string; value?: string; mono?: boolean; children?: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-muted-foreground">{label}</span>
-      {children ? children : (
-        <span className={`text-foreground ${mono ? "font-mono text-[10px]" : "font-medium"}`}>
-          {value}
-        </span>
-      )}
     </div>
   );
 }

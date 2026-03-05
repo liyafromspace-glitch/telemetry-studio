@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Clock, Play, Pause, SkipBack, SkipForward } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { SegmentBar } from "@/components/ui/segment-bar";
 
 interface TimePoint {
   time: string;
@@ -127,30 +129,21 @@ export function GraphTimeline({ onTimeChange, currentIndex, onIndexChange }: Gra
         </div>
 
         {/* Status label */}
-        <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full transition-all duration-200 ${
-          current.signals.src?.status === "error"
-            ? "status-badge-error"
-            : current.signals.src?.status === "warning"
-            ? "status-badge-warning"
-            : "status-badge-success"
-        }`}>
+        <StatusBadge
+          variant={current.signals.src?.status === "error" ? "error" : current.signals.src?.status === "warning" ? "warning" : "success"}
+          size="xs"
+        >
           {current.label}
-        </span>
+        </StatusBadge>
       </div>
 
-      {/* Vercel-style colored timeline segment bar */}
-      <div className="flex items-center gap-1 mt-2.5">
-        {segmentColors.map((color, i) => (
-          <div
-            key={i}
-            className="flex-1 h-1.5 rounded-full transition-all duration-200"
-            style={{
-              background: i <= currentIndex ? color : "hsl(0, 0%, 18%)",
-              opacity: i <= currentIndex ? 1 : 0.4,
-            }}
-          />
-        ))}
-      </div>
+      <SegmentBar
+        className="mt-2.5"
+        segments={segmentColors.map((color, i) => ({
+          color,
+          active: i <= currentIndex,
+        }))}
+      />
     </div>
   );
 }

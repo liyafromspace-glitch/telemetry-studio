@@ -3,6 +3,7 @@ import { Play, SkipForward, RotateCcw, CheckCircle, AlertTriangle, XCircle, Code
 import { Rule } from "@/data/mockRules";
 import { CausalChain, buildSimulationChain } from "@/components/ide/CausalChain";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { SegmentBar } from "@/components/ui/segment-bar";
 
 interface SimulationPanelProps {
   rule: Rule;
@@ -177,22 +178,16 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
               </div>
             ))}
           </div>
-          {/* Segment bar */}
-          <div className="flex items-center gap-0.5 mt-2.5">
-            {steps.map((step, i) => (
-              <div
-                key={i}
-                className="flex-1 h-1 rounded-full transition-all duration-200"
-                style={{
-                  background: step.status === "pass" ? "hsl(142, 71%, 45%)"
-                    : step.status === "active" ? "hsl(217, 91%, 60%)"
-                    : step.status === "fail" ? "hsl(0, 84%, 60%)"
-                    : "hsl(0, 0%, 18%)",
-                  opacity: step.status === "pending" ? 0.3 : 1,
-                }}
-              />
-            ))}
-          </div>
+          <SegmentBar
+            className="mt-2.5"
+            segments={steps.map((step) => ({
+              color: step.status === "pass" ? "hsl(142, 71%, 45%)"
+                : step.status === "active" ? "hsl(217, 91%, 60%)"
+                : step.status === "fail" ? "hsl(0, 84%, 60%)"
+                : "hsl(0, 0%, 18%)",
+              active: step.status !== "pending",
+            }))}
+          />
         </div>
       </div>
 

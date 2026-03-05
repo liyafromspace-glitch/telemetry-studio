@@ -8,6 +8,7 @@ import { CausalChain, buildIncidentChain } from "@/components/ide/CausalChain";
 import { SystemStory } from "@/components/ide/SystemStory";
 import { IncidentPlayback } from "@/components/ide/IncidentPlayback";
 import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
+import { TimelineList, type TimelineItem } from "@/components/ui/timeline-list";
 
 interface InvestigateViewProps {
   onNavigateToConfigure: () => void;
@@ -134,7 +135,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
       <div className="flex-1 overflow-y-auto bg-background p-4">
         {activeTab === "description" && (
           <div className="space-y-3 animate-fade-in">
-            <div className="ide-panel-glow rounded-sm">
+            <div className="vercel-card">
               <div className="ide-header">Описание</div>
               <div className="p-3 text-xs text-foreground leading-relaxed">{incident.description}</div>
             </div>
@@ -145,7 +146,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
               title="Почему произошёл инцидент"
               steps={buildIncidentChain(incident)}
             />
-            <div className="ide-panel-glow rounded-sm">
+            <div className="vercel-card">
               <div className="ide-header">Связанные параметры</div>
               <div className="p-3 flex flex-wrap gap-1.5">
                 {incident.linkedParameters.map((p) => (
@@ -165,7 +166,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         )}
 
         {activeTab === "tasks" && (
-          <div className="ide-panel-glow rounded-sm animate-fade-in">
+          <div className="vercel-card animate-fade-in">
             <div className="ide-header">Задачи</div>
             <div className="divide-y divide-border">
               {incident.tasks.length === 0 ? (
@@ -192,28 +193,29 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         )}
 
         {activeTab === "history" && (
-          <div className="ide-panel-glow rounded-sm animate-fade-in">
-            <div className="ide-header">История</div>
-            <div className="divide-y divide-border">
-              {incident.history.map((entry, i) => (
-                <div key={i} className="px-3 py-2 text-xs">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Clock className="w-3 h-3" />
-                    <span className="font-mono text-[10px]">{entry.date}</span>
-                    <span className="flex items-center gap-1 ml-auto">
-                      <User className="w-2.5 h-2.5" /> {entry.user}
-                    </span>
-                  </div>
-                  <div className="text-foreground mt-0.5 pl-5">{entry.action}</div>
-                </div>
-              ))}
-            </div>
+          <div className="animate-fade-in">
+            <TimelineList
+              title="История"
+              headerIcon={<Clock className="w-3 h-3" />}
+              items={incident.history.map((entry, i): TimelineItem => ({
+                id: `hist-${i}`,
+                label: entry.date,
+                title: entry.action,
+                dotColor: "muted-foreground",
+                meta: (
+                  <span className="flex items-center gap-1">
+                    <User className="w-2.5 h-2.5" /> {entry.user}
+                  </span>
+                ),
+              }))}
+              expandable={false}
+            />
           </div>
         )}
 
         {activeTab === "linked" && (
           <div className="space-y-3 animate-fade-in">
-            <div className="ide-panel-glow rounded-sm">
+            <div className="vercel-card">
               <div className="ide-header flex items-center gap-1.5">
                 <Cpu className="w-3 h-3" /> Функции
               </div>
@@ -225,7 +227,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
                 ))}
               </div>
             </div>
-            <div className="ide-panel-glow rounded-sm">
+            <div className="vercel-card">
               <div className="ide-header flex items-center gap-1.5">
                 <Grid3X3 className="w-3 h-3" /> Матрицы
               </div>
@@ -237,7 +239,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
                 ))}
               </div>
             </div>
-            <div className="ide-panel-glow rounded-sm">
+            <div className="vercel-card">
               <div className="ide-header flex items-center gap-1.5">
                 <FileText className="w-3 h-3" /> Отчёты
               </div>
