@@ -16,18 +16,18 @@ function highlightCode(code: string) {
     const stringRegex = /"[^"]*"|'[^']*'/g;
     const numberRegex = /\b\d+\.?\d*\b/g;
 
-    const tokens: { start: number; end: number; type: string; text: string }[] = [];
+    const tokens: {start: number;end: number;type: string;text: string;}[] = [];
 
     let match;
     while ((match = stringRegex.exec(line)) !== null) {
       tokens.push({ start: match.index, end: match.index + match[0].length, type: 'string', text: match[0] });
     }
     while ((match = keywords.exec(line)) !== null) {
-      const overlaps = tokens.some(t => match!.index >= t.start && match!.index < t.end);
+      const overlaps = tokens.some((t) => match!.index >= t.start && match!.index < t.end);
       if (!overlaps) tokens.push({ start: match.index, end: match.index + match[0].length, type: 'keyword', text: match[0] });
     }
     while ((match = numberRegex.exec(line)) !== null) {
-      const overlaps = tokens.some(t => match!.index >= t.start && match!.index < t.end);
+      const overlaps = tokens.some((t) => match!.index >= t.start && match!.index < t.end);
       if (!overlaps) tokens.push({ start: match.index, end: match.index + match[0].length, type: 'number', text: match[0] });
     }
 
@@ -51,19 +51,19 @@ function highlightCode(code: string) {
 // Structure node-graph diagram matching reference screenshot
 function GlowDiagram() {
   const nodes = [
-    { x: 50, y: 30, label: "Сигнал" },
-    { x: 160, y: 30, label: "Фильтр" },
-    { x: 270, y: 30, label: "Функция" },
-    { x: 105, y: 100, label: "λ" },
-    { x: 215, y: 100, label: "Матрица" },
-    { x: 50, y: 165, label: "Датчик" },
-    { x: 160, y: 165, label: "Проверка" },
-    { x: 270, y: 165, label: "Отчёт" },
-  ];
+  { x: 50, y: 30, label: "Сигнал" },
+  { x: 160, y: 30, label: "Фильтр" },
+  { x: 270, y: 30, label: "Функция" },
+  { x: 105, y: 100, label: "λ" },
+  { x: 215, y: 100, label: "Матрица" },
+  { x: 50, y: 165, label: "Датчик" },
+  { x: 160, y: 165, label: "Проверка" },
+  { x: 270, y: 165, label: "Отчёт" }];
+
   const edges: [number, number][] = [
-    [0, 3], [1, 3], [1, 4], [2, 4],
-    [3, 5], [3, 6], [4, 6], [4, 7],
-  ];
+  [0, 3], [1, 3], [1, 4], [2, 4],
+  [3, 5], [3, 6], [4, 6], [4, 7]];
+
 
   return (
     <svg viewBox="0 0 320 200" className="w-full h-full">
@@ -76,39 +76,39 @@ function GlowDiagram() {
       </defs>
       {/* Edges with glow */}
       {edges.map(([from, to], i) => {
-        const f = nodes[from], t = nodes[to];
+        const f = nodes[from],t = nodes[to];
         // Curved paths for more organic feel
-        const mx = (f.x + t.x) / 2, my = (f.y + t.y) / 2;
+        const mx = (f.x + t.x) / 2,my = (f.y + t.y) / 2;
         return (
           <g key={i}>
             <line x1={f.x} y1={f.y} x2={t.x} y2={t.y}
-              stroke="url(#edgeGradPurpleTeal)" strokeWidth="1.5"
-              opacity="0.7"
-            />
-          </g>
-        );
+            stroke="url(#edgeGradPurpleTeal)" strokeWidth="1.5"
+            opacity="0.7" />
+            
+          </g>);
+
       })}
       {/* Nodes */}
-      {nodes.map((n, i) => (
-        <g key={i} className="graph-node">
+      {nodes.map((n, i) =>
+      <g key={i} className="graph-node">
           {/* Outer rect */}
           <rect
-            x={n.x - 20} y={n.y - 16} width={40} height={32} rx={3}
-            fill="hsl(228 10% 14%)" stroke="hsl(185 60% 45%)" strokeWidth="1"
-          />
+          x={n.x - 20} y={n.y - 16} width={40} height={32} rx={3}
+          fill="hsl(228 10% 14%)" stroke="hsl(185 60% 45%)" strokeWidth="1" />
+        
           {/* Inner rect */}
           <rect
-            x={n.x - 15} y={n.y - 11} width={30} height={22} rx={2}
-            fill="hsl(228 10% 18%)" stroke="hsl(185 50% 35%)" strokeWidth="0.5"
-          />
+          x={n.x - 15} y={n.y - 11} width={30} height={22} rx={2}
+          fill="hsl(228 10% 18%)" stroke="hsl(185 50% 35%)" strokeWidth="0.5" />
+        
           {/* Label */}
           <text x={n.x} y={n.y + 2} textAnchor="middle" fill="hsl(185 50% 70%)" fontSize="6" fontFamily="Inter, sans-serif">
             {n.label}
           </text>
         </g>
-      ))}
-    </svg>
-  );
+      )}
+    </svg>);
+
 }
 
 
@@ -122,10 +122,10 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
         <div className="stat-card">
           <div className="stat-card-label">
             <span className={`status-dot ${
-              rule.status === "active" ? "status-active" :
-              rule.status === "error" ? "status-error" :
-              rule.status === "draft" ? "status-draft" : "status-scheduled"
-            }`} />
+            rule.status === "active" ? "status-active" :
+            rule.status === "error" ? "status-error" :
+            rule.status === "draft" ? "status-draft" : "status-scheduled"}`
+            } />
             Статус
           </div>
           <div className="stat-card-value">{statusLabels[rule.status]}</div>
@@ -153,11 +153,11 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
         </div>
         <div className="stat-card">
           <div className="stat-card-label">
-            {rule.errorCount > 0
-              ? <XCircle className="w-3.5 h-3.5 text-destructive" />
-              : rule.warningCount > 0
-                ? <AlertTriangle className="w-3.5 h-3.5 text-warning" />
-                : <CheckCircle className="w-3.5 h-3.5 text-success" />
+            {rule.errorCount > 0 ?
+            <XCircle className="w-3.5 h-3.5 text-destructive" /> :
+            rule.warningCount > 0 ?
+            <AlertTriangle className="w-3.5 h-3.5 text-warning" /> :
+            <CheckCircle className="w-3.5 h-3.5 text-success" />
             }
             Проблемы
           </div>
@@ -169,20 +169,20 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       <div className="ide-panel-glow rounded-sm">
         <div className="ide-header flex items-center justify-between">
           <span>Основные свойства</span>
-          <div className="flex items-center gap-1.5 normal-case tracking-normal">
-            <button className="btn-secondary !text-[10px] !py-0.5 !px-2">
-              <CheckCircle className="w-3 h-3" />
-              Проверить
-            </button>
-            <button className="btn-secondary !text-[10px] !py-0.5 !px-2">
-              <Save className="w-3 h-3" />
-              Сохранить
-            </button>
-            <button className="btn-primary !text-[10px] !py-0.5 !px-2">
-              <Zap className="w-3 h-3" />
-              Активировать
-            </button>
-          </div>
+          
+
+
+
+
+
+
+
+
+
+
+
+
+          
         </div>
         <div className="p-3 grid grid-cols-2 gap-x-8 gap-y-3 text-xs">
           <Property label="Название правила" value={rule.name} />
@@ -198,10 +198,10 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       <div className="ide-panel-glow rounded-sm relative overflow-hidden">
         <div className="ide-header">Функция преобразования</div>
         {/* Left glow edge */}
-        <div 
+        <div
           className="absolute left-0 top-8 bottom-0 w-1"
-          style={{ background: 'linear-gradient(180deg, hsl(185 70% 50% / 0.3) 0%, hsl(185 70% 50% / 0.05) 100%)' }}
-        />
+          style={{ background: 'linear-gradient(180deg, hsl(185 70% 50% / 0.3) 0%, hsl(185 70% 50% / 0.05) 100%)' }} />
+        
         <pre className="p-4 pl-5 text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block" style={{ background: 'hsl(228 12% 11%)' }}>
           <code>{highlightCode(rule.code)}</code>
         </pre>
@@ -209,34 +209,34 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
 
       {/* Structure section */}
       <div className="ide-panel-glow rounded-sm">
-        <button 
+        <button
           onClick={() => setStructureOpen(!structureOpen)}
-          className="ide-header w-full flex items-center justify-between cursor-pointer hover:bg-accent/30 transition-colors"
-        >
+          className="ide-header w-full flex items-center justify-between cursor-pointer hover:bg-accent/30 transition-colors">
+          
           <span>Структура и матрицы</span>
           <ChevronUp className={`w-3.5 h-3.5 transition-transform ${structureOpen ? '' : 'rotate-180'}`} />
         </button>
-        {structureOpen && (
-          <div className="p-4">
+        {structureOpen &&
+        <div className="p-4">
             <div className="aspect-[3/1.2] bg-background/30 rounded-sm border border-border overflow-hidden relative">
-              <div 
-                className="absolute inset-0 opacity-30"
-                style={{ background: 'radial-gradient(ellipse at center, hsl(270 50% 40% / 0.2) 0%, transparent 70%)' }}
-              />
+              <div
+              className="absolute inset-0 opacity-30"
+              style={{ background: 'radial-gradient(ellipse at center, hsl(270 50% 40% / 0.2) 0%, transparent 70%)' }} />
+            
               <GlowDiagram />
             </div>
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
-function Property({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function Property({ label, value, mono }: {label: string;value: string;mono?: boolean;}) {
   return (
     <div>
       <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5 font-medium">{label}</div>
       <div className={`text-foreground ${mono ? "font-mono text-[11px]" : "font-medium"}`}>{value}</div>
-    </div>
-  );
+    </div>);
+
 }
