@@ -6,19 +6,19 @@ import { cn } from "@/lib/utils";
  * Clean, minimal, consistent across the entire system.
  */
 const statusBadgeVariants = cva(
-  "inline-flex items-center gap-1.5 rounded-full font-medium leading-none whitespace-nowrap select-none border",
+  "inline-flex items-center gap-1.5 rounded-full font-medium leading-none whitespace-nowrap select-none",
   {
     variants: {
       variant: {
-        success: "border-success/25 bg-success/6 text-success",
-        warning: "border-warning/25 bg-warning/6 text-warning",
-        error: "border-destructive/25 bg-destructive/6 text-destructive",
-        info: "border-primary/25 bg-primary/6 text-primary",
-        idle: "border-border bg-muted/50 text-muted-foreground",
-        active: "border-success/25 bg-success/6 text-success",
-        draft: "border-border bg-muted/50 text-muted-foreground",
-        scheduled: "border-primary/25 bg-primary/6 text-primary",
-        neutral: "border-border bg-foreground/4 text-foreground/70",
+        success: "bg-success/6 text-success",
+        warning: "bg-warning/6 text-warning",
+        error: "bg-destructive/6 text-destructive",
+        info: "bg-primary/6 text-primary",
+        idle: "border border-border bg-muted/50 text-muted-foreground",
+        active: "bg-success/6 text-success",
+        draft: "border border-border bg-muted/50 text-muted-foreground",
+        scheduled: "bg-primary/6 text-primary",
+        neutral: "border border-border bg-foreground/4 text-foreground/70",
       },
       size: {
         xs: "px-1.5 py-0.5 text-[9px]",
