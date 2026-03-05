@@ -198,9 +198,9 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       <div className="ide-panel-glow rounded-sm relative overflow-hidden">
         <div className="ide-header">Функция преобразования</div>
         {/* Left glow edge */}
-        <div
-          className="absolute left-0 top-8 bottom-0 w-1"
-          style={{ background: 'linear-gradient(180deg, hsl(185 70% 50% / 0.3) 0%, hsl(185 70% 50% / 0.05) 100%)' }} />
+        
+
+        
         
         <pre className="p-4 pl-5 text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block" style={{ background: 'hsl(228 12% 11%)' }}>
           <code>{highlightCode(rule.code)}</code>
