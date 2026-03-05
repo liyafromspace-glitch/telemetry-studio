@@ -139,7 +139,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       </div>
 
       {/* Properties */}
-      <div className="ide-panel-glow rounded-sm">
+      <div className="vercel-card">
         <div className="ide-header flex items-center justify-between">
           <span>Основные свойства</span>
         </div>
@@ -154,7 +154,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       </div>
 
       {/* Code editor */}
-      <div className="ide-panel-glow rounded-sm relative overflow-hidden">
+      <div className="vercel-card relative overflow-hidden">
         <div className="ide-header">Функция преобразования</div>
         <pre className="p-4 pl-5 text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block" style={{ background: 'hsl(228 12% 11%)' }}>
           <code>{highlightCode(rule.code)}</code>
@@ -162,7 +162,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       </div>
 
       {/* Structure section */}
-      <div className="ide-panel-glow rounded-sm">
+      <div className="vercel-card">
         <button
           onClick={() => setStructureOpen(!structureOpen)}
           className="ide-header w-full flex items-center justify-between cursor-pointer hover:bg-accent/30 transition-colors">

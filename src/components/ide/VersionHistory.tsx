@@ -1,6 +1,7 @@
 import { Rule } from "@/data/mockRules";
 import { GitBranch, Clock, User } from "lucide-react";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TimelineList, type TimelineItem } from "@/components/ui/timeline-list";
 
 interface VersionHistoryProps {
   rule: Rule;
@@ -17,49 +18,37 @@ export function VersionHistory({ rule }: VersionHistoryProps) {
     current: i === 0,
   }));
 
+  const items: TimelineItem[] = versions.map((v) => ({
+    id: `v${v.version}`,
+    label: `v${v.version}`,
+    title: v.changes,
+    dotColor: v.current ? "primary" as const : "muted-foreground" as const,
+    active: v.current,
+    icon: <GitBranch className="w-3 h-3 text-primary" />,
+    meta: (
+      <span className="flex items-center gap-3">
+        <span className="flex items-center gap-1">
+          <User className="w-2.5 h-2.5" /> {v.author}
+        </span>
+        <span className="flex items-center gap-1">
+          <Clock className="w-2.5 h-2.5" /> {v.date}
+        </span>
+      </span>
+    ),
+    action: v.current ? (
+      <StatusBadge variant="active" size="xs">текущая</StatusBadge>
+    ) : (
+      <span className="text-[10px] text-primary hover:underline">Сравнить</span>
+    ),
+  }));
+
   return (
     <div className="p-4 animate-fade-in">
-      <div className="ide-panel rounded-sm">
-        <div className="ide-header">История версий</div>
-        <div className="divide-y divide-border">
-          {versions.map((v) => (
-            <div
-              key={v.version}
-              className={`p-3 flex items-start gap-3 text-xs ${
-                v.current ? "bg-accent/50" : ""
-              }`}
-            >
-              <div className="flex-shrink-0 mt-0.5">
-                <GitBranch className="w-3.5 h-3.5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">v{v.version}</span>
-                  {v.current && (
-                    <StatusBadge variant="active" size="xs">
-                      текущая
-                    </StatusBadge>
-                  )}
-                </div>
-                <div className="text-muted-foreground mt-0.5">{v.changes}</div>
-                <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <User className="w-2.5 h-2.5" /> {v.author}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-2.5 h-2.5" /> {v.date}
-                  </span>
-                </div>
-              </div>
-              {!v.current && (
-                <button className="text-[10px] text-primary hover:underline flex-shrink-0">
-                  Сравнить
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      <TimelineList
+        title="История версий"
+        headerIcon={<GitBranch className="w-3 h-3" />}
+        items={items}
+      />
     </div>
   );
 }

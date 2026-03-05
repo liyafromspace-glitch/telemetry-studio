@@ -52,7 +52,7 @@ export function CausalChain({ title, steps, onStepClick }: CausalChainProps) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   return (
-    <div className="ide-panel-glow rounded-sm">
+    <div className="vercel-card">
       <div className="ide-header">{title}</div>
       <div className="p-3">
         {steps.map((step, i) => (

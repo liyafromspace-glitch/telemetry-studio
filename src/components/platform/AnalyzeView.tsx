@@ -69,13 +69,13 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
       </div>
 
       <div className="flex-1 overflow-y-auto bg-background p-4 space-y-4 animate-fade-in">
-        <div className="ide-panel-glow rounded-sm">
+        <div className="vercel-card">
           <div className="ide-header">Описание</div>
           <div className="p-3 text-xs text-foreground leading-relaxed">{report.description}</div>
         </div>
 
         {/* Chart with teal glow palette */}
-        <div className="ide-panel-glow rounded-sm">
+        <div className="vercel-card">
           <div className="ide-header flex items-center gap-1.5">
             <TrendingUp className="w-3 h-3" /> Визуализация
           </div>
@@ -123,7 +123,7 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          <div className="ide-panel-glow rounded-sm">
+          <div className="vercel-card">
             <div className="ide-header flex items-center gap-1.5">
               <Link2 className="w-3 h-3" /> Параметры
             </div>
@@ -133,7 +133,7 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
               ))}
             </div>
           </div>
-          <div className="ide-panel-glow rounded-sm">
+          <div className="vercel-card">
             <div className="ide-header flex items-center gap-1.5">
               <Cpu className="w-3 h-3" /> Функции
             </div>
@@ -143,7 +143,7 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
               ))}
             </div>
           </div>
-          <div className="ide-panel-glow rounded-sm">
+          <div className="vercel-card">
             <div className="ide-header flex items-center gap-1.5">
               <Grid3X3 className="w-3 h-3" /> Матрицы
             </div>

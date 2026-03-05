@@ -125,7 +125,7 @@ function AuditRow({ entry, expanded, onToggle }: { entry: VersionAuditEntry; exp
           <td colSpan={7} className="px-4 py-3">
             <div className="space-y-2">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Изменение:</div>
-              <div className="ide-panel-glow rounded-sm p-2 text-xs font-mono text-foreground">
+              <div className="vercel-card p-2 text-xs font-mono text-foreground">
                 {entry.changeDescription}
               </div>
               <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
@@ -150,7 +150,7 @@ function AuditRow({ entry, expanded, onToggle }: { entry: VersionAuditEntry; exp
 function VersionCompare() {
   return (
     <div className="space-y-4">
-      <div className="ide-panel-glow rounded-sm">
+      <div className="vercel-card">
         <div className="ide-header">Сравнение: Матрица диапазонов давления v3 → v4</div>
         <div className="grid grid-cols-2 divide-x divide-border">
           <div className="p-3">
@@ -174,7 +174,7 @@ function VersionCompare() {
         </div>
       </div>
 
-      <div className="ide-panel-glow rounded-sm">
+      <div className="vercel-card">
         <div className="ide-header">Сравнение: Конвертация температуры v4 → v5</div>
         <div className="grid grid-cols-2 divide-x divide-border">
           <div className="p-3">
