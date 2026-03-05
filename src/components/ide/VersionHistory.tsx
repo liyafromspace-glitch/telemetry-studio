@@ -1,5 +1,6 @@
 import { Rule } from "@/data/mockRules";
 import { GitBranch, Clock, User } from "lucide-react";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface VersionHistoryProps {
   rule: Rule;
@@ -35,9 +36,9 @@ export function VersionHistory({ rule }: VersionHistoryProps) {
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-foreground">v{v.version}</span>
                   {v.current && (
-                    <span className="text-[9px] uppercase tracking-wider bg-primary/20 text-primary px-1.5 py-0.5 rounded-sm">
+                    <StatusBadge variant="active" size="xs">
                       текущая
-                    </span>
+                    </StatusBadge>
                   )}
                 </div>
                 <div className="text-muted-foreground mt-0.5">{v.changes}</div>

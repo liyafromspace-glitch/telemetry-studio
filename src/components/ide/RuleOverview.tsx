@@ -1,23 +1,17 @@
 import { Rule, statusLabels } from "@/data/mockRules";
 import { CheckCircle, AlertTriangle, XCircle, FileText, Link2, GitBranch, Save, Zap, ChevronUp } from "lucide-react";
 import { useState } from "react";
-
-interface RuleOverviewProps {
-  rule: Rule;
-}
+import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 
 function highlightCode(code: string) {
   return code.split('\n').map((line, i) => {
     if (line.trimStart().startsWith('//')) {
       return <div key={i}><span className="comment">{line}</span></div>;
     }
-
     const keywords = /\b(const|let|var|if|else|return|function|new|typeof|instanceof)\b/g;
     const stringRegex = /"[^"]*"|'[^']*'/g;
     const numberRegex = /\b\d+\.?\d*\b/g;
-
     const tokens: {start: number;end: number;type: string;text: string;}[] = [];
-
     let match;
     while ((match = stringRegex.exec(line)) !== null) {
       tokens.push({ start: match.index, end: match.index + match[0].length, type: 'string', text: match[0] });
@@ -30,11 +24,8 @@ function highlightCode(code: string) {
       const overlaps = tokens.some((t) => match!.index >= t.start && match!.index < t.end);
       if (!overlaps) tokens.push({ start: match.index, end: match.index + match[0].length, type: 'number', text: match[0] });
     }
-
     tokens.sort((a, b) => a.start - b.start);
-
     if (tokens.length === 0) return <div key={i}>{line || '\u00A0'}</div>;
-
     const result: React.ReactNode[] = [];
     let pos = 0;
     tokens.forEach((token, ti) => {
@@ -43,28 +34,25 @@ function highlightCode(code: string) {
       pos = token.end;
     });
     if (pos < line.length) result.push(<span key="rest">{line.slice(pos)}</span>);
-
     return <div key={i}>{result}</div>;
   });
 }
 
-// Structure node-graph diagram matching reference screenshot
 function GlowDiagram() {
   const nodes = [
-  { x: 50, y: 30, label: "Сигнал" },
-  { x: 160, y: 30, label: "Фильтр" },
-  { x: 270, y: 30, label: "Функция" },
-  { x: 105, y: 100, label: "λ" },
-  { x: 215, y: 100, label: "Матрица" },
-  { x: 50, y: 165, label: "Датчик" },
-  { x: 160, y: 165, label: "Проверка" },
-  { x: 270, y: 165, label: "Отчёт" }];
-
+    { x: 50, y: 30, label: "Сигнал" },
+    { x: 160, y: 30, label: "Фильтр" },
+    { x: 270, y: 30, label: "Функция" },
+    { x: 105, y: 100, label: "λ" },
+    { x: 215, y: 100, label: "Матрица" },
+    { x: 50, y: 165, label: "Датчик" },
+    { x: 160, y: 165, label: "Проверка" },
+    { x: 270, y: 165, label: "Отчёт" },
+  ];
   const edges: [number, number][] = [
-  [0, 3], [1, 3], [1, 4], [2, 4],
-  [3, 5], [3, 6], [4, 6], [4, 7]];
-
-
+    [0, 3], [1, 3], [1, 4], [2, 4],
+    [3, 5], [3, 6], [4, 6], [4, 7],
+  ];
   return (
     <svg viewBox="0 0 320 200" className="w-full h-full">
       <defs>
@@ -74,43 +62,29 @@ function GlowDiagram() {
           <stop offset="100%" stopColor="hsl(185 70% 50%)" stopOpacity="0.7" />
         </linearGradient>
       </defs>
-      {/* Edges with glow */}
       {edges.map(([from, to], i) => {
-        const f = nodes[from],t = nodes[to];
-        // Curved paths for more organic feel
-        const mx = (f.x + t.x) / 2,my = (f.y + t.y) / 2;
+        const f = nodes[from], t = nodes[to];
         return (
           <g key={i}>
             <line x1={f.x} y1={f.y} x2={t.x} y2={t.y}
-            stroke="url(#edgeGradPurpleTeal)" strokeWidth="1.5"
-            opacity="0.7" />
-            
-          </g>);
-
+              stroke="url(#edgeGradPurpleTeal)" strokeWidth="1.5" opacity="0.7" />
+          </g>
+        );
       })}
-      {/* Nodes */}
       {nodes.map((n, i) =>
-      <g key={i} className="graph-node">
-          {/* Outer rect */}
-          <rect
-          x={n.x - 20} y={n.y - 16} width={40} height={32} rx={3}
-          fill="hsl(228 10% 14%)" stroke="hsl(185 60% 45%)" strokeWidth="1" />
-        
-          {/* Inner rect */}
-          <rect
-          x={n.x - 15} y={n.y - 11} width={30} height={22} rx={2}
-          fill="hsl(228 10% 18%)" stroke="hsl(185 50% 35%)" strokeWidth="0.5" />
-        
-          {/* Label */}
+        <g key={i} className="graph-node">
+          <rect x={n.x - 20} y={n.y - 16} width={40} height={32} rx={3}
+            fill="hsl(228 10% 14%)" stroke="hsl(185 60% 45%)" strokeWidth="1" />
+          <rect x={n.x - 15} y={n.y - 11} width={30} height={22} rx={2}
+            fill="hsl(228 10% 18%)" stroke="hsl(185 50% 35%)" strokeWidth="0.5" />
           <text x={n.x} y={n.y + 2} textAnchor="middle" fill="hsl(185 50% 70%)" fontSize="6" fontFamily="Inter, sans-serif">
             {n.label}
           </text>
         </g>
       )}
-    </svg>);
-
+    </svg>
+  );
 }
-
 
 export function RuleOverview({ rule }: RuleOverviewProps) {
   const [structureOpen, setStructureOpen] = useState(true);
@@ -121,14 +95,13 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="stat-card">
           <div className="stat-card-label">
-            <span className={`status-dot ${
-            rule.status === "active" ? "status-active" :
-            rule.status === "error" ? "status-error" :
-            rule.status === "draft" ? "status-draft" : "status-scheduled"}`
-            } />
             Статус
           </div>
-          <div className="stat-card-value">{statusLabels[rule.status]}</div>
+          <div className="stat-card-value">
+            <StatusBadge variant={ruleStatusToVariant(rule.status)} size="md">
+              {statusLabels[rule.status]}
+            </StatusBadge>
+          </div>
         </div>
         <div className="stat-card">
           <div className="stat-card-label">
@@ -169,20 +142,6 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       <div className="ide-panel-glow rounded-sm">
         <div className="ide-header flex items-center justify-between">
           <span>Основные свойства</span>
-          
-
-
-
-
-
-
-
-
-
-
-
-
-          
         </div>
         <div className="p-3 grid grid-cols-2 gap-x-8 gap-y-3 text-xs">
           <Property label="Название правила" value={rule.name} />
@@ -197,11 +156,6 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       {/* Code editor */}
       <div className="ide-panel-glow rounded-sm relative overflow-hidden">
         <div className="ide-header">Функция преобразования</div>
-        {/* Left glow edge */}
-        
-
-        
-        
         <pre className="p-4 pl-5 text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block" style={{ background: 'hsl(228 12% 11%)' }}>
           <code>{highlightCode(rule.code)}</code>
         </pre>
@@ -212,7 +166,6 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
         <button
           onClick={() => setStructureOpen(!structureOpen)}
           className="ide-header w-full flex items-center justify-between cursor-pointer hover:bg-accent/30 transition-colors">
-          
           <span>Структура и матрицы</span>
           <ChevronUp className={`w-3.5 h-3.5 transition-transform ${structureOpen ? '' : 'rotate-180'}`} />
         </button>
@@ -222,14 +175,12 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
               <div
               className="absolute inset-0 opacity-30"
               style={{ background: 'radial-gradient(ellipse at center, hsl(270 50% 40% / 0.2) 0%, transparent 70%)' }} />
-            
               <GlowDiagram />
             </div>
           </div>
         }
       </div>
     </div>);
-
 }
 
 function Property({ label, value, mono }: {label: string;value: string;mono?: boolean;}) {
@@ -238,5 +189,8 @@ function Property({ label, value, mono }: {label: string;value: string;mono?: bo
       <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5 font-medium">{label}</div>
       <div className={`text-foreground ${mono ? "font-mono text-[11px]" : "font-medium"}`}>{value}</div>
     </div>);
+}
 
+interface RuleOverviewProps {
+  rule: Rule;
 }

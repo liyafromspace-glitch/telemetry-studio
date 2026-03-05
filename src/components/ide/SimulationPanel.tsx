@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Play, SkipForward, RotateCcw, CheckCircle, AlertTriangle, XCircle, Code, Sliders, Eye, EyeOff } from "lucide-react";
 import { Rule } from "@/data/mockRules";
 import { CausalChain, buildSimulationChain } from "@/components/ide/CausalChain";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface SimulationPanelProps {
   rule: Rule;
@@ -147,6 +148,16 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
     }, 400);
   };
 
+  const stepVariant = (status: EvalStep["status"]) => {
+    switch (status) {
+      case "pass": return "success" as const;
+      case "fail": return "error" as const;
+      case "warning": return "warning" as const;
+      case "active": return "neutral" as const;
+      default: return "idle" as const;
+    }
+  };
+
   return (
     <div className="p-4 space-y-3 animate-fade-in">
       {/* Execution Timeline */}
@@ -156,16 +167,10 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
           <div className="flex items-center gap-1">
             {steps.map((step, i) => (
               <div key={i} className="flex items-center gap-1">
-                <div className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all duration-200 ${
-                  step.status === "active" ? "bg-foreground text-background"
-                  : step.status === "pass" ? "status-badge-success"
-                  : step.status === "fail" ? "status-badge-error"
-                  : step.status === "warning" ? "status-badge-warning"
-                  : "bg-muted text-muted-foreground"
-                }`}>
+                <StatusBadge variant={stepVariant(step.status)} size="sm" dot={step.status !== "pending"}>
                   {step.status === "pass" && <CheckCircle className="w-2.5 h-2.5 inline mr-0.5" />}
                   {step.label}
-                </div>
+                </StatusBadge>
                 {i < steps.length - 1 && (
                   <div className={`w-6 h-px ${step.status === "pass" || step.status === "active" ? "bg-foreground/30" : "bg-border"}`} />
                 )}
@@ -367,7 +372,6 @@ function GhostSparkline({ actual, predicted, showGhost }: { actual: number[]; pr
       </defs>
       <polygon points={areaPoints} fill="url(#ghostArea)" />
       <polyline points={actualLine} fill="none" stroke="hsl(0, 0%, 70%)" strokeWidth="1.5" strokeLinejoin="round" />
-
       {showGhost && (
         <polyline
           points={predictedLine}
@@ -380,7 +384,6 @@ function GhostSparkline({ actual, predicted, showGhost }: { actual: number[]; pr
           className="animate-fade-in"
         />
       )}
-
       {actual.map((v, i) => {
         const x = (i / (actual.length - 1)) * w;
         const y = h - ((v - min) / range) * (h - 8) - 4;

@@ -3,6 +3,7 @@ import { statusLabels } from "@/data/mockRules";
 import { CheckCircle, AlertTriangle, XCircle, Keyboard, ChevronDown, Link2, FileText, Cpu } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
+import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 
 interface MatrixRightPanelProps {
   matrix: Matrix;
@@ -23,7 +24,6 @@ export function MatrixRightPanel({ matrix }: MatrixRightPanelProps) {
 
   return (
     <div className="w-[300px] min-w-[300px] border-l border-border flex flex-col h-full bg-card overflow-y-auto">
-      {/* Properties */}
       <CollapsibleSection
         title="Свойства матрицы"
         open={openSections.has("props")}
@@ -32,14 +32,17 @@ export function MatrixRightPanel({ matrix }: MatrixRightPanelProps) {
         <div className="p-3 space-y-2 text-xs">
           <PropRow label="Название" value={matrix.name} />
           <PropRow label="Тип" value={matrix.matrixType} />
-          <PropRow label="Статус" value={statusLabels[matrix.status]} badge={matrix.status} />
+          <PropRow label="Статус">
+            <StatusBadge variant={ruleStatusToVariant(matrix.status)}>
+              {statusLabels[matrix.status]}
+            </StatusBadge>
+          </PropRow>
           <PropRow label="Версия" value={`v${matrix.version}`} />
           <PropRow label="Автор" value={matrix.author} />
           <PropRow label="Проверка" value={matrix.lastCheck} />
         </div>
       </CollapsibleSection>
 
-      {/* Description */}
       <CollapsibleSection
         title="Описание"
         open={openSections.has("desc")}
@@ -50,7 +53,6 @@ export function MatrixRightPanel({ matrix }: MatrixRightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Validation Console */}
       <CollapsibleSection
         title="Консоль проверки"
         open={openSections.has("validation")}
@@ -85,7 +87,6 @@ export function MatrixRightPanel({ matrix }: MatrixRightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Dependencies */}
       <CollapsibleSection
         title="Зависимости"
         open={openSections.has("deps")}
@@ -107,7 +108,6 @@ export function MatrixRightPanel({ matrix }: MatrixRightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Metadata */}
       <CollapsibleSection
         title="Метаданные"
         open={openSections.has("metadata")}
@@ -121,7 +121,6 @@ export function MatrixRightPanel({ matrix }: MatrixRightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      {/* Shortcuts */}
       <div className="mt-auto p-2.5 border-t border-border">
         <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
           <Keyboard className="w-2.5 h-2.5" />
@@ -156,22 +155,15 @@ function CollapsibleSection({
   );
 }
 
-function PropRow({ label, value, badge, mono }: { label: string; value: string; badge?: string; mono?: boolean }) {
+function PropRow({ label, value, mono, children }: { label: string; value?: string; mono?: boolean; children?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{label}</span>
-      <span className={`text-foreground flex items-center gap-1.5 ${mono ? "font-mono text-[10px]" : "font-medium"}`}>
-        {badge && (
-          <span
-            className={`status-dot ${
-              badge === "active" ? "status-active" :
-              badge === "error" ? "status-error" :
-              badge === "draft" ? "status-draft" : "status-scheduled"
-            }`}
-          />
-        )}
-        {value}
-      </span>
+      {children ? children : (
+        <span className={`text-foreground ${mono ? "font-mono text-[10px]" : "font-medium"}`}>
+          {value}
+        </span>
+      )}
     </div>
   );
 }
