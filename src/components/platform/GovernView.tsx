@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { versionAuditLog, type VersionAuditEntry } from "@/data/mockPlatform";
 import {
-  Shield, GitBranch, Clock, User, FileText, Link2, Cpu, ArrowRight, ChevronDown
-} from "lucide-react";
+  Shield, GitBranch, Clock, User, FileText, Link2, Cpu, ArrowRight, ChevronDown } from
+"lucide-react";
 import { StatusBadge } from "@/components/ui/status-badge";
 
 interface GovernViewProps {
@@ -18,7 +18,7 @@ export function GovernView({ onNavigateToAnalyze }: GovernViewProps) {
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-2 text-xs">
           <Shield className="w-3.5 h-3.5 text-primary" />
-          <span className="font-medium text-foreground">Журнал управления и аудита</span>
+          
         </div>
         <button onClick={onNavigateToAnalyze} className="btn-secondary">
           Перейти к отчётам <ArrowRight className="w-3 h-3" />
@@ -29,27 +29,27 @@ export function GovernView({ onNavigateToAnalyze }: GovernViewProps) {
         <button
           onClick={() => setActiveTab("log")}
           className={`flex-1 py-1 px-3 text-center font-medium rounded-md transition-colors duration-150 ${
-            activeTab === "log"
-              ? "bg-accent text-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
+          activeTab === "log" ?
+          "bg-accent text-foreground" :
+          "text-muted-foreground hover:text-foreground"}`
+          }>
+          
           Журнал активаций
         </button>
         <button
           onClick={() => setActiveTab("compare")}
           className={`flex-1 py-1 px-3 text-center font-medium rounded-md transition-colors duration-150 ${
-            activeTab === "compare"
-              ? "bg-accent text-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
+          activeTab === "compare" ?
+          "bg-accent text-foreground" :
+          "text-muted-foreground hover:text-foreground"}`
+          }>
+          
           Сравнение версий
         </button>
       </div>
 
-      {activeTab === "log" ? (
-        <div className="flex-1 overflow-auto">
+      {activeTab === "log" ?
+      <div className="flex-1 overflow-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border text-[10px] text-muted-foreground uppercase tracking-wider bg-card">
@@ -63,35 +63,35 @@ export function GovernView({ onNavigateToAnalyze }: GovernViewProps) {
               </tr>
             </thead>
             <tbody>
-              {versionAuditLog.map((entry) => (
-                <AuditRow
-                  key={entry.id}
-                  entry={entry}
-                  expanded={expandedRow === entry.id}
-                  onToggle={() => setExpandedRow(expandedRow === entry.id ? null : entry.id)}
-                />
-              ))}
+              {versionAuditLog.map((entry) =>
+            <AuditRow
+              key={entry.id}
+              entry={entry}
+              expanded={expandedRow === entry.id}
+              onToggle={() => setExpandedRow(expandedRow === entry.id ? null : entry.id)} />
+
+            )}
             </tbody>
           </table>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-auto p-4 animate-fade-in">
+        </div> :
+
+      <div className="flex-1 overflow-auto p-4 animate-fade-in">
           <VersionCompare />
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
-function AuditRow({ entry, expanded, onToggle }: { entry: VersionAuditEntry; expanded: boolean; onToggle: () => void }) {
+function AuditRow({ entry, expanded, onToggle }: {entry: VersionAuditEntry;expanded: boolean;onToggle: () => void;}) {
   const totalImpact = entry.impactParameters + entry.impactFunctions + entry.impactReports;
 
   return (
     <>
       <tr
         className="border-b border-border hover:bg-accent/30 transition-colors cursor-pointer"
-        onClick={onToggle}
-      >
+        onClick={onToggle}>
+        
         <td className="px-4 py-2">
           <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${expanded ? "" : "-rotate-90"}`} />
         </td>
@@ -120,12 +120,12 @@ function AuditRow({ entry, expanded, onToggle }: { entry: VersionAuditEntry; exp
           </span>
         </td>
       </tr>
-      {expanded && (
-        <tr className="bg-accent/10">
+      {expanded &&
+      <tr className="bg-accent/10">
           <td colSpan={7} className="px-4 py-3">
             <div className="space-y-2">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Изменение:</div>
-              <div className="vercel-card p-2 text-xs font-mono text-foreground">
+              <div className="ide-panel-glow rounded-sm p-2 text-xs font-mono text-foreground">
                 {entry.changeDescription}
               </div>
               <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
@@ -142,15 +142,15 @@ function AuditRow({ entry, expanded, onToggle }: { entry: VersionAuditEntry; exp
             </div>
           </td>
         </tr>
-      )}
-    </>
-  );
+      }
+    </>);
+
 }
 
 function VersionCompare() {
   return (
     <div className="space-y-4">
-      <div className="vercel-card">
+      <div className="ide-panel-glow rounded-sm">
         <div className="ide-header">Сравнение: Матрица диапазонов давления v3 → v4</div>
         <div className="grid grid-cols-2 divide-x divide-border">
           <div className="p-3">
@@ -174,7 +174,7 @@ function VersionCompare() {
         </div>
       </div>
 
-      <div className="vercel-card">
+      <div className="ide-panel-glow rounded-sm">
         <div className="ide-header">Сравнение: Конвертация температуры v4 → v5</div>
         <div className="grid grid-cols-2 divide-x divide-border">
           <div className="p-3">
@@ -193,6 +193,6 @@ function VersionCompare() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
