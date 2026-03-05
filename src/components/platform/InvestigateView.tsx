@@ -38,26 +38,25 @@ export function InvestigateView({ onNavigateToConfigure, initialSignal }: Invest
             <button
               key={inc.id}
               onClick={() => setSelectedId(inc.id)}
-              className={`w-full text-left px-3 py-2 border-b border-border transition-colors ${
+              className={`w-full text-left px-3 py-2.5 border-b border-border transition-colors duration-150 ${
                 selectedId === inc.id ? "bg-accent" : "hover:bg-accent/30"
               }`}
             >
-              <div className="flex items-center gap-1.5 text-xs">
-                <StatusBadge variant={ruleStatusToVariant(inc.status)} size="xs" dot={false}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-mono text-[10px] text-muted-foreground">{inc.code}</span>
+                <StatusBadge variant={ruleStatusToVariant(inc.status)} size="xs">
                   {incidentStatusLabels[inc.status]}
                 </StatusBadge>
-                <span className="font-mono text-[10px] text-muted-foreground ml-auto">{inc.code}</span>
               </div>
-              <div className="text-xs text-foreground mt-0.5 truncate">{inc.title}</div>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="text-xs text-foreground truncate mb-1">{inc.title}</div>
+              <div className="flex items-center gap-2">
                 <StatusBadge
                   variant={inc.priority === "critical" ? "error" : inc.priority === "high" ? "warning" : "idle"}
                   size="xs"
-                  dot={false}
                 >
                   {inc.priority}
                 </StatusBadge>
-                <span className="text-[10px] text-muted-foreground">{inc.updatedAt}</span>
+                <span className="text-[10px] text-muted-foreground ml-auto">{inc.updatedAt}</span>
               </div>
             </button>
           ))}
@@ -150,7 +149,9 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
               <div className="ide-header">Связанные параметры</div>
               <div className="p-3 flex flex-wrap gap-1.5">
                 {incident.linkedParameters.map((p) => (
-                  <span key={p} className="px-2 py-0.5 bg-accent rounded-sm text-[10px] font-mono text-foreground border border-border">{p}</span>
+                  <StatusBadge key={p} variant="neutral" size="xs" dot={false} className="font-mono">
+                    {p}
+                  </StatusBadge>
                 ))}
               </div>
             </div>

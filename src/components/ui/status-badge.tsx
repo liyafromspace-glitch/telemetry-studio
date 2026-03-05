@@ -1,20 +1,24 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+/**
+ * Vercel-style status badge — bordered pill with colored dot + neutral text.
+ * Clean, minimal, consistent across the entire system.
+ */
 const statusBadgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full text-[10px] font-medium leading-none whitespace-nowrap select-none",
+  "inline-flex items-center gap-1.5 rounded-full font-medium leading-none whitespace-nowrap select-none border",
   {
     variants: {
       variant: {
-        success: "bg-success/12 text-success",
-        warning: "bg-warning/12 text-warning",
-        error: "bg-destructive/12 text-destructive",
-        info: "bg-primary/12 text-primary",
-        idle: "bg-muted text-muted-foreground",
-        active: "bg-success/12 text-success",
-        draft: "bg-muted text-muted-foreground",
-        scheduled: "bg-primary/12 text-primary",
-        neutral: "bg-foreground/8 text-foreground",
+        success: "border-success/25 bg-success/6 text-success",
+        warning: "border-warning/25 bg-warning/6 text-warning",
+        error: "border-destructive/25 bg-destructive/6 text-destructive",
+        info: "border-primary/25 bg-primary/6 text-primary",
+        idle: "border-border bg-muted/50 text-muted-foreground",
+        active: "border-success/25 bg-success/6 text-success",
+        draft: "border-border bg-muted/50 text-muted-foreground",
+        scheduled: "border-primary/25 bg-primary/6 text-primary",
+        neutral: "border-border bg-foreground/4 text-foreground/70",
       },
       size: {
         xs: "px-1.5 py-0.5 text-[9px]",
@@ -28,6 +32,18 @@ const statusBadgeVariants = cva(
     },
   }
 );
+
+const dotColorMap: Record<string, string> = {
+  success: "bg-success",
+  warning: "bg-warning",
+  error: "bg-destructive",
+  info: "bg-primary",
+  active: "bg-success",
+  scheduled: "bg-primary",
+  neutral: "bg-foreground/40",
+  idle: "bg-muted-foreground/60",
+  draft: "bg-muted-foreground/60",
+};
 
 interface StatusBadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>,
@@ -49,12 +65,7 @@ export function StatusBadge({
         <span
           className={cn(
             "w-1.5 h-1.5 rounded-full flex-shrink-0",
-            variant === "success" || variant === "active" ? "bg-success" :
-            variant === "warning" ? "bg-warning" :
-            variant === "error" ? "bg-destructive" :
-            variant === "info" || variant === "scheduled" ? "bg-primary" :
-            variant === "neutral" ? "bg-foreground/50" :
-            "bg-muted-foreground"
+            dotColorMap[variant || "idle"]
           )}
         />
       )}
@@ -76,9 +87,9 @@ export function StatusBadgeSvg({
   label?: string;
 }) {
   const colors = {
-    success: { bg: "hsl(142, 71%, 45%)", text: "hsl(142, 71%, 90%)" },
-    warning: { bg: "hsl(38, 92%, 50%)", text: "hsl(38, 92%, 90%)" },
-    error: { bg: "hsl(0, 84%, 60%)", text: "hsl(0, 84%, 90%)" },
+    success: { bg: "hsl(142, 71%, 45%)", border: "hsl(142, 71%, 45%)", text: "hsl(142, 71%, 75%)" },
+    warning: { bg: "hsl(38, 92%, 50%)", border: "hsl(38, 92%, 50%)", text: "hsl(38, 92%, 80%)" },
+    error: { bg: "hsl(0, 84%, 60%)", border: "hsl(0, 84%, 60%)", text: "hsl(0, 84%, 80%)" },
   };
   const labels = { success: "OK", warning: "Warning", error: "Error" };
   const c = colors[status];
@@ -88,7 +99,8 @@ export function StatusBadgeSvg({
 
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={9} fill={c.bg} opacity={0.12} />
+      <rect x={x} y={y} width={w} height={h} rx={9} fill="transparent" stroke={c.border} strokeOpacity={0.25} strokeWidth={1} />
+      <rect x={x} y={y} width={w} height={h} rx={9} fill={c.bg} opacity={0.06} />
       <circle cx={x + 10} cy={y + h / 2} r={2.5} fill={c.bg} opacity={0.9} />
       <text
         x={x + 17}

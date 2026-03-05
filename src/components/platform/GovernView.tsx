@@ -3,6 +3,7 @@ import { versionAuditLog, type VersionAuditEntry } from "@/data/mockPlatform";
 import {
   Shield, GitBranch, Clock, User, FileText, Link2, Cpu, ArrowRight, ChevronDown
 } from "lucide-react";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface GovernViewProps {
   onNavigateToAnalyze: () => void;
@@ -102,9 +103,9 @@ function AuditRow({ entry, expanded, onToggle }: { entry: VersionAuditEntry; exp
         </td>
         <td className="px-4 py-2 text-foreground max-w-[300px] truncate">{entry.entityName}</td>
         <td className="px-4 py-2">
-          <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-accent text-muted-foreground border border-border">
+          <StatusBadge variant="neutral" size="xs" dot={false}>
             {entry.entityType === "function" ? "Функция" : "Матрица"}
-          </span>
+          </StatusBadge>
         </td>
         <td className="px-4 py-2 text-center">
           <span className={`font-mono ${totalImpact > 100 ? "text-warning" : "text-muted-foreground"}`}>

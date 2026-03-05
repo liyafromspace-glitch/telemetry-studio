@@ -210,25 +210,29 @@
     background: hsl(var(--conn-green));
   }
 
-  /* ── Status badges (Vercel-style) ── */
+  /* ── Status badges (Vercel-style — bordered pill + dot) ── */
   .status-badge {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium;
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border;
   }
   .status-badge-success {
-    background: hsl(var(--success) / 0.12);
+    background: hsl(var(--success) / 0.06);
     color: hsl(var(--success));
+    border-color: hsl(var(--success) / 0.25);
   }
   .status-badge-warning {
-    background: hsl(var(--warning) / 0.12);
+    background: hsl(var(--warning) / 0.06);
     color: hsl(var(--warning));
+    border-color: hsl(var(--warning) / 0.25);
   }
   .status-badge-error {
-    background: hsl(var(--destructive) / 0.12);
+    background: hsl(var(--destructive) / 0.06);
     color: hsl(var(--destructive));
+    border-color: hsl(var(--destructive) / 0.25);
   }
   .status-badge-idle {
-    background: hsl(var(--muted));
+    background: hsl(var(--muted) / 0.5);
     color: hsl(var(--muted-foreground));
+    border-color: hsl(var(--border));
   }
 
   /* ── Timeline segment bars (Vercel invocation style) ── */
