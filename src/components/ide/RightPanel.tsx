@@ -14,26 +14,26 @@ const mockSparklineData: Record<string, number[]> = {
   "Давление": [340, 355, 370, 390, 400, 412, 410],
   "Плотность": [840, 841, 842, 841, 843, 842, 842],
   "Расход": [900, 950, 1000, 1050, 1100, 1200, 1247],
-  "Общее": [50, 55, 52, 58, 54, 56, 53],
+  "Общее": [50, 55, 52, 58, 54, 56, 53]
 };
 
 const templates = [
-  { id: "t1", name: "Контроль перегрева", icon: "🔥" },
-  { id: "t2", name: "Аномалия давления", icon: "⚡" },
-  { id: "t3", name: "Отказ клапана", icon: "🔧" },
-];
+{ id: "t1", name: "Контроль перегрева", icon: "🔥" },
+{ id: "t2", name: "Аномалия давления", icon: "⚡" },
+{ id: "t3", name: "Отказ клапана", icon: "🔧" }];
 
-function Sparkline({ data }: { data: number[] }) {
+
+function Sparkline({ data }: {data: number[];}) {
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
   const w = 140;
   const h = 28;
   const pts = data.map((v, i) => ({
-    x: (i / (data.length - 1)) * w,
-    y: h - ((v - min) / range) * (h - 6) - 3,
+    x: i / (data.length - 1) * w,
+    y: h - (v - min) / range * (h - 6) - 3
   }));
-  const linePoints = pts.map(p => `${p.x},${p.y}`).join(" ");
+  const linePoints = pts.map((p) => `${p.x},${p.y}`).join(" ");
   // Area fill
   const areaPoints = `0,${h} ${linePoints} ${w},${h}`;
 
@@ -59,8 +59,8 @@ function Sparkline({ data }: { data: number[] }) {
       </defs>
       <polygon points={areaPoints} fill="url(#sparkGlowArea)" />
       <polyline points={linePoints} fill="none" stroke="url(#sparkGlowLine)" strokeWidth="1.5" strokeLinejoin="round" filter="url(#glowFilter)" />
-    </svg>
-  );
+    </svg>);
+
 }
 
 export function RightPanel({ rule }: RightPanelProps) {
@@ -69,9 +69,9 @@ export function RightPanel({ rule }: RightPanelProps) {
   );
 
   const toggleSection = (id: string) => {
-    setOpenSections(prev => {
+    setOpenSections((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);else next.add(id);
       return next;
     });
   };
@@ -85,8 +85,8 @@ export function RightPanel({ rule }: RightPanelProps) {
         id="logic"
         title="Логика"
         open={openSections.has("logic")}
-        onToggle={() => toggleSection("logic")}
-      >
+        onToggle={() => toggleSection("logic")}>
+        
         <div className="p-3 space-y-2 text-xs">
           <PropRow label="Название" value={rule.name} />
           <PropRow label="Тип" value={rule.parameterType} />
@@ -100,8 +100,8 @@ export function RightPanel({ rule }: RightPanelProps) {
         id="signals"
         title="Входные сигналы"
         open={openSections.has("signals")}
-        onToggle={() => toggleSection("signals")}
-      >
+        onToggle={() => toggleSection("signals")}>
+        
         <div className="p-3 space-y-2.5 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Тип параметра</span>
@@ -113,17 +113,17 @@ export function RightPanel({ rule }: RightPanelProps) {
           </div>
           {/* Colored value dots */}
           <div className="flex gap-1 flex-wrap justify-end">
-            {sparkData.map((v, i) => (
-              <span key={i} className="sparkline-value">{v}</span>
-            ))}
+            {sparkData.map((v, i) =>
+            <span key={i} className="sparkline-value">{v}</span>
+            )}
           </div>
           {/* Inline validation */}
-          {(rule.parameterType === "Давление" || rule.parameterType === "Влажность") && (
-            <div className="flex items-start gap-1.5 text-warning bg-warning/10 p-2 rounded-sm border border-warning/20">
+          {(rule.parameterType === "Давление" || rule.parameterType === "Влажность") &&
+          <div className="flex items-start gap-1.5 text-warning bg-warning/10 p-2 rounded-sm border border-warning/20">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span className="text-[10px] font-medium">⚠ Допустимый диапазон: 0–100 %RH</span>
+              <span className="text-[10px] font-medium">Допустимый диапазон: 0–100 %RH</span>
             </div>
-          )}
+          }
         </div>
       </CollapsibleSection>
 
@@ -132,25 +132,25 @@ export function RightPanel({ rule }: RightPanelProps) {
         id="validation"
         title="Консоль проверки"
         open={openSections.has("validation")}
-        onToggle={() => toggleSection("validation")}
-      >
+        onToggle={() => toggleSection("validation")}>
+        
         <div className="p-3 space-y-1 text-[11px] font-mono">
           <div className="flex items-center gap-1.5 text-success">
             <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
             Синтаксис OK
           </div>
-          {rule.warningCount > 0 && (
-            <div className="flex items-center gap-1.5 text-warning">
+          {rule.warningCount > 0 &&
+          <div className="flex items-center gap-1.5 text-warning">
               <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
               {rule.warningCount} предупр.
             </div>
-          )}
-          {rule.errorCount > 0 && (
-            <div className="flex items-center gap-1.5 text-destructive">
+          }
+          {rule.errorCount > 0 &&
+          <div className="flex items-center gap-1.5 text-destructive">
               <XCircle className="w-3.5 h-3.5 flex-shrink-0" />
               {rule.errorCount} ошибок
             </div>
-          )}
+          }
         </div>
       </CollapsibleSection>
 
@@ -159,8 +159,8 @@ export function RightPanel({ rule }: RightPanelProps) {
         id="deps"
         title="Зависимости"
         open={openSections.has("deps")}
-        onToggle={() => toggleSection("deps")}
-      >
+        onToggle={() => toggleSection("deps")}>
+        
         <div className="p-3 space-y-1.5 text-xs">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Link2 className="w-3 h-3" />
@@ -182,8 +182,8 @@ export function RightPanel({ rule }: RightPanelProps) {
         id="metadata"
         title="Метаданные"
         open={openSections.has("metadata")}
-        onToggle={() => toggleSection("metadata")}
-      >
+        onToggle={() => toggleSection("metadata")}>
+        
         <div className="p-3 space-y-2 text-xs">
           <PropRow label="Автор" value={rule.author} />
           <PropRow label="Создано" value={rule.createdAt} />
@@ -197,18 +197,18 @@ export function RightPanel({ rule }: RightPanelProps) {
         id="templates"
         title="Шаблоны"
         open={openSections.has("templates")}
-        onToggle={() => toggleSection("templates")}
-      >
+        onToggle={() => toggleSection("templates")}>
+        
         <div className="p-2 space-y-0.5">
-          {templates.map((t) => (
-            <button
-              key={t.id}
-              className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
-            >
+          {templates.map((t) =>
+          <button
+            key={t.id}
+            className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+            
               <Zap className="w-3 h-3" />
               <span>{t.name}</span>
             </button>
-          ))}
+          )}
         </div>
       </CollapsibleSection>
 
@@ -219,8 +219,8 @@ export function RightPanel({ rule }: RightPanelProps) {
           <span>⌘Enter проверить · ⌘⇧S активировать · ESC закрыть</span>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 function CollapsibleSection({
@@ -228,14 +228,14 @@ function CollapsibleSection({
   title,
   open,
   onToggle,
-  children,
-}: {
-  id: string;
-  title: string;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
+  children
+
+
+
+
+
+
+}: {id: string;title: string;open: boolean;onToggle: () => void;children: React.ReactNode;}) {
   return (
     <Collapsible open={open} onOpenChange={onToggle}>
       <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2 border-b border-border text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors">
@@ -245,26 +245,26 @@ function CollapsibleSection({
       <CollapsibleContent className="panel-section">
         {children}
       </CollapsibleContent>
-    </Collapsible>
-  );
+    </Collapsible>);
+
 }
 
-function PropRow({ label, value, badge, mono }: { label: string; value: string; badge?: string; mono?: boolean }) {
+function PropRow({ label, value, badge, mono }: {label: string;value: string;badge?: string;mono?: boolean;}) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{label}</span>
       <span className={`text-foreground flex items-center gap-1.5 ${mono ? "font-mono text-[10px]" : "font-medium"}`}>
-        {badge && (
-          <span
-            className={`status-dot ${
-              badge === "active" ? "status-active" :
-              badge === "error" ? "status-error" :
-              badge === "draft" ? "status-draft" : "status-scheduled"
-            }`}
-          />
-        )}
+        {badge &&
+        <span
+          className={`status-dot ${
+          badge === "active" ? "status-active" :
+          badge === "error" ? "status-error" :
+          badge === "draft" ? "status-draft" : "status-scheduled"}`
+          } />
+
+        }
         {value}
       </span>
-    </div>
-  );
+    </div>);
+
 }
