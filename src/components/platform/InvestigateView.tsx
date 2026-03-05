@@ -42,7 +42,7 @@ export function InvestigateView({ onNavigateToConfigure, initialSignal }: Invest
                 selectedId === inc.id ? "bg-accent" : "hover:bg-accent/30"
               }`}
             >
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center justify-between mb-1">
                 <span className="font-mono text-[10px] text-muted-foreground">{inc.code}</span>
                 <StatusBadge variant={ruleStatusToVariant(inc.status)} size="xs">
                   {incidentStatusLabels[inc.status]}
