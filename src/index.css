@@ -361,16 +361,13 @@
 
   /* Tree item */
   .tree-item {
-    @apply w-full flex items-center gap-1.5 pr-2 py-1 text-xs transition-colors duration-150;
+    @apply w-full flex items-center gap-1.5 pr-2 py-1 text-xs rounded-md mx-1 transition-colors duration-150;
   }
   .tree-item-active {
-    @apply bg-accent text-accent-foreground;
-    border-left: 2px solid hsl(var(--foreground));
-    background: linear-gradient(90deg, hsl(var(--accent)) 0%, transparent 100%);
+    @apply bg-accent text-foreground font-medium;
   }
   .tree-item-inactive {
-    @apply text-sidebar-foreground hover:bg-accent/50;
-    border-left: 2px solid transparent;
+    @apply text-muted-foreground hover:bg-accent/50 hover:text-foreground;
   }
 
   /* Section divider */
