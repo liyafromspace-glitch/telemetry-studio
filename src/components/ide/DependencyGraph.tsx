@@ -103,11 +103,32 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
   const edges = edgesByMode[graphMode];
   const getNode = (id: string) => nodes.find((n) => n.id === id)!;
 
-  const isInFocus = (nodeId: string) => {
-    if (!focusedNode) return true;
-    if (nodeId === focusedNode) return true;
-    return edges.some(e => (e.from === focusedNode && e.to === nodeId) || (e.to === focusedNode && e.from === nodeId));
+  // Traverse graph to find all upstream (ancestors) and downstream (descendants)
+  const getUpstream = useCallback((nodeId: string, visited = new Set<string>()): Set<string> => {
+    visited.add(nodeId);
+    edges.filter(e => e.to === nodeId && !visited.has(e.from)).forEach(e => getUpstream(e.from, visited));
+    return visited;
+  }, [edges]);
+
+  const getDownstream = useCallback((nodeId: string, visited = new Set<string>()): Set<string> => {
+    visited.add(nodeId);
+    edges.filter(e => e.from === nodeId && !visited.has(e.to)).forEach(e => getDownstream(e.to, visited));
+    return visited;
+  }, [edges]);
+
+  const upstream = focusedNode ? getUpstream(focusedNode) : new Set<string>();
+  const downstream = focusedNode ? getDownstream(focusedNode) : new Set<string>();
+
+  type FocusRole = "self" | "upstream" | "downstream" | "none";
+  const getNodeRole = (nodeId: string): FocusRole => {
+    if (!focusedNode) return "self";
+    if (nodeId === focusedNode) return "self";
+    if (upstream.has(nodeId)) return "upstream";
+    if (downstream.has(nodeId)) return "downstream";
+    return "none";
   };
+
+  const isInFocus = (nodeId: string) => getNodeRole(nodeId) !== "none";
 
   const handleTimeChange = useCallback((point: TimePoint) => {
     const overrides: Record<string, "success" | "warning" | "error"> = {};
@@ -207,8 +228,11 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
 
               {nodes.map((node) => {
                 const isHovered = hoveredNode === node.id;
-                const inFocus = isInFocus(node.id);
+                const role = getNodeRole(node.id);
+                const inFocus = role !== "none";
                 const borderColor = connColors[node.connColor];
+                const roleColor = role === "upstream" ? "hsl(217, 91%, 60%)" : role === "downstream" ? "hsl(38, 92%, 50%)" : undefined;
+                const strokeColor = isHovered ? borderColor : roleColor && role !== "self" ? roleColor : "hsl(0, 0%, 18%)";
 
                 return (
                   <Tooltip key={node.id}>
@@ -227,11 +251,18 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                           height={cardH}
                           rx={8}
                           fill="hsl(0, 0%, 10%)"
-                          stroke={isHovered ? borderColor : "hsl(0, 0%, 18%)"}
-                          strokeWidth={isHovered ? 1.5 : 1}
+                          stroke={strokeColor}
+                          strokeWidth={role === "self" ? 2 : isHovered ? 1.5 : 1}
                           strokeDasharray={node.type === "matrix" || node.type === "report" ? "4 3" : "none"}
                           className="transition-all duration-200"
                         />
+                        {/* Direction indicator for upstream/downstream */}
+                        {focusedNode && role === "upstream" && (
+                          <text x={node.x + cardW / 2 - 16} y={node.y - cardH / 2 + 12} fontSize="9" fill="hsl(217, 91%, 60%)">↑</text>
+                        )}
+                        {focusedNode && role === "downstream" && (
+                          <text x={node.x + cardW / 2 - 16} y={node.y - cardH / 2 + 12} fontSize="9" fill="hsl(38, 92%, 50%)">↓</text>
+                        )}
                         <text
                           x={node.x - cardW / 2 + 12}
                           y={node.y - 2}
@@ -261,7 +292,9 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-xs whitespace-pre-line max-w-[220px]">
                       {node.tooltip}
-                      {focusedNode === node.id && "\n🔍 Фокус: нажмите ещё раз для сброса"}
+                      {role === "self" && focusedNode && "\n🔍 Фокус: нажмите ещё раз для сброса"}
+                      {role === "upstream" && "\n↑ Upstream — зависимость"}
+                      {role === "downstream" && "\n↓ Downstream — эффект"}
                     </TooltipContent>
                   </Tooltip>
                 );
@@ -292,10 +325,13 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
         <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-pink" style={{ width: 6, height: 6 }} /> Матрицы</span>
         <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-green" style={{ width: 6, height: 6 }} /> Отчёты</span>
         <span className="text-border">|</span>
-        <span>— сплошная: прямая связь</span>
-        <span>- - - пунктир: зависимость</span>
+        <span>— прямая связь</span>
+        <span>- - - зависимость</span>
         {focusedNode && (
           <>
+            <span className="text-border">|</span>
+            <span className="flex items-center gap-1"><span style={{ color: "hsl(217, 91%, 60%)" }}>↑</span> upstream</span>
+            <span className="flex items-center gap-1"><span style={{ color: "hsl(38, 92%, 50%)" }}>↓</span> downstream</span>
             <span className="text-border">|</span>
             <button onClick={() => setFocusedNode(null)} className="text-foreground hover:underline">
               Сбросить фокус
