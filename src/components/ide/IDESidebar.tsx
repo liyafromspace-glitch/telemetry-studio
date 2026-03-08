@@ -38,10 +38,6 @@ function MiniSparkline({ seed }: {seed: number;}) {
 
 
 
-
-
-}
-
 export function IDESidebar({ selected, onSelect }: IDESidebarProps) {
   const [search, setSearch] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
