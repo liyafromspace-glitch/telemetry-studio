@@ -101,9 +101,9 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
                 <YAxis tick={{ fontSize: 9, fill: "hsl(220, 8%, 45%)" }} stroke="hsl(228, 8%, 18%)" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(230, 10%, 15%)",
+                    backgroundColor: "hsl(0, 0%, 10%)",
                     border: "1px solid hsl(0, 0%, 15%)",
-                    borderRadius: "4px",
+                    borderRadius: "8px",
                     fontSize: "10px",
                     boxShadow: "none",
                   }}
