@@ -39,40 +39,36 @@ export interface AssetNode {
 export const matrices: Matrix[] = [
   {
     id: "matrix-001",
-    name: "Матрица зависимостей СИ",
-    matrixType: "Зависимости",
+    name: "Аварийная защита резервуара",
+    matrixType: "Защита",
     status: "active",
-    version: 2,
-    author: "Андреев А.Н.",
-    lastCheck: "2024-02-20",
-    reportsUsed: 5,
+    version: 4,
+    author: "Андреева А.Н.",
+    lastCheck: "2026-03-10 09:36",
+    reportsUsed: 4,
     parametersLinked: 12,
     functionsLinked: 3,
     errorCount: 0,
-    warningCount: 2,
-    createdAt: "2023-10-05",
-    description: "Матрица определяет допустимые зависимости между датчиками в пределах выбранной области действия.",
+    warningCount: 1,
+    createdAt: "2025-06-15",
+    description: "Матрица определяет логику аварийной защиты резервуара-12: связи между температурой, давлением и управляющими клапанами.",
     rows: [
-      { id: "r1", source: "Датчик температуры #1", target: "Датчик температуры #2", dependencyType: "Корреляция", deviation: 2.5, unit: "°C", status: "ok" },
-      { id: "r2", source: "Датчик температуры #1", target: "Датчик давления #1", dependencyType: "Компенсация", deviation: 0.8, unit: "бар", status: "warning", statusMessage: "Несоответствие единиц измерения" },
-      { id: "r3", source: "Датчик давления #1", target: "Датчик давления #2", dependencyType: "Резервирование", deviation: 1.2, unit: "бар", status: "ok" },
-      { id: "r4", source: "Датчик уровня #1", target: "Датчик плотности #1", dependencyType: "Расчётная", deviation: 5.0, unit: "кг/м³", status: "warning", statusMessage: "Превышен диапазон допустимого отклонения" },
+      { id: "r1", source: "TI-R12-01 (Температура)", target: "XV-R12-01 (Клапан подачи)", dependencyType: "Аварийное перекрытие", deviation: 6.4, unit: "°C", status: "error", statusMessage: "Превышен порог 90°C → клапан закрыт" },
+      { id: "r2", source: "PI-R12-01 (Давление)", target: "XV-R12-01 (Клапан подачи)", dependencyType: "Аварийное перекрытие", deviation: 1.3, unit: "бар", status: "warning", statusMessage: "Давление приближается к порогу" },
+      { id: "r3", source: "TI-R12-01 (Температура)", target: "PI-R12-01 (Давление)", dependencyType: "Корреляция", deviation: 0.87, unit: "коэфф.", status: "warning", statusMessage: "Высокая корреляция: рост температуры → рост давления" },
+      { id: "r4", source: "SI-R12-01 (Насос)", target: "TI-R12-01 (Температура)", dependencyType: "Компенсация", deviation: 2.1, unit: "°C", status: "ok" },
     ],
     assets: [
       {
         id: "a0", label: "Северное месторождение", children: [
           {
-            id: "a1", label: "Резервуар 1", children: [
-              { id: "a1-1", label: "Датчик температуры #1" },
-              { id: "a1-2", label: "Датчик температуры #2" },
-              { id: "a1-3", label: "Датчик давления #1" },
-              { id: "a1-4", label: "Датчик уровня #1" },
-            ]
-          },
-          {
-            id: "a2", label: "Резервуар 2", children: [
-              { id: "a2-1", label: "Датчик давления #2" },
-              { id: "a2-2", label: "Датчик плотности #1" },
+            id: "a1", label: "Резервуар-12", children: [
+              { id: "a1-1", label: "TI-R12-01 (Температура основной)" },
+              { id: "a1-2", label: "TI-R12-02 (Температура резервный)" },
+              { id: "a1-3", label: "PI-R12-01 (Давление линии)" },
+              { id: "a1-4", label: "SI-R12-01 (Скорость насоса)" },
+              { id: "a1-5", label: "XV-R12-01 (Клапан подачи)" },
+              { id: "a1-6", label: "LI-R12-01 (Уровень топлива)" },
             ]
           },
         ]
@@ -81,162 +77,97 @@ export const matrices: Matrix[] = [
   },
   {
     id: "matrix-002",
-    name: "Матрица соответствия параметров",
-    matrixType: "Соответствие параметров",
+    name: "Матрица параметров резервуара",
+    matrixType: "Параметры",
     status: "active",
     version: 6,
     author: "Петров К.С.",
-    lastCheck: "2024-02-17 14:30",
-    reportsUsed: 18,
-    parametersLinked: 95,
-    functionsLinked: 6,
+    lastCheck: "2026-03-10 06:00",
+    reportsUsed: 3,
+    parametersLinked: 10,
+    functionsLinked: 4,
     errorCount: 0,
     warningCount: 0,
-    createdAt: "2023-08-12",
-    description: "Матрица связывает параметры системы измерения с нормативными значениями и эталонами.",
+    createdAt: "2025-04-12",
+    description: "Матрица допустимых диапазонов параметров для резервуара-12.",
     rows: [
-      { id: "r1", source: "Температура входа", target: "Эталон T-001", dependencyType: "Калибровка", deviation: 0.3, unit: "°C", status: "ok" },
-      { id: "r2", source: "Давление входа", target: "Эталон P-001", dependencyType: "Калибровка", deviation: 0.1, unit: "бар", status: "ok" },
-      { id: "r3", source: "Плотность", target: "Эталон D-001", dependencyType: "Калибровка", deviation: 0.5, unit: "кг/м³", status: "ok" },
+      { id: "r1", source: "Температура", target: "Диапазон 20–90°C", dependencyType: "Допустимый диапазон", deviation: 0, unit: "°C", status: "ok" },
+      { id: "r2", source: "Давление", target: "Диапазон 2–11 бар", dependencyType: "Допустимый диапазон", deviation: 0, unit: "бар", status: "ok" },
+      { id: "r3", source: "Скорость насоса", target: "Диапазон 800–1500 RPM", dependencyType: "Допустимый диапазон", deviation: 0, unit: "RPM", status: "ok" },
+      { id: "r4", source: "Уровень топлива", target: "Диапазон 20–95%", dependencyType: "Допустимый диапазон", deviation: 0, unit: "%", status: "ok" },
     ],
     assets: [
       {
-        id: "a1", label: "Линия 1", children: [
-          { id: "a1-1", label: "Температура входа" },
-          { id: "a1-2", label: "Давление входа" },
-          { id: "a1-3", label: "Плотность" },
+        id: "a1", label: "Резервуар-12", children: [
+          { id: "a1-1", label: "Температура" },
+          { id: "a1-2", label: "Давление" },
+          { id: "a1-3", label: "Скорость насоса" },
+          { id: "a1-4", label: "Уровень топлива" },
         ]
       },
     ],
   },
   {
     id: "matrix-003",
-    name: "Матрица плановых и фактических значений",
-    matrixType: "План/факт",
-    status: "draft",
-    version: 2,
+    name: "Матрица управляющих механизмов",
+    matrixType: "Управление",
+    status: "active",
+    version: 5,
     author: "Смирнов И.И.",
-    lastCheck: "2024-02-16 09:00",
-    reportsUsed: 0,
-    parametersLinked: 43,
-    functionsLinked: 2,
+    lastCheck: "2026-03-10 09:35",
+    reportsUsed: 2,
+    parametersLinked: 5,
+    functionsLinked: 3,
     errorCount: 0,
     warningCount: 1,
-    createdAt: "2024-01-15",
-    description: "Матрица сопоставляет плановые значения параметров с фактическими показаниями телеметрии.",
+    createdAt: "2025-07-20",
+    description: "Матрица связей между управляющими механизмами и контролируемыми параметрами резервуара-12.",
     rows: [
-      { id: "r1", source: "Температура план", target: "Температура факт", dependencyType: "Сопоставление", deviation: 0, unit: "°C", status: "ok" },
-      { id: "r2", source: "Давление план", target: "Давление факт", dependencyType: "Сопоставление", deviation: 0, unit: "бар", status: "warning", statusMessage: "Значение не подтверждено" },
-      { id: "r3", source: "Уровень план", target: "Уровень факт", dependencyType: "Сопоставление", deviation: 0, unit: "м", status: "ok" },
+      { id: "r1", source: "Клапан XV-R12-01", target: "TI-R12-01 (Температура)", dependencyType: "Управление", deviation: 0, unit: "", status: "ok" },
+      { id: "r2", source: "Насос SI-R12-01", target: "PI-R12-01 (Давление)", dependencyType: "Обратная связь", deviation: 1.2, unit: "бар", status: "warning", statusMessage: "Задержка отклика 800мс" },
+      { id: "r3", source: "Насос SI-R12-01", target: "LI-R12-01 (Уровень)", dependencyType: "Обратная связь", deviation: 0.5, unit: "%", status: "ok" },
     ],
     assets: [
       {
-        id: "a1", label: "Плановые показатели", children: [
-          { id: "a1-1", label: "Температура план" },
-          { id: "a1-2", label: "Давление план" },
-          { id: "a1-3", label: "Уровень план" },
+        id: "a1", label: "Насосная станция R12", children: [
+          { id: "a1-1", label: "Насос SI-R12-01" },
+        ]
+      },
+      {
+        id: "a2", label: "Узел регулирования R12", children: [
+          { id: "a2-1", label: "Клапан XV-R12-01" },
         ]
       },
     ],
   },
   {
     id: "matrix-004",
-    name: "Матрица диапазонов давления",
-    matrixType: "Диапазоны",
-    status: "error",
-    version: 3,
-    author: "Андреева А.Н.",
-    lastCheck: "2024-02-18 08:30",
-    reportsUsed: 8,
-    parametersLinked: 34,
-    functionsLinked: 3,
-    errorCount: 2,
-    warningCount: 4,
-    createdAt: "2023-12-01",
-    description: "Матрица определяет допустимые диапазоны давления для каждого участка трубопровода.",
-    rows: [
-      { id: "r1", source: "Участок А", target: "Манометр #1", dependencyType: "Диапазон", deviation: 10, unit: "бар", status: "ok" },
-      { id: "r2", source: "Участок Б", target: "Манометр #2", dependencyType: "Диапазон", deviation: 15, unit: "бар", status: "error", statusMessage: "Циклическая зависимость" },
-      { id: "r3", source: "Участок В", target: "Манометр #3", dependencyType: "Диапазон", deviation: 8, unit: "бар", status: "error", statusMessage: "Выход за предельные значения" },
-      { id: "r4", source: "Участок Г", target: "Манометр #4", dependencyType: "Диапазон", deviation: 12, unit: "бар", status: "warning", statusMessage: "Приближение к границе диапазона" },
-    ],
-    assets: [
-      {
-        id: "a1", label: "Трубопровод 1", children: [
-          { id: "a1-1", label: "Участок А" },
-          { id: "a1-2", label: "Участок Б" },
-        ]
-      },
-      {
-        id: "a2", label: "Трубопровод 2", children: [
-          { id: "a2-1", label: "Участок В" },
-          { id: "a2-2", label: "Участок Г" },
-        ]
-      },
-    ],
-  },
-  {
-    id: "matrix-005",
-    name: "Матрица показателей плотности",
-    matrixType: "Показатели плотности",
-    status: "scheduled",
+    name: "Матрица корреляций сигналов",
+    matrixType: "Корреляции",
+    status: "draft",
     version: 1,
-    author: "Петров К.С.",
-    lastCheck: "2024-02-15 16:00",
-    reportsUsed: 0,
-    parametersLinked: 28,
+    author: "Андреева А.Н.",
+    lastCheck: "2026-03-10 09:40",
+    reportsUsed: 1,
+    parametersLinked: 8,
     functionsLinked: 2,
     errorCount: 0,
-    warningCount: 0,
-    createdAt: "2024-02-10",
-    description: "Матрица связывает показатели плотности нефтепродуктов с температурными коррекциями.",
-    rows: [
-      { id: "r1", source: "Плотномер #1", target: "Термокомпенсатор #1", dependencyType: "Коррекция", deviation: 0.2, unit: "кг/м³", status: "ok" },
-      { id: "r2", source: "Плотномер #2", target: "Термокомпенсатор #2", dependencyType: "Коррекция", deviation: 0.3, unit: "кг/м³", status: "ok" },
-    ],
-    assets: [
-      {
-        id: "a1", label: "Узел учёта", children: [
-          { id: "a1-1", label: "Плотномер #1" },
-          { id: "a1-2", label: "Плотномер #2" },
-          { id: "a1-3", label: "Термокомпенсатор #1" },
-          { id: "a1-4", label: "Термокомпенсатор #2" },
-        ]
-      },
-    ],
-  },
-  {
-    id: "matrix-006",
-    name: "Матрица управляющих механизмов",
-    matrixType: "Управляющие механизмы",
-    status: "active",
-    version: 5,
-    author: "Смирнов И.И.",
-    lastCheck: "2024-02-18 12:00",
-    reportsUsed: 14,
-    parametersLinked: 52,
-    functionsLinked: 5,
-    errorCount: 0,
     warningCount: 2,
-    createdAt: "2023-07-20",
-    description: "Матрица определяет связи между управляющими механизмами и контролируемыми параметрами.",
+    createdAt: "2026-03-10",
+    description: "Матрица кросс-корреляций между сигналами резервуара-12. Используется для выявления причинно-следственных связей.",
     rows: [
-      { id: "r1", source: "Клапан КР-01", target: "Расходомер #1", dependencyType: "Управление", deviation: 1.5, unit: "м³/ч", status: "ok" },
-      { id: "r2", source: "Клапан КР-02", target: "Расходомер #2", dependencyType: "Управление", deviation: 2.0, unit: "м³/ч", status: "warning", statusMessage: "Задержка отклика > 500мс" },
-      { id: "r3", source: "Насос Н-01", target: "Манометр #5", dependencyType: "Обратная связь", deviation: 3.0, unit: "бар", status: "ok" },
-      { id: "r4", source: "Насос Н-02", target: "Расходомер #3", dependencyType: "Обратная связь", deviation: 1.8, unit: "м³/ч", status: "warning", statusMessage: "Нестабильный сигнал" },
+      { id: "r1", source: "Температура резервуара", target: "Давление линии", dependencyType: "Корреляция", deviation: 0.87, unit: "коэфф.", status: "warning", statusMessage: "Высокая положительная корреляция" },
+      { id: "r2", source: "Температура резервуара", target: "Скорость насоса", dependencyType: "Корреляция", deviation: 0.42, unit: "коэфф.", status: "ok" },
+      { id: "r3", source: "Давление линии", target: "Скорость насоса", dependencyType: "Корреляция", deviation: 0.65, unit: "коэфф.", status: "ok" },
+      { id: "r4", source: "Температура резервуара", target: "Уровень топлива", dependencyType: "Корреляция", deviation: -0.31, unit: "коэфф.", status: "ok" },
     ],
     assets: [
       {
-        id: "a1", label: "Насосная станция", children: [
-          { id: "a1-1", label: "Насос Н-01" },
-          { id: "a1-2", label: "Насос Н-02" },
-        ]
-      },
-      {
-        id: "a2", label: "Узел регулирования", children: [
-          { id: "a2-1", label: "Клапан КР-01" },
-          { id: "a2-2", label: "Клапан КР-02" },
+        id: "a1", label: "Резервуар-12", children: [
+          { id: "a1-1", label: "TI-R12-01 (Температура)" },
+          { id: "a1-2", label: "PI-R12-01 (Давление)" },
+          { id: "a1-3", label: "SI-R12-01 (Скорость насоса)" },
+          { id: "a1-4", label: "LI-R12-01 (Уровень топлива)" },
         ]
       },
     ],

@@ -11,7 +11,7 @@ export function LiveSystemPulse() {
   const [pulse, setPulse] = useState<PulseData>({
     signalsPerSec: 142,
     rulesPerSec: 38,
-    activeIncidents: 3,
+    activeIncidents: 2,
   });
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export function LiveSystemPulse() {
       setPulse({
         signalsPerSec: 130 + Math.floor(Math.random() * 30),
         rulesPerSec: 32 + Math.floor(Math.random() * 15),
-        activeIncidents: 2 + Math.floor(Math.random() * 3),
+        activeIncidents: 2,
       });
     }, 2000);
     return () => clearInterval(interval);
@@ -27,7 +27,7 @@ export function LiveSystemPulse() {
 
   return (
     <div className="flex items-center gap-3 bg-muted rounded-lg px-3 py-1.5">
-      {/* Live indicator — keeps pulse as the only animated dot */}
+      {/* Live indicator */}
       <div className="flex items-center gap-1.5">
         <div className="relative">
           <div className="w-2 h-2 rounded-full bg-success" />
@@ -43,15 +43,15 @@ export function LiveSystemPulse() {
 
       <div className="flex items-center gap-3 text-[10px]">
         <span className="flex items-center gap-1 text-muted-foreground">
-          <span className="font-mono text-foreground font-medium">{pulse.signalsPerSec}</span> сиг/с
+          <span className="font-mono text-foreground font-medium">{pulse.signalsPerSec}</span> сигналов/с
         </span>
         <span className="flex items-center gap-1 text-muted-foreground">
           <Zap className="w-2.5 h-2.5 text-conn-orange" />
-          <span className="font-mono text-foreground font-medium">{pulse.rulesPerSec}</span> прав/с
+          <span className="font-mono text-foreground font-medium">{pulse.rulesPerSec}</span> правил/с
         </span>
         <span className="flex items-center gap-1 text-muted-foreground">
           <AlertTriangle className="w-2.5 h-2.5 text-warning" />
-          <span className="font-mono text-foreground font-medium">{pulse.activeIncidents}</span>
+          <span className="font-mono text-foreground font-medium">{pulse.activeIncidents}</span> инцидентов
         </span>
       </div>
     </div>
