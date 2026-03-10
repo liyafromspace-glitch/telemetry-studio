@@ -162,14 +162,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       </div>
 
       {/* Structure section */}
-      <div className="vercel-card">
-        
-
-
-
-
-        
-        {structureOpen
+      
 
 
 
@@ -178,8 +171,15 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
 
 
 
-        }
-      </div>
+
+
+
+
+
+
+
+
+      
     </div>);
 }
 
