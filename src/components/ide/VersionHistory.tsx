@@ -38,7 +38,7 @@ export function VersionHistory({ rule }: VersionHistoryProps) {
     action: v.current ? (
       <StatusBadge variant="active" size="xs">текущая</StatusBadge>
     ) : (
-      <span className="text-[10px] text-primary hover:underline">Сравнить</span>
+      <span className="text-[10px] text-muted-foreground hover:text-foreground hover:underline">Сравнить</span>
     ),
   }));
 
