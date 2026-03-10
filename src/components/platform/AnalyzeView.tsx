@@ -102,10 +102,10 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "hsl(230, 10%, 15%)",
-                    border: "1px solid hsl(185, 70%, 50%, 0.2)",
+                    border: "1px solid hsl(0, 0%, 15%)",
                     borderRadius: "4px",
                     fontSize: "10px",
-                    boxShadow: "0 0 12px hsl(185, 70%, 50%, 0.1)",
+                    boxShadow: "none",
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: "10px" }} />
