@@ -44,13 +44,13 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
             <div className="flex items-center gap-0.5">
               {stages.map((stage, i) => (
                 <div key={stage.id} className="flex items-center gap-0.5">
-                  <div className={`px-2.5 py-1 rounded-full text-[10px] font-medium ${
+                  <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium whitespace-nowrap ${
                     i < currentStageIndex ? "status-badge-success"
                     : i === currentStageIndex ? "bg-foreground text-background"
                     : "bg-muted text-muted-foreground"
                   }`}>
-                    {i < currentStageIndex && <CheckCircle className="w-2.5 h-2.5 inline mr-0.5" />}
-                    {stage.label}
+                    {i < currentStageIndex && <CheckCircle className="w-2.5 h-2.5 flex-shrink-0" />}
+                    <span>{stage.label}</span>
                   </div>
                   {i < stages.length - 1 && <div className="w-4 h-px bg-border" />}
                 </div>
