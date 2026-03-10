@@ -163,12 +163,12 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
 
       {/* Structure section */}
       <div className="vercel-card">
-        <button
-          onClick={() => setStructureOpen(!structureOpen)}
-          className="ide-header w-full flex items-center justify-between cursor-pointer hover:bg-accent/30 transition-colors">
-          <span>Структура и матрицы</span>
-          <ChevronUp className={`w-3.5 h-3.5 transition-transform ${structureOpen ? '' : 'rotate-180'}`} />
-        </button>
+        
+
+
+
+
+        
         {structureOpen
 
 
