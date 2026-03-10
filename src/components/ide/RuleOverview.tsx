@@ -40,19 +40,19 @@ function highlightCode(code: string) {
 
 function GlowDiagram() {
   const nodes = [
-    { x: 50, y: 30, label: "Сигнал" },
-    { x: 160, y: 30, label: "Фильтр" },
-    { x: 270, y: 30, label: "Функция" },
-    { x: 105, y: 100, label: "λ" },
-    { x: 215, y: 100, label: "Матрица" },
-    { x: 50, y: 165, label: "Датчик" },
-    { x: 160, y: 165, label: "Проверка" },
-    { x: 270, y: 165, label: "Отчёт" },
-  ];
+  { x: 50, y: 30, label: "Сигнал" },
+  { x: 160, y: 30, label: "Фильтр" },
+  { x: 270, y: 30, label: "Функция" },
+  { x: 105, y: 100, label: "λ" },
+  { x: 215, y: 100, label: "Матрица" },
+  { x: 50, y: 165, label: "Датчик" },
+  { x: 160, y: 165, label: "Проверка" },
+  { x: 270, y: 165, label: "Отчёт" }];
+
   const edges: [number, number][] = [
-    [0, 3], [1, 3], [1, 4], [2, 4],
-    [3, 5], [3, 6], [4, 6], [4, 7],
-  ];
+  [0, 3], [1, 3], [1, 4], [2, 4],
+  [3, 5], [3, 6], [4, 6], [4, 7]];
+
   return (
     <svg viewBox="0 0 320 200" className="w-full h-full">
       <defs>
@@ -63,27 +63,27 @@ function GlowDiagram() {
         </linearGradient>
       </defs>
       {edges.map(([from, to], i) => {
-        const f = nodes[from], t = nodes[to];
+        const f = nodes[from],t = nodes[to];
         return (
           <g key={i}>
             <line x1={f.x} y1={f.y} x2={t.x} y2={t.y}
-              stroke="url(#edgeGradPurpleTeal)" strokeWidth="1.5" opacity="0.7" />
-          </g>
-        );
+            stroke="url(#edgeGradPurpleTeal)" strokeWidth="1.5" opacity="0.7" />
+          </g>);
+
       })}
       {nodes.map((n, i) =>
-        <g key={i} className="graph-node">
+      <g key={i} className="graph-node">
           <rect x={n.x - 20} y={n.y - 16} width={40} height={32} rx={3}
-            fill="hsl(228 10% 14%)" stroke="hsl(185 60% 45%)" strokeWidth="1" />
+        fill="hsl(228 10% 14%)" stroke="hsl(185 60% 45%)" strokeWidth="1" />
           <rect x={n.x - 15} y={n.y - 11} width={30} height={22} rx={2}
-            fill="hsl(228 10% 18%)" stroke="hsl(185 50% 35%)" strokeWidth="0.5" />
+        fill="hsl(228 10% 18%)" stroke="hsl(185 50% 35%)" strokeWidth="0.5" />
           <text x={n.x} y={n.y + 2} textAnchor="middle" fill="hsl(185 50% 70%)" fontSize="6" fontFamily="Inter, sans-serif">
             {n.label}
           </text>
         </g>
       )}
-    </svg>
-  );
+    </svg>);
+
 }
 
 export function RuleOverview({ rule }: RuleOverviewProps) {
@@ -169,15 +169,15 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
           <span>Структура и матрицы</span>
           <ChevronUp className={`w-3.5 h-3.5 transition-transform ${structureOpen ? '' : 'rotate-180'}`} />
         </button>
-        {structureOpen &&
-        <div className="p-4">
-            <div className="aspect-[3/1.2] bg-background/30 rounded-sm border border-border overflow-hidden relative">
-              <div
-              className="absolute inset-0 opacity-30"
-              style={{ background: 'radial-gradient(ellipse at center, hsl(270 50% 40% / 0.2) 0%, transparent 70%)' }} />
-              <GlowDiagram />
-            </div>
-          </div>
+        {structureOpen
+
+
+
+
+
+
+
+
         }
       </div>
     </div>);
