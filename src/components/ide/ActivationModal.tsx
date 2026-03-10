@@ -41,9 +41,9 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
           {/* Staged deployment pipeline */}
           <div>
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Этап развёртывания</div>
-            <div className="flex items-center gap-0.5 w-full overflow-x-auto pb-1">
+            <div className="flex items-center gap-0.5">
               {stages.map((stage, i) =>
-              <div key={stage.id} className="flex items-center gap-0.5 shrink-0">
+              <div key={stage.id} className="flex items-center gap-0.5">
                   <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium whitespace-nowrap ${
                 i < currentStageIndex ? "status-badge-success" :
                 i === currentStageIndex ? "bg-foreground text-background" :
@@ -150,7 +150,7 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
 
           {/* Mini dependency preview */}
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Граф зависимостей:</div>
+            
             
 
 
