@@ -11,10 +11,10 @@ interface AnalyzeViewProps {
 }
 
 const chartData = Array.from({ length: 20 }, (_, i) => ({
-  time: `${String(i + 1).padStart(2, "0")}:00`,
-  TI03025: i < 15 ? 82 + Math.random() * 6 : null,
-  PT02012: 320 + Math.random() * 30 + (i > 12 ? i * 8 : 0),
-  FT01007: 900 + Math.random() * 200 + (i > 15 ? 300 : 0),
+  time: `09:${String(20 + i * 2).padStart(2, "0")}`,
+  "TI-R12-01": i < 3 ? 84 + i : 84 + i * 1.8 + Math.random() * 2,
+  "PI-R12-01": 9.5 + i * 0.15 + Math.random() * 0.3,
+  "SI-R12-01": 1420 + Math.random() * 30 + (i > 15 ? -20 : 0),
 }));
 
 export function AnalyzeView({ onNavigateToInvestigate }: AnalyzeViewProps) {
@@ -74,26 +74,26 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
           <div className="p-3 text-xs text-foreground leading-relaxed">{report.description}</div>
         </div>
 
-        {/* Chart with teal glow palette */}
+        {/* Chart */}
         <div className="vercel-card">
           <div className="ide-header flex items-center gap-1.5">
-            <TrendingUp className="w-3 h-3" /> Визуализация
+            <TrendingUp className="w-3 h-3" /> Визуализация: Резервуар-12
           </div>
           <div className="p-3 h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="gradTI" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity={0.2} />
+                    <stop offset="0%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradPI" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradSI" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity={0.15} />
                     <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gradPT" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(2, 93%, 63%)" stopOpacity={0.15} />
-                    <stop offset="100%" stopColor="hsl(2, 93%, 63%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gradFT" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(39, 74%, 48%)" stopOpacity={0.15} />
-                    <stop offset="100%" stopColor="hsl(39, 74%, 48%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(228, 8%, 18%)" />
@@ -109,23 +109,22 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: "10px" }} />
-                <Area type="monotone" dataKey="TI03025" stroke="hsl(185, 70%, 50%)" strokeWidth={1.5} fill="url(#gradTI)" dot={false} connectNulls={false} />
-                <Area type="monotone" dataKey="PT02012" stroke="hsl(2, 93%, 63%)" strokeWidth={1.5} fill="url(#gradPT)" dot={false} />
-                <Area type="monotone" dataKey="FT01007" stroke="hsl(39, 74%, 48%)" strokeWidth={1.5} fill="url(#gradFT)" dot={false} />
+                <Area type="monotone" dataKey="TI-R12-01" name="Температура °C" stroke="hsl(0, 84%, 60%)" strokeWidth={1.5} fill="url(#gradTI)" dot={false} />
+                <Area type="monotone" dataKey="PI-R12-01" name="Давление бар" stroke="hsl(38, 92%, 50%)" strokeWidth={1.5} fill="url(#gradPI)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         <CausalChain
-          title="Логическая цепочка события"
+          title="Цепочка выполнения"
           steps={buildReportChain(report)}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="vercel-card">
             <div className="ide-header flex items-center gap-1.5">
-              <Link2 className="w-3 h-3" /> Параметры
+              <Link2 className="w-3 h-3" /> Сигналы
             </div>
             <div className="p-3 space-y-1">
               {report.linkedParameters.map((p) => (
@@ -135,7 +134,7 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
           </div>
           <div className="vercel-card">
             <div className="ide-header flex items-center gap-1.5">
-              <Cpu className="w-3 h-3" /> Функции
+              <Cpu className="w-3 h-3" /> Правила
             </div>
             <div className="p-3 space-y-1">
               {report.linkedFunctions.map((f) => (

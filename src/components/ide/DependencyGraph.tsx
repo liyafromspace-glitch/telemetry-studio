@@ -53,25 +53,25 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
 
   const nodesByMode: Record<GraphMode, GraphNode[]> = {
     modules: [
-      { id: "sig", label: "Сигналы", type: "signal", status: "success", x: 100, y: 140, tooltip: "Модуль сигналов\nТип: Модуль\nСтатус: Активен", connColor: "blue" },
-      { id: "fn", label: "Функции", type: "function", status: ruleStatus, x: 300, y: 140, tooltip: "Модуль функций\nТип: Модуль", connColor: "orange" },
-      { id: "mx", label: "Матрицы", type: "matrix", status: "success", x: 500, y: 140, tooltip: "Модуль матриц\nТип: Модуль", connColor: "pink" },
-      { id: "rp", label: "Отчёты", type: "report", status: "success", x: 680, y: 140, tooltip: "Модуль отчётов\nТип: Модуль", connColor: "green" },
+      { id: "sig", label: "Сигналы", type: "signal", status: "warning", x: 100, y: 140, tooltip: "Модуль сигналов\nСтатус: 2 превышения", connColor: "blue" },
+      { id: "fn", label: "Правила", type: "function", status: ruleStatus, x: 300, y: 140, tooltip: "Модуль правил\n7 правил", connColor: "orange" },
+      { id: "mx", label: "Матрицы", type: "matrix", status: "warning", x: 500, y: 140, tooltip: "Модуль матриц\n4 матрицы", connColor: "pink" },
+      { id: "rp", label: "Отчёты", type: "report", status: "success", x: 680, y: 140, tooltip: "Модуль отчётов\n4 отчёта", connColor: "green" },
     ],
     functions: [
-      { id: "src", label: rule.parameterType, type: "signal", status: "success", x: 100, y: 140, tooltip: `${rule.parameterType}\nТип: Сигнал`, connColor: "blue" },
-      { id: "rule", label: rule.name, type: "function", status: ruleStatus, x: 320, y: 140, tooltip: `${rule.name}\nТип: Функция`, connColor: "orange" },
-      { id: "mx", label: "Матрица СИ", type: "matrix", status: rule.warningCount > 0 ? "warning" : "success", x: 320, y: 50, tooltip: "Матрица зависимостей СИ", connColor: "pink" },
-      { id: "r1", label: "Отчёт #1", type: "report", status: "success", x: 560, y: 90, tooltip: "Отчёт #1", connColor: "green" },
-      { id: "r2", label: "Отчёт #2", type: "report", status: rule.warningCount > 0 ? "warning" : "success", x: 560, y: 190, tooltip: "Отчёт #2", connColor: "green" },
+      { id: "temp", label: "Температура", type: "signal", status: "error", x: 100, y: 90, tooltip: "TI-R12-01.PV\n96°C > 90°C", connColor: "blue" },
+      { id: "press", label: "Давление", type: "signal", status: "warning", x: 100, y: 190, tooltip: "PI-R12-01.PV\n12.3 бар > 11 бар", connColor: "blue" },
+      { id: "rule", label: rule.name, type: "function", status: ruleStatus, x: 320, y: 140, tooltip: `${rule.name}\nТип: Правило\nv${rule.version}`, connColor: "orange" },
+      { id: "mx", label: "Авар. защита", type: "matrix", status: "warning", x: 540, y: 90, tooltip: "Аварийная защита резервуара\nКлапан → ЗАКРЫТ", connColor: "pink" },
+      { id: "inc", label: "INC-4201", type: "incident", status: "error", x: 540, y: 190, tooltip: "Перегрев резервуара-12\nВ работе", connColor: "pink" },
     ],
     signals: [
-      { id: "s1", label: "TI03025.PV", type: "signal", status: "error", x: 80, y: 60, tooltip: "TI03025.PV\nПотеря", connColor: "blue" },
-      { id: "s2", label: "PT02012.PV", type: "signal", status: "error", x: 80, y: 140, tooltip: "PT02012.PV\nПревышение", connColor: "blue" },
-      { id: "s3", label: "FT01007.PV", type: "signal", status: "warning", x: 80, y: 220, tooltip: "FT01007.PV\nАномалия", connColor: "orange" },
+      { id: "s1", label: "TI-R12-01.PV", type: "signal", status: "error", x: 80, y: 60, tooltip: "Температура: 96°C\nПорог: 90°C", connColor: "blue" },
+      { id: "s2", label: "PI-R12-01.PV", type: "signal", status: "warning", x: 80, y: 140, tooltip: "Давление: 12.3 бар\nПорог: 11 бар", connColor: "blue" },
+      { id: "s3", label: "SI-R12-01.PV", type: "signal", status: "success", x: 80, y: 220, tooltip: "Скорость насоса: 1450 RPM\nВ норме", connColor: "orange" },
       { id: "fn", label: rule.name, type: "function", status: ruleStatus, x: 360, y: 140, tooltip: rule.name, connColor: "pink" },
-      { id: "inc", label: "INC-2989", type: "incident", status: "error", x: 600, y: 80, tooltip: "INC-2989\nВ работе", connColor: "pink" },
-      { id: "r1", label: "Отчёт #1", type: "report", status: "success", x: 600, y: 200, tooltip: "Отчёт #1", connColor: "green" },
+      { id: "valve", label: "XV-R12-01", type: "matrix", status: "error", x: 600, y: 80, tooltip: "Клапан подачи\nСтатус: ЗАКРЫТ", connColor: "pink" },
+      { id: "inc", label: "INC-4201", type: "incident", status: "error", x: 600, y: 200, tooltip: "Перегрев резервуара-12\nВ работе", connColor: "pink" },
     ],
   };
 
@@ -82,17 +82,17 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
       { from: "mx", to: "rp", color: "pink", dashed: true },
     ],
     functions: [
-      { from: "src", to: "rule", color: "blue", dashed: false },
-      { from: "mx", to: "rule", color: "pink", dashed: true },
-      { from: "rule", to: "r1", color: "orange", dashed: true },
-      { from: "rule", to: "r2", color: "orange", dashed: true },
+      { from: "temp", to: "rule", color: "blue", dashed: false },
+      { from: "press", to: "rule", color: "blue", dashed: false },
+      { from: "rule", to: "mx", color: "orange", dashed: false },
+      { from: "rule", to: "inc", color: "pink", dashed: false },
     ],
     signals: [
       { from: "s1", to: "fn", color: "blue", dashed: false },
       { from: "s2", to: "fn", color: "blue", dashed: false },
       { from: "s3", to: "fn", color: "orange", dashed: true },
+      { from: "fn", to: "valve", color: "pink", dashed: false },
       { from: "fn", to: "inc", color: "pink", dashed: false },
-      { from: "fn", to: "r1", color: "green", dashed: true },
     ],
   };
 
@@ -103,7 +103,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
   const edges = edgesByMode[graphMode];
   const getNode = (id: string) => nodes.find((n) => n.id === id)!;
 
-  // Traverse graph to find all upstream (ancestors) and downstream (descendants)
   const getUpstream = useCallback((nodeId: string, visited = new Set<string>()): Set<string> => {
     visited.add(nodeId);
     edges.filter(e => e.to === nodeId && !visited.has(e.from)).forEach(e => getUpstream(e.from, visited));
@@ -169,7 +168,7 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                     graphMode === mode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {mode === "modules" ? "Модули" : mode === "functions" ? "Функции" : "Сигналы"}
+                  {mode === "modules" ? "Модули" : mode === "functions" ? "Правила" : "Сигналы"}
                 </button>
               ))}
             </div>
@@ -256,7 +255,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                           strokeDasharray={node.type === "matrix" || node.type === "report" ? "4 3" : "none"}
                           className="transition-all duration-200"
                         />
-                        {/* Direction indicator for upstream/downstream */}
                         {focusedNode && role === "upstream" && (
                           <text x={node.x + cardW / 2 - 16} y={node.y - cardH / 2 + 12} fontSize="9" fill="hsl(217, 91%, 60%)">↑</text>
                         )}
@@ -280,7 +278,7 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                           fontSize="8"
                           fontFamily="Inter, sans-serif"
                         >
-                          {node.type === "signal" ? "Сигнал" : node.type === "function" ? "Функция" : node.type === "matrix" ? "Матрица" : node.type === "incident" ? "Инцидент" : "Отчёт"}
+                          {node.type === "signal" ? "Сигнал" : node.type === "function" ? "Правило" : node.type === "matrix" ? "Матрица" : node.type === "incident" ? "Инцидент" : "Отчёт"}
                         </text>
                         <circle
                           cx={node.x - cardW / 2}
@@ -300,7 +298,6 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
                 );
               })}
 
-              {/* Status badges rendered on top */}
               {nodes.map((node) => {
                 const inFocus = isInFocus(node.id);
                 return (
@@ -321,7 +318,7 @@ export function DependencyGraph({ rule, onNavigateToRule }: DependencyGraphProps
       {/* Legend */}
       <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground px-1">
         <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-blue" style={{ width: 6, height: 6 }} /> Сигналы</span>
-        <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-orange" style={{ width: 6, height: 6 }} /> Функции</span>
+        <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-orange" style={{ width: 6, height: 6 }} /> Правила</span>
         <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-pink" style={{ width: 6, height: 6 }} /> Матрицы</span>
         <span className="flex items-center gap-1.5"><span className="conn-dot conn-dot-green" style={{ width: 6, height: 6 }} /> Отчёты</span>
         <span className="text-border">|</span>

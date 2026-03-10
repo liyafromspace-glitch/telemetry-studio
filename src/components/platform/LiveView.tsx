@@ -1,5 +1,5 @@
 import { liveSignals, type LiveSignal } from "@/data/mockPlatform";
-import { Radio, Clock, ArrowRight } from "lucide-react";
+import { Radio, Clock, ArrowRight, AlertTriangle } from "lucide-react";
 import { LiveSystemPulse } from "@/components/ide/LiveSystemPulse";
 import { StatusBadge } from "@/components/ui/status-badge";
 
@@ -8,12 +8,12 @@ interface LiveViewProps {
 }
 
 const mockHistory: Record<string, number[]> = {
-  "TI03025.PV": [85, 84, 83, 82, 0, 0, 0],
-  "PT02012.PV": [340, 355, 370, 390, 400, 412, 413],
-  "FT01007.PV": [900, 950, 1000, 1050, 1100, 1200, 1247],
-  "LT04001.PV": [4.1, 4.15, 4.2, 4.18, 4.22, 4.21, 4.21],
-  "DT05003.PV": [841, 842, 841, 843, 842, 842, 842],
-  "HT06002.PV": [92, 94, 95, 96, 97, 98, 99]
+  "TI-R12-01.PV": [84, 85, 87, 89, 92, 94, 96],
+  "PI-R12-01.PV": [9.8, 10.2, 10.5, 11.0, 11.5, 11.8, 12.3],
+  "SI-R12-01.PV": [1420, 1430, 1440, 1445, 1450, 1448, 1450],
+  "LI-R12-01.PV": [80, 79, 79, 78, 78, 78, 78],
+  "XV-R12-01.ST": [1, 1, 1, 1, 1, 1, 1],
+  "TI-R12-02.PV": [83, 84, 86, 88, 89, 90, 91],
 };
 
 function MiniSparkline({ data, status }: {data: number[];status: string;}) {
@@ -35,7 +35,6 @@ function MiniSparkline({ data, status }: {data: number[];status: string;}) {
     <svg width={w} height={h} className="inline-block">
       <polyline points={linePoints} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
     </svg>);
-
 }
 
 export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
@@ -44,6 +43,18 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
+      {/* Alert banner */}
+      <div className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border-b border-destructive/20">
+        <AlertTriangle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />
+        <span className="text-xs text-destructive font-medium">⚠ Перегрев резервуара-12 — температура 96°C, порог 90°C</span>
+        <button
+          onClick={() => onNavigateToInvestigate("TI-R12-01")}
+          className="ml-auto text-[10px] text-destructive hover:underline flex items-center gap-0.5"
+        >
+          Расследовать <ArrowRight className="w-2.5 h-2.5" />
+        </button>
+      </div>
+
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card">
         <div className="flex items-center gap-3 text-xs">
           <div className="flex items-center gap-2">
@@ -51,7 +62,6 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
               <div className="w-2 h-2 rounded-full bg-success" />
               <div className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping opacity-75" />
             </div>
-            
           </div>
           <LiveSystemPulse />
         </div>
@@ -92,7 +102,6 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
         </table>
       </div>
     </div>);
-
 }
 
 function SignalRow({ signal, onInvestigate }: {signal: LiveSignal;onInvestigate: (p: string) => void;}) {
@@ -104,7 +113,6 @@ function SignalRow({ signal, onInvestigate }: {signal: LiveSignal;onInvestigate:
         <StatusBadge
           variant={signal.status === "critical" ? "error" : signal.status === "warning" ? "warning" : "success"}
           size="xs">
-          
           {signal.status === "critical" ? "Error" : signal.status === "warning" ? "Warning" : "OK"}
         </StatusBadge>
       </td>
@@ -127,11 +135,9 @@ function SignalRow({ signal, onInvestigate }: {signal: LiveSignal;onInvestigate:
         <button
           onClick={() => onInvestigate(signal.parameter)}
           className="text-[10px] text-foreground hover:underline flex items-center gap-0.5">
-          
             Расследовать <ArrowRight className="w-2.5 h-2.5" />
           </button>
         }
       </td>
     </tr>);
-
 }

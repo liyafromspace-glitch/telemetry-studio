@@ -18,29 +18,37 @@ interface SignalField {
 }
 
 const defaultFields: Record<string, SignalField[]> = {
-  "Влажность": [
-    { name: "Температура", value: "22", unit: "°C", type: "number" },
-    { name: "Влажность", value: "75", unit: "%RH", type: "number" },
-  ],
   "Температура": [
-    { name: "sensor1", value: "95", unit: "°C", type: "number" },
-    { name: "sensor2", value: "80", unit: "°C", type: "number" },
+    { name: "Температура", value: "96", unit: "°C", type: "number" },
+    { name: "Давление", value: "12", unit: "бар", type: "number" },
+    { name: "Скорость насоса", value: "1450", unit: "RPM", type: "number" },
   ],
   "Давление": [
-    { name: "Давление", value: "412", unit: "бар", type: "number" },
+    { name: "Давление", value: "12.3", unit: "бар", type: "number" },
     { name: "Клапан", value: "ОТКРЫТ", unit: "", type: "select", options: ["ОТКРЫТ", "ЗАКРЫТ"] },
   ],
+  "Скорость": [
+    { name: "Скорость", value: "1450", unit: "RPM", type: "number" },
+    { name: "Скорость нарастания", value: "150", unit: "RPM/с", type: "number" },
+  ],
+  "Уровень": [
+    { name: "Уровень", value: "78", unit: "%", type: "number" },
+  ],
+  "Клапан": [
+    { name: "Команда", value: "CLOSE", unit: "", type: "select", options: ["OPEN", "CLOSE"] },
+    { name: "Проверка безопасности", value: "true", unit: "", type: "select", options: ["true", "false"] },
+  ],
   "default": [
-    { name: "value", value: "100", unit: "", type: "number" },
-    { name: "temperature", value: "20", unit: "°C", type: "number" },
+    { name: "Температура", value: "96", unit: "°C", type: "number" },
+    { name: "Давление", value: "12", unit: "бар", type: "number" },
   ],
 };
 
 const ghostData: Record<string, { actual: number[]; predicted: number[] }> = {
-  "Влажность": { actual: [72, 74, 74, 75, 78, 76, 76], predicted: [73, 74, 75, 76, 77, 77, 78] },
-  "Температура": { actual: [82, 84, 85, 88, 92, 95, 96], predicted: [82, 83, 84, 85, 86, 87, 87] },
-  "Давление": { actual: [340, 355, 370, 390, 400, 412, 413], predicted: [340, 350, 358, 365, 370, 375, 378] },
-  "default": { actual: [50, 55, 52, 58, 54, 56, 53], predicted: [51, 53, 54, 55, 55, 56, 56] },
+  "Температура": { actual: [84, 85, 87, 89, 92, 95, 96], predicted: [84, 85, 86, 86, 87, 87, 88] },
+  "Давление": { actual: [9.8, 10.2, 10.5, 11.0, 11.5, 11.8, 12.3], predicted: [9.8, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5] },
+  "Скорость": { actual: [1420, 1430, 1440, 1445, 1450, 1448, 1450], predicted: [1420, 1425, 1430, 1435, 1440, 1440, 1440] },
+  "default": { actual: [84, 85, 87, 89, 92, 95, 96], predicted: [84, 85, 86, 86, 87, 87, 88] },
 };
 
 type EvalStep = {
@@ -78,7 +86,8 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
       obj[f.name] = f.type === "number" ? parseFloat(f.value) || 0 : f.value;
       if (f.unit) obj[f.name + "_unit"] = f.unit;
     });
-    obj["timestamp"] = "2024-02-20T10:00:00Z";
+    obj["timestamp"] = "2026-03-10T09:34:00Z";
+    obj["object"] = "Резервуар-12";
     return JSON.stringify(obj, null, 2);
   };
 
@@ -107,24 +116,37 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
   };
 
   const finishSimulation = () => {
+    const tempField = fields.find(f => f.name === "Температура");
+    const pressField = fields.find(f => f.name === "Давление");
+    const tempVal = tempField ? parseFloat(tempField.value) : 96;
+    const pressVal = pressField ? parseFloat(pressField.value) : 12;
+    const triggered = tempVal > 90 && pressVal > 11;
+
     const mockTraces: TraceEntry[] =
       rule.parameterType === "Температура"
         ? [
-            { expression: "sensor1 = 95", result: "получено", pass: true },
-            { expression: "sensor2 = 80", result: "получено", pass: true },
-            { expression: "delta = |95 - 80| = 15", result: "15°C", pass: true },
-            { expression: "delta > MAX_DELTA (15)", result: rule.errorCount > 0 ? "ИСТИНА" : "ЛОЖЬ", pass: rule.errorCount === 0 },
-            { expression: `Функция: ${rule.name}`, result: rule.errorCount > 0 ? "ТРЕВОГА" : "НОРМА", pass: rule.errorCount === 0 },
+            { expression: `Температура = ${tempVal}°C`, result: "получено", pass: true },
+            { expression: `Давление = ${pressVal} бар`, result: "получено", pass: true },
+            { expression: `Температура > 90°C`, result: tempVal > 90 ? "ИСТИНА" : "ЛОЖЬ", pass: tempVal <= 90 },
+            { expression: `Давление > 11 бар`, result: pressVal > 11 ? "ИСТИНА" : "ЛОЖЬ", pass: pressVal <= 11 },
+            { expression: `Правило: ${rule.name}`, result: triggered ? "АКТИВИРУЕТСЯ" : "НЕ АКТИВИРУЕТСЯ", pass: !triggered },
+            { expression: `Клапан XV-R12-01`, result: triggered ? "ЗАКРЫВАЕТСЯ" : "БЕЗ ИЗМЕНЕНИЙ", pass: !triggered },
           ]
         : [
             { expression: `${fields[0]?.name} = ${fields[0]?.value}`, result: "получено", pass: true },
             { expression: `Проверка диапазона`, result: rule.warningCount > 0 ? "ПРЕДУПРЕЖДЕНИЕ" : "OK", pass: rule.warningCount === 0 },
-            { expression: `Функция: ${rule.name}`, result: "выполнена", pass: true },
+            { expression: `Правило: ${rule.name}`, result: "выполнено", pass: true },
           ];
     setTraces(mockTraces);
-    setOutput(JSON.stringify({ processed: true, result: rule.errorCount > 0 ? "alarm" : "ok", timestamp: "2024-02-20T10:00:00Z" }, null, 2));
+    setOutput(JSON.stringify({
+      rule: rule.name,
+      triggered,
+      result: triggered ? "Правило активируется. Клапан закрывается." : "Правило не активируется. Продолжить работу.",
+      timestamp: "2026-03-10T09:34:00Z",
+      object: "Резервуар-12",
+    }, null, 2));
     setSteps((s) =>
-      s.map((st) => ({ ...st, status: rule.errorCount > 0 ? (st.label === "Результат" ? "fail" : "pass") : "pass" }))
+      s.map((st) => ({ ...st, status: triggered ? (st.label === "Результат" ? "fail" : "pass") : "pass" }))
     );
     setCurrentStep(steps.length);
   };
@@ -215,7 +237,7 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
             <div className="p-3 space-y-2">
               {fields.map((field, i) => (
                 <div key={i} className="text-xs flex items-center gap-0">
-                  <label className="w-24 text-muted-foreground truncate">{field.name}</label>
+                  <label className="w-32 text-muted-foreground truncate">{field.name}</label>
                   {field.type === "select" ? (
                     <select
                       value={field.value}
@@ -232,7 +254,7 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
                       className="flex-1 bg-background border border-border rounded-lg px-2 py-1.5 text-xs font-mono text-foreground focus:border-foreground/30 focus:outline-none transition-colors"
                     />
                   )}
-                  {field.unit && <span className="text-[10px] text-muted-foreground w-10 px-2">{field.unit}</span>}
+                  {field.unit && <span className="text-[10px] text-muted-foreground w-12 px-2">{field.unit}</span>}
                 </div>
               ))}
             </div>
@@ -311,7 +333,7 @@ export function SimulationPanel({ rule }: SimulationPanelProps) {
       {/* Causal Chain */}
       {traces.length > 0 && (
         <CausalChain
-          title="Как работает функция"
+          title="Как работает правило"
           steps={buildSimulationChain(
             fields.map((f) => ({ name: f.name, value: f.value })),
             rule.name,

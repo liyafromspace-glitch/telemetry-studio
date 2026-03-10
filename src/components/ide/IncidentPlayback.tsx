@@ -13,24 +13,23 @@ interface PlaybackStep {
 
 const playbackByIncident: Record<string, PlaybackStep[]> = {
   "inc-001": [
-    { nodeId: "sig", label: "TI03025.PV", type: "signal", description: "Сигнал: потеря данных (timeout > 60s)" },
-    { nodeId: "cond", label: "Timeout > 60s", type: "condition", description: "Условие: TRUE — данные не обновляются" },
-    { nodeId: "fn", label: "Конвертация температуры", type: "function", description: "Ошибка: нет входных данных" },
-    { nodeId: "mx", label: "Матрица зависимостей СИ", type: "matrix", description: "Статус обновлён: Потеря сигнала" },
-    { nodeId: "inc", label: "INC-2989", type: "incident", description: "Инцидент создан автоматически" },
+    { nodeId: "sig1", label: "TI-R12-01.PV = 96°C", type: "signal", description: "Сигнал: температура резервуара превысила порог 90°C" },
+    { nodeId: "sig2", label: "PI-R12-01.PV = 12.3 бар", type: "signal", description: "Сигнал: давление линии выше нормы 11 бар" },
+    { nodeId: "cond", label: "T > 90°C И P > 11 бар", type: "condition", description: "Условие: оба порога превышены → TRUE" },
+    { nodeId: "fn", label: "Контроль перегрева", type: "function", description: "Правило активировано, команда на закрытие клапана" },
+    { nodeId: "mx", label: "Аварийная защита", type: "matrix", description: "Матрица: клапан XV-R12-01 → ЗАКРЫТ" },
+    { nodeId: "inc", label: "INC-4201", type: "incident", description: "Инцидент «Перегрев резервуара-12» создан автоматически" },
   ],
   "inc-002": [
-    { nodeId: "sig", label: "FT01007.PV", type: "signal", description: "Значение: 1247.3 м³/ч" },
-    { nodeId: "cond", label: "Value > 1100", type: "condition", description: "Превышение верхней границы" },
-    { nodeId: "fn", label: "Пересчет расхода", type: "function", description: "Выброс обнаружен" },
-    { nodeId: "inc", label: "INC-3012", type: "incident", description: "Инцидент создан" },
+    { nodeId: "sig", label: "PI-R12-01.PV = 12.3 бар", type: "signal", description: "Давление: 12.3 бар при норме < 11" },
+    { nodeId: "cond", label: "P > 11 бар", type: "condition", description: "Превышение верхней границы давления" },
+    { nodeId: "fn", label: "Контроль давления линии", type: "function", description: "Правило зафиксировало превышение" },
+    { nodeId: "inc", label: "INC-4198", type: "incident", description: "Инцидент создан" },
   ],
   "inc-003": [
-    { nodeId: "sig", label: "PT02012.PV", type: "signal", description: "Давление: 412.8 бар" },
-    { nodeId: "cond", label: "Value > 350", type: "condition", description: "Превышение допустимого диапазона" },
-    { nodeId: "fn", label: "Проверка давления", type: "function", description: "Валидация не пройдена" },
-    { nodeId: "mx", label: "Матрица давления", type: "matrix", description: "Диапазон нарушен" },
-    { nodeId: "inc", label: "INC-2950", type: "incident", description: "Инцидент создан" },
+    { nodeId: "sig", label: "SI-R12-01.PV = 1520 RPM", type: "signal", description: "Скорость: 1520 RPM при максимуме 1500" },
+    { nodeId: "fn", label: "Мониторинг насоса", type: "function", description: "Превышение скорости зафиксировано" },
+    { nodeId: "inc", label: "INC-4150", type: "incident", description: "Инцидент создан" },
   ],
 };
 
@@ -127,14 +126,14 @@ export function IncidentPlayback({ incident }: IncidentPlaybackProps) {
                   <div className={`transition-all duration-200 ${isActive ? "opacity-100" : isDone ? "opacity-60" : "opacity-30"}`}>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium text-foreground">
-                        {step.label.length > 20 ? step.label.slice(0, 19) + "…" : step.label}
+                        {step.label.length > 25 ? step.label.slice(0, 24) + "…" : step.label}
                       </span>
                       <StatusBadge
                         variant={isDone ? "success" : isActive ? "neutral" : "idle"}
                         size="xs"
                         dot={false}
                       >
-                        {isDone ? "Complete" : isActive ? "Active" : "Idle"}
+                        {isDone ? "Выполнен" : isActive ? "Активен" : "Ожидание"}
                       </StatusBadge>
                     </div>
                     {(isActive || isDone) && (

@@ -18,7 +18,7 @@ interface CausalChainProps {
 
 const typeLabels: Record<CausalStep["type"], string> = {
   signal: "Сигнал",
-  function: "Функция",
+  function: "Правило",
   matrix: "Матрица",
   result: "Результат",
   incident: "Инцидент",
@@ -128,26 +128,96 @@ export function buildIncidentChain(incident: {
   description: string;
 }): CausalStep[] {
   const steps: CausalStep[] = [];
-  incident.linkedParameters.forEach(p => {
-    steps.push({ type: "signal", label: p, value: "Отклонение зафиксировано", meta: { lastRun: "2 мин назад", errors: 0 } });
+
+  // Signal steps
+  steps.push({
+    type: "signal",
+    label: "Температура резервуара",
+    value: "TI-R12-01.PV = 96°C (порог: 90°C)",
+    meta: { lastRun: "09:34", errors: 0 },
+    details: ["Рост с 84°C за 6 минут", "Корреляция с давлением: 0.87"],
   });
-  incident.linkedFunctions.forEach(f => {
-    steps.push({ type: "function", label: f, details: [`Условие: ${f.includes("температур") ? "Температура > 90" : "Значение вне диапазона"}`], meta: { lastRun: "2 мин назад", errors: 0 } });
+  if (incident.linkedParameters.length > 1) {
+    steps.push({
+      type: "signal",
+      label: "Давление линии",
+      value: "PI-R12-01.PV = 12.3 бар (порог: 11 бар)",
+      meta: { lastRun: "09:33", errors: 0 },
+    });
+  }
+
+  // Function steps
+  steps.push({
+    type: "function",
+    label: "Контроль перегрева",
+    value: "Условие: T > 90°C И P > 11 бар → TRUE",
+    details: ["Температура 96°C > 90°C: ИСТИНА", "Давление 12.3 бар > 11 бар: ИСТИНА", "Результат: активация аварийной защиты"],
+    meta: { lastRun: "09:34", errors: 0 },
+    status: "error",
   });
-  incident.linkedMatrices.forEach(m => {
-    steps.push({ type: "matrix", label: m, details: ["Критические пороги применены"], meta: { lastRun: "2 мин назад", errors: 0 } });
+
+  // Matrix step
+  steps.push({
+    type: "matrix",
+    label: "Аварийная защита резервуара",
+    value: "Клапан XV-R12-01 → ЗАКРЫТ",
+    details: ["Перекрытие подачи по правилу аварийной защиты"],
+    meta: { lastRun: "09:35", errors: 0 },
   });
-  steps.push({ type: "result", label: "Обнаружено отклонение", value: "Сформирован инцидент", status: "error" });
-  steps.push({ type: "incident", label: incident.title, value: incident.description.substring(0, 80) + "…", status: "error" });
+
+  // Result
+  steps.push({
+    type: "result",
+    label: "Перекрытие клапана подачи",
+    value: "XV-R12-01 переведён в состояние ЗАКРЫТ",
+    status: "error",
+  });
+
+  // Incident
+  steps.push({
+    type: "incident",
+    label: incident.title,
+    value: incident.description.substring(0, 80) + "…",
+    status: "error",
+  });
+
   return steps;
 }
 
 export function buildSimulationChain(fields: { name: string; value: string }[], ruleName: string, hasError: boolean): CausalStep[] {
   const steps: CausalStep[] = [];
-  steps.push({ type: "signal", label: "Входные сигналы", value: fields.map(f => `${f.name} = ${f.value}`).join(", "), details: fields.map(f => `${f.name} = ${f.value}`) });
-  steps.push({ type: "function", label: ruleName, value: hasError ? "Условие сработало" : "Условие не сработало", status: hasError ? "error" : "ok", details: [`Проверка условий: ${hasError ? "ИСТИНА" : "ЛОЖЬ"}`] });
-  steps.push({ type: "matrix", label: "Критические пороги", value: hasError ? "Уровень 3" : "В норме" });
-  steps.push({ type: "result", label: hasError ? "Остановить клапан" : "Продолжить работу", status: hasError ? "error" : "ok" });
+  const tempField = fields.find(f => f.name === "Температура");
+  const pressField = fields.find(f => f.name === "Давление");
+  const tempVal = tempField ? parseFloat(tempField.value) : 0;
+  const pressVal = pressField ? parseFloat(pressField.value) : 0;
+  const triggered = tempVal > 90 && pressVal > 11;
+
+  steps.push({
+    type: "signal",
+    label: "Входные сигналы",
+    value: fields.map(f => `${f.name} = ${f.value}`).join(", "),
+    details: fields.map(f => `${f.name} = ${f.value}`),
+  });
+  steps.push({
+    type: "function",
+    label: ruleName,
+    value: triggered ? "Условие выполнено → правило активируется" : "Условие не выполнено",
+    status: triggered ? "error" : "ok",
+    details: [
+      `Температура ${tempVal}°C ${tempVal > 90 ? ">" : "≤"} 90°C: ${tempVal > 90 ? "ИСТИНА" : "ЛОЖЬ"}`,
+      `Давление ${pressVal} бар ${pressVal > 11 ? ">" : "≤"} 11 бар: ${pressVal > 11 ? "ИСТИНА" : "ЛОЖЬ"}`,
+    ],
+  });
+  steps.push({
+    type: "matrix",
+    label: "Аварийная защита резервуара",
+    value: triggered ? "Клапан → ЗАКРЫТ" : "Без изменений",
+  });
+  steps.push({
+    type: "result",
+    label: triggered ? "Клапан закрывается" : "Продолжить работу",
+    status: triggered ? "error" : "ok",
+  });
   return steps;
 }
 
@@ -159,7 +229,7 @@ export function buildReportChain(report: {
 }): CausalStep[] {
   const steps: CausalStep[] = [];
   report.linkedParameters.slice(0, 2).forEach(p => { steps.push({ type: "signal", label: p, value: "Данные за период" }); });
-  report.linkedFunctions.slice(0, 2).forEach(f => { steps.push({ type: "function", label: f, details: ["Обработка данных"] }); });
+  report.linkedFunctions.slice(0, 2).forEach(f => { steps.push({ type: "function", label: f, details: ["Обработка и проверка условий"] }); });
   report.linkedMatrices.slice(0, 1).forEach(m => { steps.push({ type: "matrix", label: m }); });
   steps.push({ type: "result", label: report.name, value: "Отчёт сформирован", status: "ok" });
   return steps;
