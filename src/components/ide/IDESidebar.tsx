@@ -29,12 +29,7 @@ function MiniSparkline({ seed }: {seed: number;}) {
   const h = 14;
   const points = data.map((v, i) => `${i / (data.length - 1) * w},${h - v * h}`).join(" ");
 
-  return;
-
-
-
-
-
+  return null;
 }
 
 
