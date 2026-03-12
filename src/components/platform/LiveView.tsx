@@ -1,5 +1,5 @@
 import { liveSignals, type LiveSignal } from "@/data/mockPlatform";
-import { Radio, Clock, ArrowRight, AlertTriangle } from "lucide-react";
+import { Radio, Clock, ArrowRight } from "lucide-react";
 import { LiveSystemPulse } from "@/components/ide/LiveSystemPulse";
 import { StatusBadge } from "@/components/ui/status-badge";
 
@@ -13,7 +13,7 @@ const mockHistory: Record<string, number[]> = {
   "SI-R12-01.PV": [1420, 1430, 1440, 1445, 1450, 1448, 1450],
   "LI-R12-01.PV": [80, 79, 79, 78, 78, 78, 78],
   "XV-R12-01.ST": [1, 1, 1, 1, 1, 1, 1],
-  "TI-R12-02.PV": [83, 84, 86, 88, 89, 90, 91],
+  "TI-R12-02.PV": [83, 84, 86, 88, 89, 90, 91]
 };
 
 function MiniSparkline({ data, status }: {data: number[];status: string;}) {
@@ -45,12 +45,12 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
     <div className="flex-1 flex flex-col min-h-0">
       {/* Alert banner */}
       <div className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border-b border-destructive/20">
-        <AlertTriangle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />
+        
         <span className="text-xs text-destructive font-medium">⚠ Перегрев резервуара-12 — температура 96°C, порог 90°C</span>
         <button
           onClick={() => onNavigateToInvestigate("TI-R12-01")}
-          className="ml-auto text-[10px] text-destructive hover:underline flex items-center gap-0.5"
-        >
+          className="ml-auto text-[10px] text-destructive hover:underline flex items-center gap-0.5">
+          
           Расследовать <ArrowRight className="w-2.5 h-2.5" />
         </button>
       </div>
