@@ -59,14 +59,14 @@ export function LiveSystemPulse() {
 }
 
 function PulseWave({ value }: { value: number }) {
-  const [history, setHistory] = useState<number[]>(Array(20).fill(0));
+  const [history, setHistory] = useState<number[]>(Array(24).fill(0));
 
   useEffect(() => {
     setHistory((prev) => [...prev.slice(1), value]);
   }, [value]);
 
-  const w = 48;
-  const h = 16;
+  const w = 56;
+  const h = 18;
   const min = Math.min(...history);
   const max = Math.max(...history);
   const range = max - min || 1;
@@ -76,22 +76,29 @@ function PulseWave({ value }: { value: number }) {
     y: h - ((v - min) / range) * (h - 4) - 2,
   }));
   const line = pts.map((p) => `${p.x},${p.y}`).join(" ");
+  const area = `0,${h} ${line} ${w},${h}`;
 
   return (
     <svg width={w} height={h} className="inline-block">
       <defs>
-        <linearGradient id="pulseGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.7" />
+        <linearGradient id="pulseAreaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="pulseLineGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.1" />
+          <stop offset="100%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.8" />
         </linearGradient>
       </defs>
+      <polygon points={area} fill="url(#pulseAreaGrad)" />
       <polyline
         points={line}
         fill="none"
-        stroke="url(#pulseGrad)"
+        stroke="url(#pulseLineGrad)"
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
+      <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y} r="1.5" fill="hsl(0, 0%, 93%)" />
     </svg>
   );
 }

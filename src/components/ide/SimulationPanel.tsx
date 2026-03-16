@@ -367,45 +367,54 @@ function GhostSparkline({ actual, predicted, showGhost }: { actual: number[]; pr
   const max = Math.max(...all);
   const range = max - min || 1;
   const w = 320;
-  const h = 48;
+  const h = 56;
+  const pad = 6;
 
   const toPoints = (data: number[]) =>
     data.map((v, i) => ({
       x: (i / (data.length - 1)) * w,
-      y: h - ((v - min) / range) * (h - 8) - 4,
-    })).map((p) => `${p.x},${p.y}`).join(" ");
+      y: h - pad - ((v - min) / range) * (h - pad * 2),
+    }));
 
-  const actualLine = toPoints(actual);
-  const predictedLine = toPoints(predicted);
+  const actualPts = toPoints(actual);
+  const predictedPts = toPoints(predicted);
+  const actualLine = actualPts.map((p) => `${p.x},${p.y}`).join(" ");
+  const predictedLine = predictedPts.map((p) => `${p.x},${p.y}`).join(" ");
   const areaPoints = `0,${h} ${actualLine} ${w},${h}`;
 
   return (
     <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} className="w-full">
       <defs>
-        <linearGradient id="ghostArea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.08" />
+        <linearGradient id="ghostAreaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0.06" />
           <stop offset="100%" stopColor="hsl(0, 0%, 93%)" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <polygon points={areaPoints} fill="url(#ghostArea)" />
-      <polyline points={actualLine} fill="none" stroke="hsl(0, 0%, 70%)" strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Subtle grid lines */}
+      {actual.map((_, i) => (
+        <line key={i} x1={(i / (actual.length - 1)) * w} y1={0} x2={(i / (actual.length - 1)) * w} y2={h} stroke="hsl(0, 0%, 15%)" strokeWidth="0.5" strokeDasharray="2 3" />
+      ))}
+      <polygon points={areaPoints} fill="url(#ghostAreaGrad)" />
+      <polyline points={actualLine} fill="none" stroke="hsl(0, 0%, 85%)" strokeWidth="1.5" strokeLinejoin="round" />
       {showGhost && (
         <polyline
           points={predictedLine}
           fill="none"
-          stroke="hsl(0, 0%, 50%)"
+          stroke="hsl(0, 0%, 40%)"
           strokeWidth="1.5"
           strokeDasharray="4 3"
-          opacity="0.5"
+          opacity="0.6"
           strokeLinejoin="round"
           className="animate-fade-in"
         />
       )}
-      {actual.map((v, i) => {
-        const x = (i / (actual.length - 1)) * w;
-        const y = h - ((v - min) / range) * (h - 8) - 4;
-        return <circle key={i} cx={x} cy={y} r="2" fill="hsl(0, 0%, 93%)" opacity="0.6" />;
-      })}
+      {/* End dot only */}
+      <circle
+        cx={actualPts[actualPts.length - 1].x}
+        cy={actualPts[actualPts.length - 1].y}
+        r="2.5"
+        fill="hsl(0, 0%, 93%)"
+      />
     </svg>
   );
 }

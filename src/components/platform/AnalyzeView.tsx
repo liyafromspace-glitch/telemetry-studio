@@ -4,21 +4,23 @@ import {
   FileText, Link2, Cpu, Grid3X3, ChevronRight, Clock, ArrowRight, TrendingUp
 } from "lucide-react";
 import { CausalChain, buildReportChain } from "@/components/ide/CausalChain";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from "recharts";
+import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, ReferenceLine } from "recharts";
 
 interface AnalyzeViewProps {
   onNavigateToInvestigate: () => void;
 }
 
-const chartData = Array.from({ length: 20 }, (_, i) => ({
-  time: `09:${String(20 + i * 2).padStart(2, "0")}`,
-  "TI-R12-01": i < 3 ? 84 + i : 84 + i * 1.8 + Math.random() * 2,
-  "PI-R12-01": 9.5 + i * 0.15 + Math.random() * 0.3,
-  "SI-R12-01": 1420 + Math.random() * 30 + (i > 15 ? -20 : 0),
+const chartData = Array.from({ length: 40 }, (_, i) => ({
+  time: `09:${String(10 + i).padStart(2, "0")}`,
+  "TI-R12-01": i < 6 ? 84 + Math.random() * 1.5 : 84 + (i - 6) * 0.55 + Math.random() * 1.2 + (i > 30 ? (i - 30) * 0.8 : 0),
+  "PI-R12-01": 9.5 + i * 0.08 + Math.random() * 0.2,
 }));
+
+const timeRanges = ["5м", "15м", "30м", "1ч", "3ч", "12ч", "1д"];
 
 export function AnalyzeView({ onNavigateToInvestigate }: AnalyzeViewProps) {
   const [selectedId, setSelectedId] = useState<string>(reports[0].id);
+  const [activeRange, setActiveRange] = useState("30м");
   const selected = reports.find((r) => r.id === selectedId) || reports[0];
 
   return (
@@ -46,12 +48,32 @@ export function AnalyzeView({ onNavigateToInvestigate }: AnalyzeViewProps) {
         </div>
       </div>
 
-      <ReportDetail report={selected} onNavigateToInvestigate={onNavigateToInvestigate} />
+      <ReportDetail
+        report={selected}
+        onNavigateToInvestigate={onNavigateToInvestigate}
+        activeRange={activeRange}
+        onRangeChange={setActiveRange}
+      />
     </div>
   );
 }
 
-function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onNavigateToInvestigate: () => void }) {
+function ReportDetail({
+  report,
+  onNavigateToInvestigate,
+  activeRange,
+  onRangeChange,
+}: {
+  report: Report;
+  onNavigateToInvestigate: () => void;
+  activeRange: string;
+  onRangeChange: (r: string) => void;
+}) {
+  const lastTemp = chartData[chartData.length - 1]["TI-R12-01"];
+  const prevTemp = chartData[chartData.length - 2]["TI-R12-01"];
+  const delta = lastTemp - prevTemp;
+  const baselineTemp = 84;
+
   return (
     <div className="flex-1 flex flex-col min-w-0">
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
@@ -74,45 +96,134 @@ function ReportDetail({ report, onNavigateToInvestigate }: { report: Report; onN
           <div className="p-3 text-xs text-foreground leading-relaxed">{report.description}</div>
         </div>
 
-        {/* Chart */}
-        <div className="vercel-card">
-          <div className="ide-header flex items-center gap-1.5">
-            <TrendingUp className="w-3 h-3" /> Визуализация: Резервуар-12
+        {/* Chart — Terminal Style */}
+        <div className="vercel-card overflow-hidden">
+          <div className="px-4 pt-4 pb-0">
+            {/* Value header */}
+            <div className="flex items-baseline gap-3 mb-1">
+              <span className="text-2xl font-light font-mono text-foreground tracking-tight">
+                {lastTemp.toFixed(1)}<span className="text-sm text-muted-foreground ml-0.5">°C</span>
+              </span>
+              <span className={`text-xs font-mono ${delta >= 0 ? "text-destructive" : "text-success"}`}>
+                {delta >= 0 ? "+" : ""}{delta.toFixed(2)} ({((delta / prevTemp) * 100).toFixed(2)}%)
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-3">
+              <span className="bg-muted px-1.5 py-0.5 rounded text-[9px] font-mono">TI-R12-01</span>
+              <span>Резервуар-12</span>
+            </div>
           </div>
-          <div className="p-3 h-[260px]">
+
+          {/* Chart area */}
+          <div className="px-0 h-[280px] relative">
+            {/* Baseline reference label */}
+            <div className="absolute right-4 text-[10px] text-muted-foreground" style={{ top: "20%" }}>
+              <span className="text-muted-foreground/60">Базовая</span>
+              <br />
+              <span className="font-mono">{baselineTemp.toFixed(1)}</span>
+            </div>
+
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="gradTI" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0} />
+                  <linearGradient id="termGradTemp" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(0, 0%, 93%)" stopOpacity={0.08} />
+                    <stop offset="60%" stopColor="hsl(0, 0%, 93%)" stopOpacity={0.02} />
+                    <stop offset="100%" stopColor="hsl(0, 0%, 93%)" stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="gradPI" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0.15} />
-                    <stop offset="100%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gradSI" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity={0.15} />
-                    <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity={0} />
+                  <linearGradient id="termGradPress" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(0, 0%, 50%)" stopOpacity={0.06} />
+                    <stop offset="100%" stopColor="hsl(0, 0%, 50%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228, 8%, 18%)" />
-                <XAxis dataKey="time" tick={{ fontSize: 9, fill: "hsl(220, 8%, 45%)" }} stroke="hsl(228, 8%, 18%)" />
-                <YAxis tick={{ fontSize: 9, fill: "hsl(220, 8%, 45%)" }} stroke="hsl(228, 8%, 18%)" />
+                <XAxis
+                  dataKey="time"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 9, fill: "hsl(0, 0%, 35%)", fontFamily: "JetBrains Mono, monospace" }}
+                  interval={7}
+                />
+                <YAxis hide />
+                <ReferenceLine
+                  y={baselineTemp}
+                  stroke="hsl(0, 0%, 25%)"
+                  strokeDasharray="4 4"
+                  strokeWidth={0.5}
+                />
+                <ReferenceLine
+                  y={90}
+                  stroke="hsl(0, 84%, 40%)"
+                  strokeDasharray="2 3"
+                  strokeWidth={0.5}
+                  label={{ value: "90°C порог", position: "left", fontSize: 9, fill: "hsl(0, 84%, 50%)", fontFamily: "JetBrains Mono" }}
+                />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(0, 0%, 10%)",
-                    border: "1px solid hsl(0, 0%, 15%)",
-                    borderRadius: "8px",
+                    backgroundColor: "hsl(0, 0%, 5%)",
+                    border: "1px solid hsl(0, 0%, 18%)",
+                    borderRadius: "6px",
                     fontSize: "10px",
-                    boxShadow: "none",
+                    fontFamily: "JetBrains Mono, monospace",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                    padding: "8px 12px",
                   }}
+                  itemStyle={{ color: "hsl(0, 0%, 80%)" }}
+                  labelStyle={{ color: "hsl(0, 0%, 50%)", fontSize: "9px", marginBottom: "4px" }}
+                  cursor={{ stroke: "hsl(0, 0%, 30%)", strokeDasharray: "3 3" }}
                 />
-                <Legend wrapperStyle={{ fontSize: "10px" }} />
-                <Area type="monotone" dataKey="TI-R12-01" name="Температура °C" stroke="hsl(0, 84%, 60%)" strokeWidth={1.5} fill="url(#gradTI)" dot={false} />
-                <Area type="monotone" dataKey="PI-R12-01" name="Давление бар" stroke="hsl(38, 92%, 50%)" strokeWidth={1.5} fill="url(#gradPI)" dot={false} />
+                <Area
+                  type="monotone"
+                  dataKey="TI-R12-01"
+                  name="Температура °C"
+                  stroke="hsl(0, 0%, 90%)"
+                  strokeWidth={1.5}
+                  fill="url(#termGradTemp)"
+                  dot={false}
+                  activeDot={{ r: 3, fill: "hsl(0, 0%, 93%)", stroke: "hsl(0, 0%, 93%)", strokeWidth: 0 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="PI-R12-01"
+                  name="Давление бар"
+                  stroke="hsl(0, 0%, 45%)"
+                  strokeWidth={1}
+                  fill="url(#termGradPress)"
+                  dot={false}
+                  activeDot={{ r: 2, fill: "hsl(0, 0%, 60%)", stroke: "none" }}
+                />
               </AreaChart>
             </ResponsiveContainer>
+
+            {/* End dot */}
+            <div className="absolute right-0 bottom-[30%] w-2 h-2 rounded-full bg-foreground" />
+          </div>
+
+          {/* Time range chips */}
+          <div className="px-4 py-3 flex items-center gap-1 border-t border-border">
+            {timeRanges.map((r) => (
+              <button
+                key={r}
+                onClick={() => onRangeChange(r)}
+                className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-medium transition-all ${
+                  activeRange === r
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+            <div className="flex-1" />
+            <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-[1.5px] bg-foreground/80 inline-block rounded-full" />
+                Температура
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-[1px] bg-muted-foreground/50 inline-block rounded-full" />
+                Давление
+              </span>
+            </div>
           </div>
         </div>
 
