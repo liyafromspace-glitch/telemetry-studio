@@ -6,13 +6,37 @@ interface ShortcutActions {
   onStateChange?: (state: AppState) => void;
   onRunSimulation?: () => void;
   onSave?: () => void;
+  onEscape?: () => void;
+  onGoToDefinition?: () => void;
+  onFindUsages?: () => void;
 }
 
 export function useKeyboardShortcuts(actions: ShortcutActions) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const meta = e.metaKey || e.ctrlKey;
+
+      // Escape — always available
+      if (e.key === "Escape") {
+        actions.onEscape?.();
+        return;
+      }
+
+      // F12 — Go to definition
+      if (e.key === "F12") {
+        e.preventDefault();
+        actions.onGoToDefinition?.();
+        return;
+      }
+
       if (!meta) return;
+
+      // ⌘⇧F — Find usages
+      if (e.shiftKey && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        actions.onFindUsages?.();
+        return;
+      }
 
       switch (e.key.toLowerCase()) {
         case "k":
@@ -22,11 +46,6 @@ export function useKeyboardShortcuts(actions: ShortcutActions) {
         case "i":
           e.preventDefault();
           actions.onStateChange?.("investigate");
-          break;
-        case "f":
-          if (!e.shiftKey) {
-            // Don't override browser find
-          }
           break;
         case "m":
           e.preventDefault();
