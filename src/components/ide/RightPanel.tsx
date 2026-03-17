@@ -186,7 +186,7 @@ export function RightPanel({ rule }: RightPanelProps) {
       <div className="p-3 border-t border-border mt-auto">
         <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
           <Keyboard className="w-2.5 h-2.5" />
-          <span>⌘Enter проверить · ⌘⇧S активировать · ESC закрыть</span>
+          <span>⌘↵ Validate · ⌘⇧S Deploy · Esc Close</span>
         </div>
       </div>
     </div>
