@@ -91,7 +91,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Входные сигналы" open={openSections.has("signals")} onToggle={() => toggleSection("signals")}>
+      <CollapsibleSection title="Input Signals" open={openSections.has("signals")} onToggle={() => toggleSection("signals")}>
         <div className="p-4 space-y-3 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Тип параметра</span>
