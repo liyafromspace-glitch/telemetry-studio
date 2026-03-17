@@ -103,7 +103,7 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
 
           {/* Change diff */}
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2.5">Изменения:</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2.5">Change Diff:</div>
             <div className="bg-background rounded-xl border border-border p-3 text-xs font-mono space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-destructive bg-destructive/8 px-2.5 py-1 rounded-lg line-through">{mockDiff.before}</span>
