@@ -121,7 +121,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Консоль проверки" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
+      <CollapsibleSection title="Validation Console" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
         <div className="p-4 space-y-1.5 text-[11px] font-mono">
           <div className="flex items-center gap-2 text-success">
             <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
