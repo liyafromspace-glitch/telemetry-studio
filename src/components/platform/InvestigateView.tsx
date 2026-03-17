@@ -9,6 +9,8 @@ import { SystemStory } from "@/components/ide/SystemStory";
 import { IncidentPlayback } from "@/components/ide/IncidentPlayback";
 import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 import { TimelineList, type TimelineItem } from "@/components/ui/timeline-list";
+import { ContextInspector } from "@/components/ide/ContextInspector";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface InvestigateViewProps {
   onNavigateToConfigure: () => void;
@@ -26,46 +28,57 @@ export function InvestigateView({ onNavigateToConfigure, initialSignal }: Invest
   const selected = incidents.find((i) => i.id === selectedId) || incidents[0];
 
   return (
-    <div className="flex-1 flex min-h-0">
-      <div className="w-[280px] min-w-[280px] border-r border-border flex flex-col bg-card">
-        <div className="ide-header">Инциденты</div>
-        {initialSignal && (
-          <div className="px-4 py-2 bg-primary/8 border-b border-border text-[11px] text-primary font-medium">
-            Фильтр: {initialSignal}
+    <ResizablePanelGroup direction="horizontal" className="flex-1">
+      {/* Left: incident list */}
+      <ResizablePanel defaultSize={22} minSize={15} maxSize={35}>
+        <div className="flex flex-col h-full bg-card">
+          <div className="ide-header">Incidents</div>
+          {initialSignal && (
+            <div className="px-4 py-2 bg-primary/8 border-b border-border text-[11px] text-primary font-medium">
+              Filter: {initialSignal}
+            </div>
+          )}
+          <div className="flex-1 overflow-y-auto">
+            {incidents.map((inc) => (
+              <button
+                key={inc.id}
+                onClick={() => setSelectedId(inc.id)}
+                className={`w-full text-left px-4 py-3 border-b border-border transition-colors duration-150 ${
+                  selectedId === inc.id ? "bg-accent" : "hover:bg-accent/30"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-mono text-[10px] text-muted-foreground">{inc.code}</span>
+                  <StatusBadge variant={ruleStatusToVariant(inc.status)} size="xs">
+                    {incidentStatusLabels[inc.status]}
+                  </StatusBadge>
+                </div>
+                <div className="text-xs text-foreground truncate mb-1.5">{inc.title}</div>
+                <div className="flex items-center gap-2">
+                  <StatusBadge
+                    variant={inc.priority === "critical" ? "error" : inc.priority === "high" ? "warning" : "idle"}
+                    size="xs"
+                  >
+                    {inc.priority}
+                  </StatusBadge>
+                  <span className="text-[10px] text-muted-foreground ml-auto">{inc.updatedAt}</span>
+                </div>
+              </button>
+            ))}
           </div>
-        )}
-        <div className="flex-1 overflow-y-auto">
-          {incidents.map((inc) => (
-            <button
-              key={inc.id}
-              onClick={() => setSelectedId(inc.id)}
-              className={`w-full text-left px-4 py-3 border-b border-border transition-colors duration-150 ${
-                selectedId === inc.id ? "bg-accent" : "hover:bg-accent/30"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="font-mono text-[10px] text-muted-foreground">{inc.code}</span>
-                <StatusBadge variant={ruleStatusToVariant(inc.status)} size="xs">
-                  {incidentStatusLabels[inc.status]}
-                </StatusBadge>
-              </div>
-              <div className="text-xs text-foreground truncate mb-1.5">{inc.title}</div>
-              <div className="flex items-center gap-2">
-                <StatusBadge
-                  variant={inc.priority === "critical" ? "error" : inc.priority === "high" ? "warning" : "idle"}
-                  size="xs"
-                >
-                  {inc.priority}
-                </StatusBadge>
-                <span className="text-[10px] text-muted-foreground ml-auto">{inc.updatedAt}</span>
-              </div>
-            </button>
-          ))}
         </div>
-      </div>
-
-      <IncidentDetail incident={selected} onNavigateToConfigure={onNavigateToConfigure} />
-    </div>
+      </ResizablePanel>
+      <ResizableHandle />
+      {/* Center: detail */}
+      <ResizablePanel defaultSize={58} minSize={30}>
+        <IncidentDetail incident={selected} onNavigateToConfigure={onNavigateToConfigure} />
+      </ResizablePanel>
+      <ResizableHandle />
+      {/* Right: context inspector */}
+      <ResizablePanel defaultSize={20} minSize={12} collapsible>
+        <ContextInspector />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
 
@@ -73,37 +86,37 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
   const [activeTab, setActiveTab] = useState<"description" | "story" | "tasks" | "history" | "linked">("description");
 
   const tabs = [
-    { id: "description" as const, label: "Описание" },
-    { id: "story" as const, label: "Хронология" },
-    { id: "tasks" as const, label: "Задачи" },
-    { id: "history" as const, label: "История" },
-    { id: "linked" as const, label: "Связанные" },
+    { id: "description" as const, label: "Inspect" },
+    { id: "story" as const, label: "Trace" },
+    { id: "tasks" as const, label: "Tasks" },
+    { id: "history" as const, label: "Log" },
+    { id: "linked" as const, label: "References" },
   ];
 
   return (
-    <div className="flex-1 flex flex-col min-w-0">
-      <div className="flex items-center justify-between px-5 py-2.5 border-b border-border bg-card">
+    <div className="flex-1 flex flex-col min-w-0 h-full">
+      <div className="flex items-center justify-between px-5 py-2 border-b border-border bg-card shrink-0">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span>Инциденты</span>
+          <span>Incidents</span>
           <ChevronRight className="w-3 h-3" />
           <span className="font-mono">{incident.code}</span>
           <ChevronRight className="w-3 h-3" />
           <span className="text-foreground font-medium">{incident.title}</span>
         </div>
         <button onClick={onNavigateToConfigure} className="btn-primary">
-          Открыть в CONFIGURE <ArrowRight className="w-3 h-3" />
+          Open in EDIT <ArrowRight className="w-3 h-3" />
         </button>
       </div>
 
-      <div className="flex items-center gap-4 px-5 py-2 border-b border-border bg-card text-[11px]">
+      <div className="flex items-center gap-4 px-5 py-2 border-b border-border bg-card text-[11px] shrink-0">
         <span className="flex items-center gap-1.5 text-muted-foreground">
-          Статус:
+          Status:
           <StatusBadge variant={ruleStatusToVariant(incident.status)} size="xs">
             {incidentStatusLabels[incident.status]}
           </StatusBadge>
         </span>
         <span className="flex items-center gap-1.5 text-muted-foreground">
-          Приоритет:
+          Priority:
           <StatusBadge
             variant={incident.priority === "critical" ? "error" : incident.priority === "high" ? "warning" : "idle"}
             size="xs"
@@ -118,7 +131,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         )}
       </div>
 
-      <div className="flex gap-1 p-1.5 border-b border-border bg-card">
+      <div className="flex gap-1 p-1.5 border-b border-border bg-card shrink-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -132,45 +145,34 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-background p-5">
+      <div className="flex-1 overflow-y-auto bg-background p-5 min-h-0">
         {activeTab === "description" && (
-          <div className="space-y-4 animate-fade-in">
+          <div className="space-y-4">
             <div className="vercel-card">
-              <div className="ide-header">Описание</div>
+              <div className="ide-header">Description</div>
               <div className="p-4 text-xs text-foreground leading-relaxed">{incident.description}</div>
             </div>
-
             <IncidentPlayback incident={incident} />
-
-            <CausalChain
-              title="Почему произошёл инцидент"
-              steps={buildIncidentChain(incident)}
-            />
+            <CausalChain title="Root Cause Analysis" steps={buildIncidentChain(incident)} />
             <div className="vercel-card">
-              <div className="ide-header">Связанные параметры</div>
+              <div className="ide-header">Linked Signals</div>
               <div className="p-4 flex flex-wrap gap-2">
                 {incident.linkedParameters.map((p) => (
-                  <StatusBadge key={p} variant="neutral" size="xs" dot={false} className="font-mono">
-                    {p}
-                  </StatusBadge>
+                  <StatusBadge key={p} variant="neutral" size="xs" dot={false} className="font-mono">{p}</StatusBadge>
                 ))}
               </div>
             </div>
           </div>
         )}
 
-        {activeTab === "story" && (
-          <div className="animate-fade-in">
-            <SystemStory incident={incident} />
-          </div>
-        )}
+        {activeTab === "story" && <SystemStory incident={incident} />}
 
         {activeTab === "tasks" && (
-          <div className="vercel-card animate-fade-in">
-            <div className="ide-header">Задачи</div>
+          <div className="vercel-card">
+            <div className="ide-header">Tasks</div>
             <div className="divide-y divide-border">
               {incident.tasks.length === 0 ? (
-                <div className="p-4 text-xs text-muted-foreground">Нет задач</div>
+                <div className="p-4 text-xs text-muted-foreground">No tasks</div>
               ) : (
                 incident.tasks.map((task) => (
                   <div key={task.id} className="px-4 py-3 flex items-center gap-3 text-xs">
@@ -193,31 +195,29 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
         )}
 
         {activeTab === "history" && (
-          <div className="animate-fade-in">
-            <TimelineList
-              title="История"
-              headerIcon={<Clock className="w-3 h-3" />}
-              items={incident.history.map((entry, i): TimelineItem => ({
-                id: `hist-${i}`,
-                label: entry.date,
-                title: entry.action,
-                dotColor: "muted-foreground",
-                meta: (
-                  <span className="flex items-center gap-1">
-                    <User className="w-2.5 h-2.5" /> {entry.user}
-                  </span>
-                ),
-              }))}
-              expandable={false}
-            />
-          </div>
+          <TimelineList
+            title="Execution Log"
+            headerIcon={<Clock className="w-3 h-3" />}
+            items={incident.history.map((entry, i): TimelineItem => ({
+              id: `hist-${i}`,
+              label: entry.date,
+              title: entry.action,
+              dotColor: "muted-foreground",
+              meta: (
+                <span className="flex items-center gap-1">
+                  <User className="w-2.5 h-2.5" /> {entry.user}
+                </span>
+              ),
+            }))}
+            expandable={false}
+          />
         )}
 
         {activeTab === "linked" && (
-          <div className="space-y-4 animate-fade-in">
+          <div className="space-y-4">
             <div className="vercel-card">
               <div className="ide-header flex items-center gap-1.5">
-                <Cpu className="w-3 h-3" /> Функции
+                <Cpu className="w-3 h-3" /> Rules
               </div>
               <div className="p-4 space-y-2">
                 {incident.linkedFunctions.map((f) => (
@@ -229,7 +229,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
             </div>
             <div className="vercel-card">
               <div className="ide-header flex items-center gap-1.5">
-                <Grid3X3 className="w-3 h-3" /> Матрицы
+                <Grid3X3 className="w-3 h-3" /> Matrices
               </div>
               <div className="p-4 space-y-2">
                 {incident.linkedMatrices.map((m) => (
@@ -241,7 +241,7 @@ function IncidentDetail({ incident, onNavigateToConfigure }: { incident: Inciden
             </div>
             <div className="vercel-card">
               <div className="ide-header flex items-center gap-1.5">
-                <FileText className="w-3 h-3" /> Отчёты
+                <FileText className="w-3 h-3" /> Reports
               </div>
               <div className="p-4 space-y-2">
                 {incident.linkedReports.map((r) => (

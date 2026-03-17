@@ -2,6 +2,8 @@ import { liveSignals, type LiveSignal } from "@/data/mockPlatform";
 import { Clock, ArrowRight } from "lucide-react";
 import { LiveSystemPulse } from "@/components/ide/LiveSystemPulse";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TracePanel } from "@/components/ide/TracePanel";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface LiveViewProps {
   onNavigateToInvestigate: (signalParam: string) => void;
@@ -13,7 +15,7 @@ const mockHistory: Record<string, number[]> = {
   "SI-R12-01.PV": [1420, 1430, 1440, 1445, 1450, 1448, 1450],
   "LI-R12-01.PV": [80, 79, 79, 78, 78, 78, 78],
   "XV-R12-01.ST": [1, 1, 1, 1, 1, 1, 1],
-  "TI-R12-02.PV": [83, 84, 86, 88, 89, 90, 91]
+  "TI-R12-02.PV": [83, 84, 86, 88, 89, 90, 91],
 };
 
 function MiniSparkline({ data, status }: { data: number[]; status: string }) {
@@ -46,12 +48,7 @@ function MiniSparkline({ data, status }: { data: number[]; status: string }) {
         strokeLinejoin="round"
         strokeLinecap="round"
       />
-      <circle
-        cx={pts[pts.length - 1].x}
-        cy={pts[pts.length - 1].y}
-        r="2"
-        fill={color}
-      />
+      <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y} r="2" fill={color} />
     </svg>
   );
 }
@@ -61,68 +58,70 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
   const warningCount = liveSignals.filter((s) => s.status === "warning").length;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* Alert banner */}
-      <div className="flex items-center gap-3 px-5 py-2.5 bg-destructive/8 border-b border-destructive/15">
-        <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
-        <span className="text-xs text-destructive font-medium">
-          Перегрев резервуара-12 — температура 96°C, порог 90°C
-        </span>
-        <button
-          onClick={() => onNavigateToInvestigate("TI-R12-01")}
-          className="ml-auto text-[11px] text-destructive hover:text-destructive/80 flex items-center gap-1 font-medium"
-        >
-          Расследовать <ArrowRight className="w-3 h-3" />
-        </button>
-      </div>
+    <ResizablePanelGroup direction="vertical" className="flex-1">
+      <ResizablePanel defaultSize={75} minSize={40}>
+        <div className="flex flex-col h-full min-h-0">
+          {/* Alert banner */}
+          <div className="flex items-center gap-3 px-5 py-2 bg-destructive/8 border-b border-destructive/15 shrink-0">
+            <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+            <span className="text-xs text-destructive font-medium">
+              Runtime error — TI-R12-01.PV = 96°C exceeds threshold 90°C
+            </span>
+            <button
+              onClick={() => onNavigateToInvestigate("TI-R12-01")}
+              className="ml-auto text-[11px] text-destructive hover:text-destructive/80 flex items-center gap-1 font-medium"
+            >
+              Debug <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
 
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-card">
-        <div className="flex items-center gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <div className="w-2 h-2 rounded-full bg-success" />
-              <div className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping opacity-75" />
+          <div className="flex items-center justify-between px-5 py-2.5 border-b border-border bg-card shrink-0">
+            <div className="flex items-center gap-3 text-xs">
+              <div className="relative">
+                <div className="w-2 h-2 rounded-full bg-success" />
+                <div className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping opacity-75" />
+              </div>
+              <LiveSystemPulse />
+            </div>
+            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+              <StatusBadge variant="error" size="xs">{criticalCount} errors</StatusBadge>
+              <StatusBadge variant="warning" size="xs">{warningCount} warnings</StatusBadge>
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-3 h-3" /> Updated: just now
+              </span>
             </div>
           </div>
-          <LiveSystemPulse />
-        </div>
-        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-          <StatusBadge variant="error" size="xs">
-            {criticalCount} критических
-          </StatusBadge>
-          <StatusBadge variant="warning" size="xs">
-            {warningCount} предупреждений
-          </StatusBadge>
-          <span className="flex items-center gap-1.5">
-            <Clock className="w-3 h-3" /> Обновлено: только что
-          </span>
-        </div>
-      </div>
 
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b border-border text-[10px] text-muted-foreground uppercase tracking-wider bg-card">
-              <th className="text-left px-5 py-3 font-medium">Статус</th>
-              <th className="text-left px-5 py-3 font-medium">Параметр</th>
-              <th className="text-right px-5 py-3 font-medium">Текущее</th>
-              <th className="text-right px-5 py-3 font-medium">Ожидаемое</th>
-              <th className="text-left px-5 py-3 font-medium">Ед.</th>
-              <th className="text-center px-5 py-3 font-medium">Тренд</th>
-              <th className="text-left px-5 py-3 font-medium">Функция</th>
-              <th className="text-left px-5 py-3 font-medium">Матрица</th>
-              <th className="text-left px-5 py-3 font-medium">Время</th>
-              <th className="text-center px-5 py-3 font-medium"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {liveSignals.map((signal) => (
-              <SignalRow key={signal.id} signal={signal} onInvestigate={onNavigateToInvestigate} />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          <div className="flex-1 overflow-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border text-[10px] text-muted-foreground uppercase tracking-wider bg-card">
+                  <th className="text-left px-5 py-2.5 font-medium">Status</th>
+                  <th className="text-left px-5 py-2.5 font-medium">Signal</th>
+                  <th className="text-right px-5 py-2.5 font-medium">Value</th>
+                  <th className="text-right px-5 py-2.5 font-medium">Expected</th>
+                  <th className="text-left px-5 py-2.5 font-medium">Unit</th>
+                  <th className="text-center px-5 py-2.5 font-medium">Trend</th>
+                  <th className="text-left px-5 py-2.5 font-medium">Rule</th>
+                  <th className="text-left px-5 py-2.5 font-medium">Matrix</th>
+                  <th className="text-left px-5 py-2.5 font-medium">Time</th>
+                  <th className="text-center px-5 py-2.5 font-medium"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {liveSignals.map((signal) => (
+                  <SignalRow key={signal.id} signal={signal} onInvestigate={onNavigateToInvestigate} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={25} minSize={8} collapsible>
+        <TracePanel />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
 
@@ -137,17 +136,17 @@ function SignalRow({
 
   return (
     <tr className="border-b border-border transition-colors hover:bg-accent/30">
-      <td className="px-5 py-3">
+      <td className="px-5 py-2.5">
         <StatusBadge
           variant={signal.status === "critical" ? "error" : signal.status === "warning" ? "warning" : "success"}
           size="xs"
         >
-          {signal.status === "critical" ? "Error" : signal.status === "warning" ? "Warning" : "OK"}
+          {signal.status === "critical" ? "ERR" : signal.status === "warning" ? "WARN" : "OK"}
         </StatusBadge>
       </td>
-      <td className="px-5 py-3 font-mono text-[11px] text-foreground font-medium">{signal.parameter}</td>
+      <td className="px-5 py-2.5 font-mono text-[11px] text-foreground font-medium">{signal.parameter}</td>
       <td
-        className={`px-5 py-3 text-right font-mono text-[11px] ${
+        className={`px-5 py-2.5 text-right font-mono text-[11px] ${
           signal.status === "critical"
             ? "text-destructive font-medium"
             : signal.status === "warning"
@@ -157,29 +156,21 @@ function SignalRow({
       >
         {signal.currentValue}
       </td>
-      <td className="px-5 py-3 text-right font-mono text-[11px] text-muted-foreground">
-        {signal.expectedValue}
-      </td>
-      <td className="px-5 py-3 text-muted-foreground">{signal.unit}</td>
-      <td className="px-5 py-3 text-center">
+      <td className="px-5 py-2.5 text-right font-mono text-[11px] text-muted-foreground">{signal.expectedValue}</td>
+      <td className="px-5 py-2.5 text-muted-foreground">{signal.unit}</td>
+      <td className="px-5 py-2.5 text-center">
         <MiniSparkline data={sparkData} status={signal.status} />
       </td>
-      <td className="px-5 py-3 text-muted-foreground truncate max-w-[140px]">
-        {signal.linkedFunction}
-      </td>
-      <td className="px-5 py-3 text-muted-foreground truncate max-w-[160px]">
-        {signal.linkedMatrix}
-      </td>
-      <td className="px-5 py-3 text-[10px] text-muted-foreground">
-        {signal.timestamp.split(" ")[1]}
-      </td>
-      <td className="px-5 py-3 text-center">
+      <td className="px-5 py-2.5 text-muted-foreground truncate max-w-[140px]">{signal.linkedFunction}</td>
+      <td className="px-5 py-2.5 text-muted-foreground truncate max-w-[160px]">{signal.linkedMatrix}</td>
+      <td className="px-5 py-2.5 text-[10px] text-muted-foreground">{signal.timestamp.split(" ")[1]}</td>
+      <td className="px-5 py-2.5 text-center">
         {signal.status !== "normal" && (
           <button
             onClick={() => onInvestigate(signal.parameter)}
             className="text-[11px] text-foreground/70 hover:text-foreground flex items-center gap-1 transition-colors"
           >
-            Открыть <ArrowRight className="w-3 h-3" />
+            Inspect <ArrowRight className="w-3 h-3" />
           </button>
         )}
       </td>
