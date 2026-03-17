@@ -201,7 +201,8 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
             disabled={!canActivate}
             className="btn-primary rounded-lg disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            Активировать
+            Deploy
+          </button>
           </button>
         </div>
       </div>

@@ -107,7 +107,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
 
       {/* Code editor */}
       <div className="vercel-card relative overflow-hidden">
-        <div className="ide-header">Функция преобразования</div>
+        <div className="ide-header">Transform Function</div>
         <pre
           className="p-5 text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block"
           style={{ background: 'hsl(0, 0%, 4%)' }}
