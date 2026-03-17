@@ -40,7 +40,7 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
         <div className="p-5 space-y-5">
           {/* Staged deployment pipeline */}
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2.5">Этап развёртывания</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2.5">Deployment Pipeline</div>
             <div className="flex items-center gap-1 w-full overflow-x-auto pb-1">
               {stages.map((stage, i) => (
                 <div key={stage.id} className="flex items-center gap-1 shrink-0">
