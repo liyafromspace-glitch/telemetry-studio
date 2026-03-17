@@ -142,7 +142,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Зависимости" open={openSections.has("deps")} onToggle={() => toggleSection("deps")}>
+      <CollapsibleSection title="Dependencies" open={openSections.has("deps")} onToggle={() => toggleSection("deps")}>
         <div className="p-4 space-y-2 text-xs">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Link2 className="w-3 h-3" />
