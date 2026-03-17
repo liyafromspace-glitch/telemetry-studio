@@ -169,7 +169,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Шаблоны" open={openSections.has("templates")} onToggle={() => toggleSection("templates")}>
+      <CollapsibleSection title="Templates" open={openSections.has("templates")} onToggle={() => toggleSection("templates")}>
         <div className="p-2.5 space-y-0.5">
           {templates.map((t) => (
             <button
