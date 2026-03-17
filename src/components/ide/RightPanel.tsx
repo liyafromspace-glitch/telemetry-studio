@@ -80,9 +80,12 @@ export function RightPanel({ rule }: RightPanelProps) {
           <PropRow label="Версия" value={`v${rule.version}`} />
 
           {rule.name === "Контроль перегрева" && (
-            <div className="mt-3 p-3 rounded-xl border border-primary/15 bg-primary/5 text-[11px] text-foreground leading-relaxed">
-              <div className="text-[9px] text-primary uppercase tracking-wider font-semibold mb-1.5">Пояснение логики</div>
-              Температура достигла 96°C, что превысило порог 90°C. Давление 12.3 бар также выше нормы 11 бар. Это активировало функцию аварийной защиты и закрытие клапана подачи.
+            <div className="mt-3 p-3 rounded-xl border border-destructive/15 bg-destructive/5 text-[11px] font-mono text-foreground leading-relaxed">
+              <div className="text-[9px] text-destructive uppercase tracking-wider font-semibold mb-1.5">Inline Debug</div>
+              <div className="text-muted-foreground">Температура = <span className="text-destructive">96°C</span></div>
+              <div className="text-muted-foreground">Порог = <span className="text-foreground">90°C</span></div>
+              <div className="text-muted-foreground">Давление = <span className="text-warning">12.3 бар</span></div>
+              <div className="text-destructive mt-1">→ rule activated → valve closed</div>
             </div>
           )}
         </div>
