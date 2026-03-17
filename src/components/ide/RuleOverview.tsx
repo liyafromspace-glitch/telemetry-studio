@@ -93,7 +93,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       {/* Properties */}
       <div className="vercel-card">
         <div className="ide-header flex items-center justify-between">
-          <span>Основные свойства</span>
+          <span>Properties</span>
         </div>
         <div className="p-4 grid grid-cols-2 gap-x-8 gap-y-4 text-xs">
           <Property label="Название правила" value={rule.name} />
@@ -107,7 +107,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
 
       {/* Code editor */}
       <div className="vercel-card relative overflow-hidden">
-        <div className="ide-header">Функция преобразования</div>
+        <div className="ide-header">Transform Function</div>
         <pre
           className="p-5 text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block"
           style={{ background: 'hsl(0, 0%, 4%)' }}

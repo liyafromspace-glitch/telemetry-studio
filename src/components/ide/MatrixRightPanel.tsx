@@ -23,7 +23,7 @@ export function MatrixRightPanel({ matrix }: MatrixRightPanelProps) {
   };
 
   return (
-    <div className="w-[300px] min-w-[300px] border-l border-border flex flex-col h-full bg-card overflow-y-auto">
+    <div className="flex flex-col h-full bg-card overflow-y-auto border-l border-border">
       <CollapsibleSection title="Свойства матрицы" open={openSections.has("props")} onToggle={() => toggleSection("props")}>
         <div className="p-3 space-y-2 text-xs">
           <PropRow label="Название" value={matrix.name} />

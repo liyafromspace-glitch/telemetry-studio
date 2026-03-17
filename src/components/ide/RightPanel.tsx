@@ -67,8 +67,8 @@ export function RightPanel({ rule }: RightPanelProps) {
   const sparkData = mockSparklineData[rule.parameterType] || mockSparklineData["Общее"];
 
   return (
-    <div className="w-[300px] min-w-[300px] border-l border-border flex flex-col h-full bg-card overflow-y-auto">
-      <CollapsibleSection title="Логика правила" open={openSections.has("logic")} onToggle={() => toggleSection("logic")}>
+    <div className="flex flex-col h-full bg-card overflow-y-auto border-l border-border">
+      <CollapsibleSection title="Rule Logic" open={openSections.has("logic")} onToggle={() => toggleSection("logic")}>
         <div className="p-4 space-y-2.5 text-xs">
           <PropRow label="Название" value={rule.name} />
           <PropRow label="Тип" value={rule.parameterType} />
@@ -80,15 +80,18 @@ export function RightPanel({ rule }: RightPanelProps) {
           <PropRow label="Версия" value={`v${rule.version}`} />
 
           {rule.name === "Контроль перегрева" && (
-            <div className="mt-3 p-3 rounded-xl border border-primary/15 bg-primary/5 text-[11px] text-foreground leading-relaxed">
-              <div className="text-[9px] text-primary uppercase tracking-wider font-semibold mb-1.5">Пояснение логики</div>
-              Температура достигла 96°C, что превысило порог 90°C. Давление 12.3 бар также выше нормы 11 бар. Это активировало функцию аварийной защиты и закрытие клапана подачи.
+            <div className="mt-3 p-3 rounded-xl border border-destructive/15 bg-destructive/5 text-[11px] font-mono text-foreground leading-relaxed">
+              <div className="text-[9px] text-destructive uppercase tracking-wider font-semibold mb-1.5">Inline Debug</div>
+              <div className="text-muted-foreground">Температура = <span className="text-destructive">96°C</span></div>
+              <div className="text-muted-foreground">Порог = <span className="text-foreground">90°C</span></div>
+              <div className="text-muted-foreground">Давление = <span className="text-warning">12.3 бар</span></div>
+              <div className="text-destructive mt-1">→ rule activated → valve closed</div>
             </div>
           )}
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Входные сигналы" open={openSections.has("signals")} onToggle={() => toggleSection("signals")}>
+      <CollapsibleSection title="Input Signals" open={openSections.has("signals")} onToggle={() => toggleSection("signals")}>
         <div className="p-4 space-y-3 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Тип параметра</span>
@@ -118,7 +121,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Консоль проверки" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
+      <CollapsibleSection title="Validation Console" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
         <div className="p-4 space-y-1.5 text-[11px] font-mono">
           <div className="flex items-center gap-2 text-success">
             <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
@@ -139,7 +142,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Зависимости" open={openSections.has("deps")} onToggle={() => toggleSection("deps")}>
+      <CollapsibleSection title="Dependencies" open={openSections.has("deps")} onToggle={() => toggleSection("deps")}>
         <div className="p-4 space-y-2 text-xs">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Link2 className="w-3 h-3" />
@@ -156,7 +159,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Метаданные" open={openSections.has("metadata")} onToggle={() => toggleSection("metadata")}>
+      <CollapsibleSection title="Metadata" open={openSections.has("metadata")} onToggle={() => toggleSection("metadata")}>
         <div className="p-4 space-y-2.5 text-xs">
           <PropRow label="Автор" value={rule.author} />
           <PropRow label="Создано" value={rule.createdAt} />
@@ -166,7 +169,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Шаблоны" open={openSections.has("templates")} onToggle={() => toggleSection("templates")}>
+      <CollapsibleSection title="Templates" open={openSections.has("templates")} onToggle={() => toggleSection("templates")}>
         <div className="p-2.5 space-y-0.5">
           {templates.map((t) => (
             <button
@@ -183,7 +186,7 @@ export function RightPanel({ rule }: RightPanelProps) {
       <div className="p-3 border-t border-border mt-auto">
         <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
           <Keyboard className="w-2.5 h-2.5" />
-          <span>⌘Enter проверить · ⌘⇧S активировать · ESC закрыть</span>
+          <span>⌘↵ Validate · ⌘⇧S Deploy · Esc Close</span>
         </div>
       </div>
     </div>

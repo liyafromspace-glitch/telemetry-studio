@@ -4,6 +4,8 @@ import {
   FileText, Link2, Cpu, Grid3X3, ChevronRight, Clock, ArrowRight
 } from "lucide-react";
 import { CausalChain, buildReportChain } from "@/components/ide/CausalChain";
+import { ContextInspector } from "@/components/ide/ContextInspector";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, ReferenceLine } from "recharts";
 
 interface AnalyzeViewProps {
@@ -16,45 +18,56 @@ const chartData = Array.from({ length: 40 }, (_, i) => ({
   "PI-R12-01": 9.5 + i * 0.08 + Math.random() * 0.2,
 }));
 
-const timeRanges = ["5м", "15м", "30м", "1ч", "3ч", "12ч", "1д"];
+const timeRanges = ["5m", "15m", "30m", "1h", "3h", "12h", "1d"];
 
 export function AnalyzeView({ onNavigateToInvestigate }: AnalyzeViewProps) {
   const [selectedId, setSelectedId] = useState<string>(reports[0].id);
-  const [activeRange, setActiveRange] = useState("30м");
+  const [activeRange, setActiveRange] = useState("30m");
   const selected = reports.find((r) => r.id === selectedId) || reports[0];
 
   return (
-    <div className="flex-1 flex min-h-0">
-      <div className="w-[260px] min-w-[260px] border-r border-border flex flex-col bg-card">
-        <div className="ide-header">Отчёты</div>
-        <div className="flex-1 overflow-y-auto">
-          {reports.map((rep) => (
-            <button
-              key={rep.id}
-              onClick={() => setSelectedId(rep.id)}
-              className={`w-full text-left px-4 py-3 border-b border-border transition-colors ${
-                selectedId === rep.id ? "bg-accent" : "hover:bg-accent/30"
-              }`}
-            >
-              <div className="flex items-center gap-2 text-xs">
-                <FileText className="w-3 h-3 text-muted-foreground" />
-                <span className="text-foreground truncate">{rep.name}</span>
-              </div>
-              <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                <Clock className="w-2.5 h-2.5" /> {rep.lastGenerated}
-              </div>
-            </button>
-          ))}
+    <ResizablePanelGroup direction="horizontal" className="flex-1">
+      {/* Left: report list */}
+      <ResizablePanel defaultSize={20} minSize={14} maxSize={30}>
+        <div className="flex flex-col h-full bg-card">
+          <div className="ide-header">Traces</div>
+          <div className="flex-1 overflow-y-auto">
+            {reports.map((rep) => (
+              <button
+                key={rep.id}
+                onClick={() => setSelectedId(rep.id)}
+                className={`w-full text-left px-4 py-3 border-b border-border transition-colors ${
+                  selectedId === rep.id ? "bg-accent" : "hover:bg-accent/30"
+                }`}
+              >
+                <div className="flex items-center gap-2 text-xs">
+                  <FileText className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-foreground truncate">{rep.name}</span>
+                </div>
+                <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                  <Clock className="w-2.5 h-2.5" /> {rep.lastGenerated}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-
-      <ReportDetail
-        report={selected}
-        onNavigateToInvestigate={onNavigateToInvestigate}
-        activeRange={activeRange}
-        onRangeChange={setActiveRange}
-      />
-    </div>
+      </ResizablePanel>
+      <ResizableHandle />
+      {/* Center: detail */}
+      <ResizablePanel defaultSize={60} minSize={30}>
+        <ReportDetail
+          report={selected}
+          onNavigateToInvestigate={onNavigateToInvestigate}
+          activeRange={activeRange}
+          onRangeChange={setActiveRange}
+        />
+      </ResizablePanel>
+      <ResizableHandle />
+      {/* Right: context inspector */}
+      <ResizablePanel defaultSize={20} minSize={12} collapsible>
+        <ContextInspector />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
 
@@ -75,21 +88,21 @@ function ReportDetail({
   const baselineTemp = 84;
 
   return (
-    <div className="flex-1 flex flex-col min-w-0">
-      <div className="flex items-center justify-between px-5 py-2.5 border-b border-border bg-card">
+    <div className="flex-1 flex flex-col min-w-0 h-full">
+      <div className="flex items-center justify-between px-5 py-2 border-b border-border bg-card shrink-0">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span>Отчёты</span>
+          <span>Traces</span>
           <ChevronRight className="w-3 h-3" />
           <span className="text-foreground font-medium">{report.name}</span>
         </div>
         <button onClick={onNavigateToInvestigate} className="btn-secondary">
-          Показать связанные инциденты <ArrowRight className="w-3 h-3" />
+          Show linked incidents <ArrowRight className="w-3 h-3" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-background p-5 space-y-5 animate-fade-in">
+      <div className="flex-1 overflow-y-auto bg-background p-5 space-y-5">
         <div className="vercel-card">
-          <div className="ide-header">Описание</div>
+          <div className="ide-header">Description</div>
           <div className="p-4 text-xs text-foreground leading-relaxed">{report.description}</div>
         </div>
 
@@ -132,18 +145,13 @@ function ReportDetail({
                   interval={7}
                 />
                 <YAxis hide />
-                <ReferenceLine
-                  y={baselineTemp}
-                  stroke="hsl(0, 0%, 18%)"
-                  strokeDasharray="4 4"
-                  strokeWidth={0.5}
-                />
+                <ReferenceLine y={baselineTemp} stroke="hsl(0, 0%, 18%)" strokeDasharray="4 4" strokeWidth={0.5} />
                 <ReferenceLine
                   y={90}
                   stroke="hsl(0, 72%, 35%)"
                   strokeDasharray="2 3"
                   strokeWidth={0.5}
-                  label={{ value: "90°C порог", position: "left", fontSize: 9, fill: "hsl(0, 72%, 51%)", fontFamily: "JetBrains Mono" }}
+                  label={{ value: "90°C threshold", position: "left", fontSize: 9, fill: "hsl(0, 72%, 51%)", fontFamily: "JetBrains Mono" }}
                 />
                 <Tooltip
                   contentStyle={{
@@ -162,7 +170,7 @@ function ReportDetail({
                 <Area
                   type="monotone"
                   dataKey="TI-R12-01"
-                  name="Температура °C"
+                  name="Temperature °C"
                   stroke="hsl(160, 60%, 45%)"
                   strokeWidth={1.5}
                   fill="url(#termGradTemp)"
@@ -172,7 +180,7 @@ function ReportDetail({
                 <Area
                   type="monotone"
                   dataKey="PI-R12-01"
-                  name="Давление бар"
+                  name="Pressure bar"
                   stroke="hsl(0, 0%, 35%)"
                   strokeWidth={1}
                   fill="url(#termGradPress)"
@@ -183,7 +191,6 @@ function ReportDetail({
             </ResponsiveContainer>
           </div>
 
-          {/* Time range chips */}
           <div className="px-5 py-3.5 flex items-center gap-1.5 border-t border-border">
             {timeRanges.map((r) => (
               <button
@@ -202,25 +209,22 @@ function ReportDetail({
             <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-[1.5px] bg-primary inline-block rounded-full" />
-                Температура
+                Temperature
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-[1px] bg-muted-foreground/40 inline-block rounded-full" />
-                Давление
+                Pressure
               </span>
             </div>
           </div>
         </div>
 
-        <CausalChain
-          title="Цепочка выполнения"
-          steps={buildReportChain(report)}
-        />
+        <CausalChain title="Execution Chain" steps={buildReportChain(report)} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="vercel-card">
             <div className="ide-header flex items-center gap-1.5">
-              <Link2 className="w-3 h-3" /> Сигналы
+              <Link2 className="w-3 h-3" /> Signals
             </div>
             <div className="p-4 space-y-1.5">
               {report.linkedParameters.map((p) => (
@@ -230,7 +234,7 @@ function ReportDetail({
           </div>
           <div className="vercel-card">
             <div className="ide-header flex items-center gap-1.5">
-              <Cpu className="w-3 h-3" /> Правила
+              <Cpu className="w-3 h-3" /> Rules
             </div>
             <div className="p-4 space-y-1.5">
               {report.linkedFunctions.map((f) => (
@@ -240,7 +244,7 @@ function ReportDetail({
           </div>
           <div className="vercel-card">
             <div className="ide-header flex items-center gap-1.5">
-              <Grid3X3 className="w-3 h-3" /> Матрицы
+              <Grid3X3 className="w-3 h-3" /> Matrices
             </div>
             <div className="p-4 space-y-1.5">
               {report.linkedMatrices.map((m) => (

@@ -34,13 +34,13 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
       <div className="vercel-card w-full max-w-2xl shadow-2xl animate-scale-in">
         <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border">
           <Shield className="w-4 h-4 text-foreground" />
-          <span className="text-sm font-medium text-foreground">Активация правила</span>
+          <span className="text-sm font-medium text-foreground">Deploy Rule</span>
         </div>
 
         <div className="p-5 space-y-5">
           {/* Staged deployment pipeline */}
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2.5">Этап развёртывания</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2.5">Deployment Pipeline</div>
             <div className="flex items-center gap-1 w-full overflow-x-auto pb-1">
               {stages.map((stage, i) => (
                 <div key={stage.id} className="flex items-center gap-1 shrink-0">
@@ -81,7 +81,7 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
 
           {/* Validation results */}
           <div className="space-y-2 text-xs font-mono">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Проверка выполнена:</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Validation passed:</div>
             <div className="flex items-center gap-2 text-success">
               <CheckCircle className="w-3 h-3" /> Синтаксис корректен
             </div>
@@ -103,7 +103,7 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
 
           {/* Change diff */}
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2.5">Изменения:</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2.5">Change Diff:</div>
             <div className="bg-background rounded-xl border border-border p-3 text-xs font-mono space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-destructive bg-destructive/8 px-2.5 py-1 rounded-lg line-through">{mockDiff.before}</span>
@@ -201,7 +201,7 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
             disabled={!canActivate}
             className="btn-primary rounded-lg disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            Активировать
+            Deploy
           </button>
         </div>
       </div>
