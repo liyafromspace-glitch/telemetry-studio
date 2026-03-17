@@ -93,7 +93,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
       {/* Properties */}
       <div className="vercel-card">
         <div className="ide-header flex items-center justify-between">
-          <span>Основные свойства</span>
+          <span>Properties</span>
         </div>
         <div className="p-4 grid grid-cols-2 gap-x-8 gap-y-4 text-xs">
           <Property label="Название правила" value={rule.name} />
