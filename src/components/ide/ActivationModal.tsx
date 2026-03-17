@@ -34,7 +34,7 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
       <div className="vercel-card w-full max-w-2xl shadow-2xl animate-scale-in">
         <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border">
           <Shield className="w-4 h-4 text-foreground" />
-          <span className="text-sm font-medium text-foreground">Активация правила</span>
+          <span className="text-sm font-medium text-foreground">Deploy Rule</span>
         </div>
 
         <div className="p-5 space-y-5">
