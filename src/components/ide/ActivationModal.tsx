@@ -203,7 +203,6 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
           >
             Deploy
           </button>
-          </button>
         </div>
       </div>
     </div>
