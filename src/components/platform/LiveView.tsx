@@ -1,5 +1,5 @@
 import { liveSignals, type LiveSignal } from "@/data/mockPlatform";
-import { Radio, Clock, ArrowRight } from "lucide-react";
+import { Clock, ArrowRight } from "lucide-react";
 import { LiveSystemPulse } from "@/components/ide/LiveSystemPulse";
 import { StatusBadge } from "@/components/ui/status-badge";
 
@@ -16,25 +16,44 @@ const mockHistory: Record<string, number[]> = {
   "TI-R12-02.PV": [83, 84, 86, 88, 89, 90, 91]
 };
 
-function MiniSparkline({ data, status }: {data: number[];status: string;}) {
+function MiniSparkline({ data, status }: { data: number[]; status: string }) {
   const filtered = data.filter((v) => v > 0);
   if (filtered.length < 2) return <span className="text-[10px] text-muted-foreground">—</span>;
   const min = Math.min(...filtered);
   const max = Math.max(...filtered);
   const range = max - min || 1;
-  const w = 60;
-  const h = 18;
+  const w = 64;
+  const h = 20;
   const pts = filtered.map((v, i) => ({
-    x: i / (filtered.length - 1) * w,
-    y: h - (v - min) / range * (h - 4) - 2
+    x: (i / (filtered.length - 1)) * w,
+    y: h - ((v - min) / range) * (h - 4) - 2,
   }));
   const linePoints = pts.map((p) => `${p.x},${p.y}`).join(" ");
-  const color = status === "critical" ? "hsl(0, 84%, 60%)" : status === "warning" ? "hsl(38, 92%, 50%)" : "hsl(0, 0%, 50%)";
+  const color =
+    status === "critical"
+      ? "hsl(0, 72%, 51%)"
+      : status === "warning"
+      ? "hsl(38, 80%, 50%)"
+      : "hsl(0, 0%, 35%)";
 
   return (
     <svg width={w} height={h} className="inline-block">
-      <polyline points={linePoints} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
-    </svg>);
+      <polyline
+        points={linePoints}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <circle
+        cx={pts[pts.length - 1].x}
+        cy={pts[pts.length - 1].y}
+        r="2"
+        fill={color}
+      />
+    </svg>
+  );
 }
 
 export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
@@ -44,18 +63,20 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Alert banner */}
-      <div className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border-b border-destructive/20">
-        
-        <span className="text-xs text-destructive font-medium">⚠ Перегрев резервуара-12 — температура 96°C, порог 90°C</span>
+      <div className="flex items-center gap-3 px-5 py-2.5 bg-destructive/8 border-b border-destructive/15">
+        <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+        <span className="text-xs text-destructive font-medium">
+          Перегрев резервуара-12 — температура 96°C, порог 90°C
+        </span>
         <button
           onClick={() => onNavigateToInvestigate("TI-R12-01")}
-          className="ml-auto text-[10px] text-destructive hover:underline flex items-center gap-0.5">
-          
-          Расследовать <ArrowRight className="w-2.5 h-2.5" />
+          className="ml-auto text-[11px] text-destructive hover:text-destructive/80 flex items-center gap-1 font-medium"
+        >
+          Расследовать <ArrowRight className="w-3 h-3" />
         </button>
       </div>
 
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-card">
         <div className="flex items-center gap-3 text-xs">
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -65,14 +86,14 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
           </div>
           <LiveSystemPulse />
         </div>
-        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
           <StatusBadge variant="error" size="xs">
             {criticalCount} критических
           </StatusBadge>
           <StatusBadge variant="warning" size="xs">
             {warningCount} предупреждений
           </StatusBadge>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1.5">
             <Clock className="w-3 h-3" /> Обновлено: только что
           </span>
         </div>
@@ -82,62 +103,86 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-border text-[10px] text-muted-foreground uppercase tracking-wider bg-card">
-              <th className="text-left px-4 py-2.5 font-medium">Статус</th>
-              <th className="text-left px-4 py-2.5 font-medium">Параметр</th>
-              <th className="text-right px-4 py-2.5 font-medium">Текущее</th>
-              <th className="text-right px-4 py-2.5 font-medium">Ожидаемое</th>
-              <th className="text-left px-4 py-2.5 font-medium">Ед.</th>
-              <th className="text-center px-4 py-2.5 font-medium">Тренд</th>
-              <th className="text-left px-4 py-2.5 font-medium">Функция</th>
-              <th className="text-left px-4 py-2.5 font-medium">Матрица</th>
-              <th className="text-left px-4 py-2.5 font-medium">Время</th>
-              <th className="text-center px-4 py-2.5 font-medium"></th>
+              <th className="text-left px-5 py-3 font-medium">Статус</th>
+              <th className="text-left px-5 py-3 font-medium">Параметр</th>
+              <th className="text-right px-5 py-3 font-medium">Текущее</th>
+              <th className="text-right px-5 py-3 font-medium">Ожидаемое</th>
+              <th className="text-left px-5 py-3 font-medium">Ед.</th>
+              <th className="text-center px-5 py-3 font-medium">Тренд</th>
+              <th className="text-left px-5 py-3 font-medium">Функция</th>
+              <th className="text-left px-5 py-3 font-medium">Матрица</th>
+              <th className="text-left px-5 py-3 font-medium">Время</th>
+              <th className="text-center px-5 py-3 font-medium"></th>
             </tr>
           </thead>
           <tbody>
-            {liveSignals.map((signal) =>
-            <SignalRow key={signal.id} signal={signal} onInvestigate={onNavigateToInvestigate} />
-            )}
+            {liveSignals.map((signal) => (
+              <SignalRow key={signal.id} signal={signal} onInvestigate={onNavigateToInvestigate} />
+            ))}
           </tbody>
         </table>
       </div>
-    </div>);
+    </div>
+  );
 }
 
-function SignalRow({ signal, onInvestigate }: {signal: LiveSignal;onInvestigate: (p: string) => void;}) {
+function SignalRow({
+  signal,
+  onInvestigate,
+}: {
+  signal: LiveSignal;
+  onInvestigate: (p: string) => void;
+}) {
   const sparkData = mockHistory[signal.parameter] || [];
 
   return (
-    <tr className="border-b border-border transition-colors hover:bg-muted/30">
-      <td className="px-4 py-2.5">
+    <tr className="border-b border-border transition-colors hover:bg-accent/30">
+      <td className="px-5 py-3">
         <StatusBadge
           variant={signal.status === "critical" ? "error" : signal.status === "warning" ? "warning" : "success"}
-          size="xs">
+          size="xs"
+        >
           {signal.status === "critical" ? "Error" : signal.status === "warning" ? "Warning" : "OK"}
         </StatusBadge>
       </td>
-      <td className="px-4 py-2.5 font-mono text-[11px] text-foreground font-medium">{signal.parameter}</td>
-      <td className={`px-4 py-2.5 text-right font-mono text-[11px] ${
-      signal.status === "critical" ? "text-destructive font-medium" : signal.status === "warning" ? "text-warning" : "text-foreground"}`
-      }>
+      <td className="px-5 py-3 font-mono text-[11px] text-foreground font-medium">{signal.parameter}</td>
+      <td
+        className={`px-5 py-3 text-right font-mono text-[11px] ${
+          signal.status === "critical"
+            ? "text-destructive font-medium"
+            : signal.status === "warning"
+            ? "text-warning"
+            : "text-foreground"
+        }`}
+      >
         {signal.currentValue}
       </td>
-      <td className="px-4 py-2.5 text-right font-mono text-[11px] text-muted-foreground">{signal.expectedValue}</td>
-      <td className="px-4 py-2.5 text-muted-foreground">{signal.unit}</td>
-      <td className="px-4 py-2.5 text-center">
+      <td className="px-5 py-3 text-right font-mono text-[11px] text-muted-foreground">
+        {signal.expectedValue}
+      </td>
+      <td className="px-5 py-3 text-muted-foreground">{signal.unit}</td>
+      <td className="px-5 py-3 text-center">
         <MiniSparkline data={sparkData} status={signal.status} />
       </td>
-      <td className="px-4 py-2.5 text-muted-foreground truncate max-w-[140px]">{signal.linkedFunction}</td>
-      <td className="px-4 py-2.5 text-muted-foreground truncate max-w-[160px]">{signal.linkedMatrix}</td>
-      <td className="px-4 py-2.5 text-[10px] text-muted-foreground">{signal.timestamp.split(" ")[1]}</td>
-      <td className="px-4 py-2.5 text-center">
-        {signal.status !== "normal" &&
-        <button
-          onClick={() => onInvestigate(signal.parameter)}
-          className="text-[10px] text-foreground hover:underline flex items-center gap-0.5">
-            Расследовать <ArrowRight className="w-2.5 h-2.5" />
-          </button>
-        }
+      <td className="px-5 py-3 text-muted-foreground truncate max-w-[140px]">
+        {signal.linkedFunction}
       </td>
-    </tr>);
+      <td className="px-5 py-3 text-muted-foreground truncate max-w-[160px]">
+        {signal.linkedMatrix}
+      </td>
+      <td className="px-5 py-3 text-[10px] text-muted-foreground">
+        {signal.timestamp.split(" ")[1]}
+      </td>
+      <td className="px-5 py-3 text-center">
+        {signal.status !== "normal" && (
+          <button
+            onClick={() => onInvestigate(signal.parameter)}
+            className="text-[11px] text-foreground/70 hover:text-foreground flex items-center gap-1 transition-colors"
+          >
+            Открыть <ArrowRight className="w-3 h-3" />
+          </button>
+        )}
+      </td>
+    </tr>
+  );
 }
