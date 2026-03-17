@@ -27,8 +27,8 @@ export function CenterPanel({ rule }: CenterPanelProps) {
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full">
       {/* Breadcrumb + actions */}
-      <div className="flex items-center justify-between px-4 py-2 border-b glass-toolbar">
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+      <div className="flex items-center justify-between px-5 py-2.5 border-b border-border bg-card">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span className="hover:text-foreground cursor-pointer transition-colors">Производственная среда</span>
           <ChevronRight className="w-3 h-3" />
           <span className="hover:text-foreground cursor-pointer transition-colors flex items-center gap-0.5">
@@ -38,7 +38,7 @@ export function CenterPanel({ rule }: CenterPanelProps) {
           <ChevronRight className="w-3 h-3" />
           <span className="text-foreground font-semibold">{rule.name}</span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <button className="btn-secondary">
             <CheckCircle className="w-3 h-3" />
             Проверить
@@ -58,12 +58,12 @@ export function CenterPanel({ rule }: CenterPanelProps) {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-0.5 p-1 border-b glass-toolbar">
+      <div className="flex gap-1 p-1.5 border-b border-border bg-card">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-colors duration-150 ${
+            className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors duration-150 ${
               activeTab === tab.id
                 ? "bg-accent text-foreground"
                 : "text-muted-foreground hover:text-foreground"

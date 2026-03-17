@@ -1,5 +1,5 @@
 import { Rule, statusLabels } from "@/data/mockRules";
-import { CheckCircle, AlertTriangle, XCircle, Keyboard, ChevronDown, Cpu, Link2, FileText, Zap } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, Keyboard, Cpu, Link2, FileText, Zap } from "lucide-react";
 import { useState } from "react";
 import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 import { CollapsibleSection, PropRow } from "@/components/ui/collapsible-section";
@@ -30,8 +30,8 @@ function Sparkline({ data }: { data: number[] }) {
   const w = 140;
   const h = 28;
   const pts = data.map((v, i) => ({
-    x: i / (data.length - 1) * w,
-    y: h - (v - min) / range * (h - 6) - 3
+    x: (i / (data.length - 1)) * w,
+    y: h - ((v - min) / range) * (h - 6) - 3,
   }));
   const linePoints = pts.map((p) => `${p.x},${p.y}`).join(" ");
   const areaPoints = `0,${h} ${linePoints} ${w},${h}`;
@@ -39,18 +39,14 @@ function Sparkline({ data }: { data: number[] }) {
   return (
     <svg width={w} height={h} className="inline-block">
       <defs>
-        <linearGradient id="sparkGlowLine" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.3" />
-          <stop offset="50%" stopColor="hsl(180, 80%, 60%)" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="1" />
-        </linearGradient>
-        <linearGradient id="sparkGlowArea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="hsl(185, 70%, 50%)" stopOpacity="0" />
+        <linearGradient id="sparkArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="hsl(160, 60%, 45%)" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="hsl(160, 60%, 45%)" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <polygon points={areaPoints} fill="url(#sparkGlowArea)" />
-      <polyline points={linePoints} fill="none" stroke="url(#sparkGlowLine)" strokeWidth="1.5" strokeLinejoin="round" />
+      <polygon points={areaPoints} fill="url(#sparkArea)" />
+      <polyline points={linePoints} fill="none" stroke="hsl(160, 60%, 45%)" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y} r="2" fill="hsl(160, 60%, 45%)" />
     </svg>
   );
 }
@@ -73,7 +69,7 @@ export function RightPanel({ rule }: RightPanelProps) {
   return (
     <div className="w-[300px] min-w-[300px] border-l border-border flex flex-col h-full bg-card overflow-y-auto">
       <CollapsibleSection title="Логика правила" open={openSections.has("logic")} onToggle={() => toggleSection("logic")}>
-        <div className="p-3 space-y-2 text-xs">
+        <div className="p-4 space-y-2.5 text-xs">
           <PropRow label="Название" value={rule.name} />
           <PropRow label="Тип" value={rule.parameterType} />
           <PropRow label="Статус">
@@ -83,10 +79,9 @@ export function RightPanel({ rule }: RightPanelProps) {
           </PropRow>
           <PropRow label="Версия" value={`v${rule.version}`} />
 
-          {/* Explain Logic */}
           {rule.name === "Контроль перегрева" && (
-            <div className="mt-2 p-2 rounded-md border border-primary/20 bg-primary/5 text-[10px] text-foreground leading-relaxed">
-              <div className="text-[9px] text-primary uppercase tracking-wider font-semibold mb-1">Пояснение логики</div>
+            <div className="mt-3 p-3 rounded-xl border border-primary/15 bg-primary/5 text-[11px] text-foreground leading-relaxed">
+              <div className="text-[9px] text-primary uppercase tracking-wider font-semibold mb-1.5">Пояснение логики</div>
               Температура достигла 96°C, что превысило порог 90°C. Давление 12.3 бар также выше нормы 11 бар. Это активировало функцию аварийной защиты и закрытие клапана подачи.
             </div>
           )}
@@ -94,7 +89,7 @@ export function RightPanel({ rule }: RightPanelProps) {
       </CollapsibleSection>
 
       <CollapsibleSection title="Входные сигналы" open={openSections.has("signals")} onToggle={() => toggleSection("signals")}>
-        <div className="p-3 space-y-2.5 text-xs">
+        <div className="p-4 space-y-3 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Тип параметра</span>
             <span className="text-foreground font-medium">{rule.parameterType}</span>
@@ -104,57 +99,57 @@ export function RightPanel({ rule }: RightPanelProps) {
             <Sparkline data={sparkData} />
           </div>
           <div className="flex gap-1 flex-wrap justify-end">
-            {sparkData.map((v, i) =>
+            {sparkData.map((v, i) => (
               <span key={i} className="sparkline-value">{v}</span>
-            )}
+            ))}
           </div>
-          {rule.parameterType === "Температура" &&
-            <div className="flex items-start gap-1.5 text-destructive bg-destructive/10 p-2 rounded-md border border-destructive/20">
+          {rule.parameterType === "Температура" && (
+            <div className="flex items-start gap-2 text-destructive bg-destructive/8 p-3 rounded-xl border border-destructive/15">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span className="text-[10px] font-medium">Текущее значение 96°C превышает порог 90°C</span>
+              <span className="text-[11px] font-medium">Текущее значение 96°C превышает порог 90°C</span>
             </div>
-          }
-          {rule.parameterType === "Давление" &&
-            <div className="flex items-start gap-1.5 text-warning bg-warning/10 p-2 rounded-md border border-warning/20">
+          )}
+          {rule.parameterType === "Давление" && (
+            <div className="flex items-start gap-2 text-warning bg-warning/8 p-3 rounded-xl border border-warning/15">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span className="text-[10px] font-medium">Давление 12.3 бар приближается к критическому</span>
+              <span className="text-[11px] font-medium">Давление 12.3 бар приближается к критическому</span>
             </div>
-          }
+          )}
         </div>
       </CollapsibleSection>
 
       <CollapsibleSection title="Консоль проверки" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
-        <div className="p-3 space-y-1 text-[11px] font-mono">
-          <div className="flex items-center gap-1.5 text-success">
+        <div className="p-4 space-y-1.5 text-[11px] font-mono">
+          <div className="flex items-center gap-2 text-success">
             <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
             Синтаксис OK
           </div>
-          {rule.warningCount > 0 &&
-            <div className="flex items-center gap-1.5 text-warning">
+          {rule.warningCount > 0 && (
+            <div className="flex items-center gap-2 text-warning">
               <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
               {rule.warningCount} предупр.
             </div>
-          }
-          {rule.errorCount > 0 &&
-            <div className="flex items-center gap-1.5 text-destructive">
+          )}
+          {rule.errorCount > 0 && (
+            <div className="flex items-center gap-2 text-destructive">
               <XCircle className="w-3.5 h-3.5 flex-shrink-0" />
               {rule.errorCount} ошибок
             </div>
-          }
+          )}
         </div>
       </CollapsibleSection>
 
       <CollapsibleSection title="Зависимости" open={openSections.has("deps")} onToggle={() => toggleSection("deps")}>
-        <div className="p-3 space-y-1.5 text-xs">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
+        <div className="p-4 space-y-2 text-xs">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <Link2 className="w-3 h-3" />
             <span>{rule.parametersLinked} сигналов</span>
           </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <FileText className="w-3 h-3" />
             <span>{rule.reportsUsed} отчётов</span>
           </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <Cpu className="w-3 h-3" />
             <span>2 правила</span>
           </div>
@@ -162,7 +157,7 @@ export function RightPanel({ rule }: RightPanelProps) {
       </CollapsibleSection>
 
       <CollapsibleSection title="Метаданные" open={openSections.has("metadata")} onToggle={() => toggleSection("metadata")}>
-        <div className="p-3 space-y-2 text-xs">
+        <div className="p-4 space-y-2.5 text-xs">
           <PropRow label="Автор" value={rule.author} />
           <PropRow label="Создано" value={rule.createdAt} />
           <PropRow label="Проверка" value={rule.lastCheck} />
@@ -172,20 +167,21 @@ export function RightPanel({ rule }: RightPanelProps) {
       </CollapsibleSection>
 
       <CollapsibleSection title="Шаблоны" open={openSections.has("templates")} onToggle={() => toggleSection("templates")}>
-        <div className="p-2 space-y-0.5">
-          {templates.map((t) =>
+        <div className="p-2.5 space-y-0.5">
+          {templates.map((t) => (
             <button
               key={t.id}
-              className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors">
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+            >
               <Zap className="w-3 h-3" />
               <span>{t.name}</span>
             </button>
-          )}
+          ))}
         </div>
       </CollapsibleSection>
 
-      <div className="p-2.5 border-t border-border mt-auto">
-        <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
+      <div className="p-3 border-t border-border mt-auto">
+        <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
           <Keyboard className="w-2.5 h-2.5" />
           <span>⌘Enter проверить · ⌘⇧S активировать · ESC закрыть</span>
         </div>
