@@ -68,7 +68,7 @@ export function RightPanel({ rule }: RightPanelProps) {
 
   return (
     <div className="w-[300px] min-w-[300px] border-l border-border flex flex-col h-full bg-card overflow-y-auto">
-      <CollapsibleSection title="Логика правила" open={openSections.has("logic")} onToggle={() => toggleSection("logic")}>
+      <CollapsibleSection title="Rule Logic" open={openSections.has("logic")} onToggle={() => toggleSection("logic")}>
         <div className="p-4 space-y-2.5 text-xs">
           <PropRow label="Название" value={rule.name} />
           <PropRow label="Тип" value={rule.parameterType} />
