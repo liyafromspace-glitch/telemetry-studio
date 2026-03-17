@@ -159,7 +159,7 @@ export function RightPanel({ rule }: RightPanelProps) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Метаданные" open={openSections.has("metadata")} onToggle={() => toggleSection("metadata")}>
+      <CollapsibleSection title="Metadata" open={openSections.has("metadata")} onToggle={() => toggleSection("metadata")}>
         <div className="p-4 space-y-2.5 text-xs">
           <PropRow label="Автор" value={rule.author} />
           <PropRow label="Создано" value={rule.createdAt} />
