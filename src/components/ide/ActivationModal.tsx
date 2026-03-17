@@ -81,7 +81,7 @@ export function ActivationModal({ rule, onClose, onActivate }: ActivationModalPr
 
           {/* Validation results */}
           <div className="space-y-2 text-xs font-mono">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Проверка выполнена:</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Validation passed:</div>
             <div className="flex items-center gap-2 text-success">
               <CheckCircle className="w-3 h-3" /> Синтаксис корректен
             </div>
