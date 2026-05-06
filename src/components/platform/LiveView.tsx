@@ -61,33 +61,44 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
     <ResizablePanelGroup direction="vertical" className="flex-1">
       <ResizablePanel defaultSize={75} minSize={40}>
         <div className="flex flex-col h-full min-h-0">
-          {/* Alert banner */}
-          <div className="flex items-center gap-3 px-5 py-2 bg-destructive/8 border-b border-destructive/15 shrink-0">
-            <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
-            <span className="text-xs text-destructive font-medium">
-              Runtime error — TI-R12-01.PV = 96°C exceeds threshold 90°C
-            </span>
+          {/* Dominant alert moment */}
+          <div className="alert-dominant flex items-start gap-4 px-6 py-4 shrink-0">
+            <div className="mt-1 relative shrink-0">
+              <div className="w-2 h-2 rounded-full bg-destructive" />
+              <div className="absolute inset-0 w-2 h-2 rounded-full bg-destructive animate-ping opacity-60" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="type-state text-destructive/80 mb-1">Runtime error · TI-R12-01</div>
+              <div className="type-object text-[15px] text-foreground">
+                Temperature exceeds threshold
+              </div>
+              <div className="type-evidence mt-1.5 text-muted-foreground">
+                <span className="text-destructive font-semibold">96°C</span>
+                <span className="text-muted-foreground/50"> / 90°C threshold</span>
+                <span className="text-muted-foreground/40"> · 6°C over</span>
+              </div>
+            </div>
             <button
               onClick={() => onNavigateToInvestigate("TI-R12-01")}
-              className="ml-auto text-[11px] text-destructive hover:text-destructive/80 flex items-center gap-1 font-medium"
+              className="shrink-0 px-3 py-1.5 text-[11px] font-medium bg-destructive/15 hover:bg-destructive/25 text-destructive rounded-md flex items-center gap-1.5 transition-colors border border-destructive/20"
             >
               Debug <ArrowRight className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="flex items-center justify-between px-5 py-2.5 border-b border-border bg-card shrink-0">
+          <div className="flex items-center justify-between px-6 py-2 border-b border-border/60 shrink-0">
             <div className="flex items-center gap-3 text-xs">
               <div className="relative">
-                <div className="w-2 h-2 rounded-full bg-success" />
-                <div className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping opacity-75" />
+                <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                <div className="absolute inset-0 w-1.5 h-1.5 rounded-full bg-success animate-ping opacity-75" />
               </div>
               <LiveSystemPulse />
             </div>
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-              <StatusBadge variant="error" size="xs">{criticalCount} errors</StatusBadge>
-              <StatusBadge variant="warning" size="xs">{warningCount} warnings</StatusBadge>
+            <div className="flex items-center gap-4 type-metadata">
+              <span><span className="text-destructive font-medium">{criticalCount}</span> errors</span>
+              <span><span className="text-warning font-medium">{warningCount}</span> warnings</span>
               <span className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3" /> Updated: just now
+                <Clock className="w-3 h-3" /> just now
               </span>
             </div>
           </div>
