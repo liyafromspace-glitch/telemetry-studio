@@ -61,33 +61,44 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
     <ResizablePanelGroup direction="vertical" className="flex-1">
       <ResizablePanel defaultSize={75} minSize={40}>
         <div className="flex flex-col h-full min-h-0">
-          {/* Alert banner */}
-          <div className="flex items-center gap-3 px-5 py-2 bg-destructive/8 border-b border-destructive/15 shrink-0">
-            <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
-            <span className="text-xs text-destructive font-medium">
-              Runtime error — TI-R12-01.PV = 96°C exceeds threshold 90°C
-            </span>
+          {/* Dominant alert moment */}
+          <div className="alert-dominant flex items-start gap-4 px-6 py-4 shrink-0">
+            <div className="mt-1 relative shrink-0">
+              <div className="w-2 h-2 rounded-full bg-destructive" />
+              <div className="absolute inset-0 w-2 h-2 rounded-full bg-destructive animate-ping opacity-60" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="type-state text-destructive/80 mb-1">Runtime error · TI-R12-01</div>
+              <div className="type-object text-[15px] text-foreground">
+                Temperature exceeds threshold
+              </div>
+              <div className="type-evidence mt-1.5 text-muted-foreground">
+                <span className="text-destructive font-semibold">96°C</span>
+                <span className="text-muted-foreground/50"> / 90°C threshold</span>
+                <span className="text-muted-foreground/40"> · 6°C over</span>
+              </div>
+            </div>
             <button
               onClick={() => onNavigateToInvestigate("TI-R12-01")}
-              className="ml-auto text-[11px] text-destructive hover:text-destructive/80 flex items-center gap-1 font-medium"
+              className="shrink-0 px-3 py-1.5 text-[11px] font-medium bg-destructive/15 hover:bg-destructive/25 text-destructive rounded-md flex items-center gap-1.5 transition-colors border border-destructive/20"
             >
               Debug <ArrowRight className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="flex items-center justify-between px-5 py-2.5 border-b border-border bg-card shrink-0">
+          <div className="flex items-center justify-between px-6 py-2 border-b border-border/60 shrink-0">
             <div className="flex items-center gap-3 text-xs">
               <div className="relative">
-                <div className="w-2 h-2 rounded-full bg-success" />
-                <div className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping opacity-75" />
+                <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                <div className="absolute inset-0 w-1.5 h-1.5 rounded-full bg-success animate-ping opacity-75" />
               </div>
               <LiveSystemPulse />
             </div>
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-              <StatusBadge variant="error" size="xs">{criticalCount} errors</StatusBadge>
-              <StatusBadge variant="warning" size="xs">{warningCount} warnings</StatusBadge>
+            <div className="flex items-center gap-4 type-metadata">
+              <span><span className="text-destructive font-medium">{criticalCount}</span> errors</span>
+              <span><span className="text-warning font-medium">{warningCount}</span> warnings</span>
               <span className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3" /> Updated: just now
+                <Clock className="w-3 h-3" /> just now
               </span>
             </div>
           </div>
@@ -95,17 +106,17 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
           <div className="flex-1 overflow-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-border text-[10px] text-muted-foreground uppercase tracking-wider bg-card">
-                  <th className="text-left px-5 py-2.5 font-medium">Status</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Signal</th>
-                  <th className="text-right px-5 py-2.5 font-medium">Value</th>
-                  <th className="text-right px-5 py-2.5 font-medium">Expected</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Unit</th>
-                  <th className="text-center px-5 py-2.5 font-medium">Trend</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Rule</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Matrix</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Time</th>
-                  <th className="text-center px-5 py-2.5 font-medium"></th>
+                <tr className="border-b border-border/50 type-state">
+                  <th className="text-left px-6 py-2 font-medium w-8"></th>
+                  <th className="text-left px-3 py-2 font-medium">Signal</th>
+                  <th className="text-right px-3 py-2 font-medium">Value</th>
+                  <th className="text-right px-3 py-2 font-medium">Expected</th>
+                  <th className="text-left px-3 py-2 font-medium">Unit</th>
+                  <th className="text-center px-3 py-2 font-medium">Trend</th>
+                  <th className="text-left px-3 py-2 font-medium">Rule</th>
+                  <th className="text-left px-3 py-2 font-medium">Matrix</th>
+                  <th className="text-left px-3 py-2 font-medium">Time</th>
+                  <th className="text-center px-6 py-2 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
@@ -133,22 +144,21 @@ function SignalRow({
   onInvestigate: (p: string) => void;
 }) {
   const sparkData = mockHistory[signal.parameter] || [];
+  const dotColor =
+    signal.status === "critical" ? "bg-destructive"
+    : signal.status === "warning" ? "bg-warning"
+    : "bg-muted-foreground/30";
 
   return (
-    <tr className="border-b border-border transition-colors hover:bg-accent/30">
-      <td className="px-5 py-2.5">
-        <StatusBadge
-          variant={signal.status === "critical" ? "error" : signal.status === "warning" ? "warning" : "success"}
-          size="xs"
-        >
-          {signal.status === "critical" ? "ERR" : signal.status === "warning" ? "WARN" : "OK"}
-        </StatusBadge>
+    <tr className="border-b border-border/40 transition-colors hover:bg-accent/20 group">
+      <td className="px-6 py-2.5">
+        <div className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
       </td>
-      <td className="px-5 py-2.5 font-mono text-[11px] text-foreground font-medium">{signal.parameter}</td>
+      <td className="px-3 py-2.5 type-evidence font-medium">{signal.parameter}</td>
       <td
-        className={`px-5 py-2.5 text-right font-mono text-[11px] ${
+        className={`px-3 py-2.5 text-right type-evidence ${
           signal.status === "critical"
-            ? "text-destructive font-medium"
+            ? "text-destructive font-semibold"
             : signal.status === "warning"
             ? "text-warning"
             : "text-foreground"
@@ -156,19 +166,19 @@ function SignalRow({
       >
         {signal.currentValue}
       </td>
-      <td className="px-5 py-2.5 text-right font-mono text-[11px] text-muted-foreground">{signal.expectedValue}</td>
-      <td className="px-5 py-2.5 text-muted-foreground">{signal.unit}</td>
-      <td className="px-5 py-2.5 text-center">
+      <td className="px-3 py-2.5 text-right type-evidence text-muted-foreground/70">{signal.expectedValue}</td>
+      <td className="px-3 py-2.5 type-metadata">{signal.unit}</td>
+      <td className="px-3 py-2.5 text-center">
         <MiniSparkline data={sparkData} status={signal.status} />
       </td>
-      <td className="px-5 py-2.5 text-muted-foreground truncate max-w-[140px]">{signal.linkedFunction}</td>
-      <td className="px-5 py-2.5 text-muted-foreground truncate max-w-[160px]">{signal.linkedMatrix}</td>
-      <td className="px-5 py-2.5 text-[10px] text-muted-foreground">{signal.timestamp.split(" ")[1]}</td>
-      <td className="px-5 py-2.5 text-center">
+      <td className="px-3 py-2.5 type-metadata truncate max-w-[140px]">{signal.linkedFunction}</td>
+      <td className="px-3 py-2.5 type-metadata truncate max-w-[160px]">{signal.linkedMatrix}</td>
+      <td className="px-3 py-2.5 type-metadata font-mono">{signal.timestamp.split(" ")[1]}</td>
+      <td className="px-6 py-2.5 text-center">
         {signal.status !== "normal" && (
           <button
             onClick={() => onInvestigate(signal.parameter)}
-            className="text-[11px] text-foreground/70 hover:text-foreground flex items-center gap-1 transition-colors"
+            className="text-[11px] text-muted-foreground/60 hover:text-foreground flex items-center gap-1 transition-colors opacity-0 group-hover:opacity-100"
           >
             Inspect <ArrowRight className="w-3 h-3" />
           </button>

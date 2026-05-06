@@ -43,59 +43,68 @@ interface RuleOverviewProps {
 
 export function RuleOverview({ rule }: RuleOverviewProps) {
   return (
-    <div className="p-5 space-y-5">
-      {/* Status cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="stat-card">
-          <div className="stat-card-label">Статус</div>
-          <div className="stat-card-value">
-            <StatusBadge variant={ruleStatusToVariant(rule.status)} size="md">
-              {statusLabels[rule.status]}
-            </StatusBadge>
-          </div>
+    <div className="px-6 pt-6 pb-8 space-y-8">
+      {/* Object header */}
+      <div className="space-y-1.5">
+        <div className="type-state">Rule · v{rule.version}</div>
+        <h1 className="type-object text-[22px]">{rule.name}</h1>
+        <div className="flex items-center gap-3 type-metadata">
+          <StatusBadge variant={ruleStatusToVariant(rule.status)} size="xs">
+            {statusLabels[rule.status]}
+          </StatusBadge>
+          <span>{rule.parameterType}</span>
+          <span>·</span>
+          <span>{rule.author}</span>
+          <span>·</span>
+          <span className="font-mono">{rule.id}</span>
         </div>
+      </div>
+
+      {/* Stat strip — borderless, divider-separated */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 border-y border-border/60">
         <div className="stat-card">
           <div className="stat-card-label">
-            <GitBranch className="w-3.5 h-3.5 text-primary" />
-            Версия
+            <GitBranch className="w-3 h-3 text-muted-foreground/60" />
+            Version
           </div>
           <div className="stat-card-value">v{rule.version}</div>
         </div>
         <div className="stat-card">
           <div className="stat-card-label">
-            <FileText className="w-3.5 h-3.5 text-primary" />
-            Отчёты
+            <FileText className="w-3 h-3 text-muted-foreground/60" />
+            Reports
           </div>
           <div className="stat-card-value">{rule.reportsUsed}</div>
         </div>
         <div className="stat-card">
           <div className="stat-card-label">
-            <Link2 className="w-3.5 h-3.5 text-primary" />
-            Параметры
+            <Link2 className="w-3 h-3 text-muted-foreground/60" />
+            Linked
           </div>
           <div className="stat-card-value">{rule.parametersLinked}</div>
         </div>
         <div className="stat-card">
           <div className="stat-card-label">
             {rule.errorCount > 0 ? (
-              <XCircle className="w-3.5 h-3.5 text-destructive" />
+              <XCircle className="w-3 h-3 text-destructive" />
             ) : rule.warningCount > 0 ? (
-              <AlertTriangle className="w-3.5 h-3.5 text-warning" />
+              <AlertTriangle className="w-3 h-3 text-warning" />
             ) : (
-              <CheckCircle className="w-3.5 h-3.5 text-success" />
+              <CheckCircle className="w-3 h-3 text-success" />
             )}
-            Проблемы
+            Issues
           </div>
-          <div className="stat-card-value">{rule.errorCount} / {rule.warningCount}</div>
+          <div className="stat-card-value">
+            {rule.errorCount}
+            <span className="text-muted-foreground/50 font-normal"> / {rule.warningCount}</span>
+          </div>
         </div>
       </div>
 
-      {/* Properties */}
-      <div className="vercel-card">
-        <div className="ide-header flex items-center justify-between">
-          <span>Properties</span>
-        </div>
-        <div className="p-4 grid grid-cols-2 gap-x-8 gap-y-4 text-xs">
+      {/* Properties — flat */}
+      <div className="space-y-3">
+        <div className="type-state">Properties</div>
+        <div className="grid grid-cols-2 gap-x-10 gap-y-3 text-xs">
           <Property label="Название правила" value={rule.name} />
           <Property label="Тип параметра" value={rule.parameterType} />
           <Property label="Автор" value={rule.author} />
@@ -105,13 +114,10 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
         </div>
       </div>
 
-      {/* Code editor */}
-      <div className="vercel-card relative overflow-hidden">
-        <div className="ide-header">Transform Function</div>
-        <pre
-          className="p-5 text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block"
-          style={{ background: 'hsl(0, 0%, 4%)' }}
-        >
+      {/* Code — flat */}
+      <div className="space-y-3">
+        <div className="type-state">Transform Function</div>
+        <pre className="text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block py-4 px-4 rounded-lg border border-border/50 bg-[hsl(0_0%_4%)]">
           <code>{highlightCode(rule.code)}</code>
         </pre>
       </div>

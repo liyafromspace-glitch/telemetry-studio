@@ -40,12 +40,10 @@ export function ContextInspector({ className }: ContextInspectorProps) {
   }
 
   return (
-    <div className={`border-l border-border bg-card flex flex-col min-h-0 overflow-y-auto ${className}`}>
+    <div className={`border-l border-border/60 bg-card/40 flex flex-col min-h-0 overflow-y-auto ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border shrink-0">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Inspector
-        </span>
+      <div className="flex items-center justify-between px-5 py-3 shrink-0">
+        <span className="type-state">Inspector</span>
         <button
           onClick={() => setCollapsed(true)}
           className="text-muted-foreground hover:text-foreground transition-colors"
@@ -54,27 +52,23 @@ export function ContextInspector({ className }: ContextInspectorProps) {
         </button>
       </div>
 
-      {/* Active Signal */}
+      {/* Active Signal — hero */}
       {criticalSignal && (
         <InspectorSection
           icon={<Radio className="w-3 h-3" />}
-          title="Активный сигнал"
+          title="Active signal"
         >
-          <div className="space-y-2 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[11px] text-foreground">{criticalSignal.parameter}</span>
-              <StatusBadge variant="error" size="xs">critical</StatusBadge>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <div>
-                <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Текущее</div>
-                <div className="font-mono text-destructive font-medium">
-                  {criticalSignal.currentValue} {criticalSignal.unit}
-                </div>
+          <div className="space-y-3">
+            <div>
+              <div className="font-mono text-[11px] text-muted-foreground/70">{criticalSignal.parameter}</div>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-[28px] font-semibold tracking-tight text-destructive leading-none">
+                  {criticalSignal.currentValue}
+                </span>
+                <span className="text-xs text-muted-foreground/60">{criticalSignal.unit}</span>
               </div>
-              <div>
-                <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Ожидаемое</div>
-                <div className="font-mono text-muted-foreground">{criticalSignal.expectedValue}</div>
+              <div className="type-metadata mt-1">
+                vs <span className="font-mono text-foreground/70">{criticalSignal.expectedValue}</span> expected
               </div>
             </div>
             <MiniSparkline />
@@ -113,14 +107,16 @@ export function ContextInspector({ className }: ContextInspectorProps) {
               v{linkedRule.version} · {linkedRule.parameterType}
             </div>
             {linkedRule.name === "Контроль перегрева" && (
-              <div className="bg-destructive/8 border border-destructive/15 rounded-lg p-2 text-[10px] font-mono">
-                <div className="text-muted-foreground">Температура = <span className="text-destructive">96°C</span></div>
-                <div className="text-muted-foreground">Порог = <span className="text-foreground">90°C</span></div>
-                <div className="text-destructive mt-1">→ правило активировано</div>
+              <div className="font-mono text-[10.5px] space-y-0.5 pl-2 border-l border-destructive/40">
+                <div className="text-muted-foreground/70">temp <span className="text-destructive">= 96°C</span></div>
+                <div className="text-muted-foreground/70">limit <span className="text-foreground/80">= 90°C</span></div>
+                <div className="text-destructive/90 pt-0.5">→ rule fired</div>
               </div>
             )}
-            <InspectorLink label="Перейти к определению" />
-            <InspectorLink label="Показать использования" />
+            <div className="flex flex-col gap-1 pt-1">
+              <InspectorLink label="Go to definition" />
+              <InspectorLink label="Find usages" />
+            </div>
           </div>
         </InspectorSection>
       )}
@@ -178,19 +174,19 @@ function InspectorSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-b border-border">
-      <div className="flex items-center gap-1.5 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {icon}
+    <div className="px-5 py-4 border-t border-border/40 first:border-t-0">
+      <div className="flex items-center gap-1.5 type-state mb-2.5">
+        <span className="text-muted-foreground/50">{icon}</span>
         {title}
       </div>
-      <div className="px-4 pb-3">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
 
 function InspectorLink({ label }: { label: string }) {
   return (
-    <button className="flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors">
+    <button className="flex items-center gap-1 text-[10px] text-foreground/60 hover:text-foreground transition-colors">
       <ExternalLink className="w-2.5 h-2.5" />
       {label}
     </button>
@@ -202,25 +198,33 @@ function MiniSparkline() {
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
-  const w = 120;
-  const h = 24;
+  const w = 200;
+  const h = 36;
   const pts = data.map((v, i) => ({
     x: (i / (data.length - 1)) * w,
-    y: h - ((v - min) / range) * (h - 4) - 2,
+    y: h - ((v - min) / range) * (h - 6) - 3,
   }));
   const linePoints = pts.map((p) => `${p.x},${p.y}`).join(" ");
+  const areaPoints = `0,${h} ${linePoints} ${w},${h}`;
 
   return (
-    <svg width={w} height={h} className="w-full">
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-9 block" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="spark-fill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="hsl(0, 72%, 51%)" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="hsl(0, 72%, 51%)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={areaPoints} fill="url(#spark-fill)" />
       <polyline
         points={linePoints}
         fill="none"
-        stroke="hsl(0, 72%, 51%)"
-        strokeWidth="1.5"
+        stroke="hsl(0, 72%, 60%)"
+        strokeWidth="1.25"
         strokeLinejoin="round"
         strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
       />
-      <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y} r="2" fill="hsl(0, 72%, 51%)" />
     </svg>
   );
 }
