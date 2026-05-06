@@ -40,12 +40,10 @@ export function ContextInspector({ className }: ContextInspectorProps) {
   }
 
   return (
-    <div className={`border-l border-border bg-card flex flex-col min-h-0 overflow-y-auto ${className}`}>
+    <div className={`border-l border-border/60 bg-card/40 flex flex-col min-h-0 overflow-y-auto ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border shrink-0">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Inspector
-        </span>
+      <div className="flex items-center justify-between px-5 py-3 shrink-0">
+        <span className="type-state">Inspector</span>
         <button
           onClick={() => setCollapsed(true)}
           className="text-muted-foreground hover:text-foreground transition-colors"
@@ -54,27 +52,23 @@ export function ContextInspector({ className }: ContextInspectorProps) {
         </button>
       </div>
 
-      {/* Active Signal */}
+      {/* Active Signal — hero */}
       {criticalSignal && (
         <InspectorSection
           icon={<Radio className="w-3 h-3" />}
-          title="Активный сигнал"
+          title="Active signal"
         >
-          <div className="space-y-2 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[11px] text-foreground">{criticalSignal.parameter}</span>
-              <StatusBadge variant="error" size="xs">critical</StatusBadge>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <div>
-                <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Текущее</div>
-                <div className="font-mono text-destructive font-medium">
-                  {criticalSignal.currentValue} {criticalSignal.unit}
-                </div>
+          <div className="space-y-3">
+            <div>
+              <div className="font-mono text-[11px] text-muted-foreground/70">{criticalSignal.parameter}</div>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-[28px] font-semibold tracking-tight text-destructive leading-none">
+                  {criticalSignal.currentValue}
+                </span>
+                <span className="text-xs text-muted-foreground/60">{criticalSignal.unit}</span>
               </div>
-              <div>
-                <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">Ожидаемое</div>
-                <div className="font-mono text-muted-foreground">{criticalSignal.expectedValue}</div>
+              <div className="type-metadata mt-1">
+                vs <span className="font-mono text-foreground/70">{criticalSignal.expectedValue}</span> expected
               </div>
             </div>
             <MiniSparkline />
