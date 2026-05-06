@@ -30,9 +30,6 @@ export function GlobalNav({ activeState, onStateChange }: GlobalNavProps) {
             }`}
             title={label}
           >
-            {isActive && (
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-primary" />
-            )}
             <Icon className="w-4 h-4" />
             <span className="text-[7px] font-medium tracking-wider">{label}</span>
           </button>
