@@ -286,14 +286,14 @@
   }
 
   .ide-panel {
-    @apply bg-card border border-border rounded-xl;
+    @apply bg-card/60 border border-border/70 rounded-xl;
   }
   .ide-panel-glow {
     @apply bg-card border border-border rounded-xl;
   }
 
   .ide-header {
-    @apply px-4 py-2.5 border-b border-border text-[11px] font-semibold uppercase tracking-wider text-muted-foreground;
+    @apply px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/70;
   }
   .status-dot {
     @apply inline-block w-2 h-2 rounded-full transition-all duration-300;
