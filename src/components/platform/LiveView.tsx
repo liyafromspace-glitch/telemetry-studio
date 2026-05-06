@@ -106,17 +106,17 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
           <div className="flex-1 overflow-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-border text-[10px] text-muted-foreground uppercase tracking-wider bg-card">
-                  <th className="text-left px-5 py-2.5 font-medium">Status</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Signal</th>
-                  <th className="text-right px-5 py-2.5 font-medium">Value</th>
-                  <th className="text-right px-5 py-2.5 font-medium">Expected</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Unit</th>
-                  <th className="text-center px-5 py-2.5 font-medium">Trend</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Rule</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Matrix</th>
-                  <th className="text-left px-5 py-2.5 font-medium">Time</th>
-                  <th className="text-center px-5 py-2.5 font-medium"></th>
+                <tr className="border-b border-border/50 type-state">
+                  <th className="text-left px-6 py-2 font-medium w-8"></th>
+                  <th className="text-left px-3 py-2 font-medium">Signal</th>
+                  <th className="text-right px-3 py-2 font-medium">Value</th>
+                  <th className="text-right px-3 py-2 font-medium">Expected</th>
+                  <th className="text-left px-3 py-2 font-medium">Unit</th>
+                  <th className="text-center px-3 py-2 font-medium">Trend</th>
+                  <th className="text-left px-3 py-2 font-medium">Rule</th>
+                  <th className="text-left px-3 py-2 font-medium">Matrix</th>
+                  <th className="text-left px-3 py-2 font-medium">Time</th>
+                  <th className="text-center px-6 py-2 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
@@ -144,22 +144,21 @@ function SignalRow({
   onInvestigate: (p: string) => void;
 }) {
   const sparkData = mockHistory[signal.parameter] || [];
+  const dotColor =
+    signal.status === "critical" ? "bg-destructive"
+    : signal.status === "warning" ? "bg-warning"
+    : "bg-muted-foreground/30";
 
   return (
-    <tr className="border-b border-border transition-colors hover:bg-accent/30">
-      <td className="px-5 py-2.5">
-        <StatusBadge
-          variant={signal.status === "critical" ? "error" : signal.status === "warning" ? "warning" : "success"}
-          size="xs"
-        >
-          {signal.status === "critical" ? "ERR" : signal.status === "warning" ? "WARN" : "OK"}
-        </StatusBadge>
+    <tr className="border-b border-border/40 transition-colors hover:bg-accent/20 group">
+      <td className="px-6 py-2.5">
+        <div className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
       </td>
-      <td className="px-5 py-2.5 font-mono text-[11px] text-foreground font-medium">{signal.parameter}</td>
+      <td className="px-3 py-2.5 type-evidence font-medium">{signal.parameter}</td>
       <td
-        className={`px-5 py-2.5 text-right font-mono text-[11px] ${
+        className={`px-3 py-2.5 text-right type-evidence ${
           signal.status === "critical"
-            ? "text-destructive font-medium"
+            ? "text-destructive font-semibold"
             : signal.status === "warning"
             ? "text-warning"
             : "text-foreground"
@@ -167,19 +166,19 @@ function SignalRow({
       >
         {signal.currentValue}
       </td>
-      <td className="px-5 py-2.5 text-right font-mono text-[11px] text-muted-foreground">{signal.expectedValue}</td>
-      <td className="px-5 py-2.5 text-muted-foreground">{signal.unit}</td>
-      <td className="px-5 py-2.5 text-center">
+      <td className="px-3 py-2.5 text-right type-evidence text-muted-foreground/70">{signal.expectedValue}</td>
+      <td className="px-3 py-2.5 type-metadata">{signal.unit}</td>
+      <td className="px-3 py-2.5 text-center">
         <MiniSparkline data={sparkData} status={signal.status} />
       </td>
-      <td className="px-5 py-2.5 text-muted-foreground truncate max-w-[140px]">{signal.linkedFunction}</td>
-      <td className="px-5 py-2.5 text-muted-foreground truncate max-w-[160px]">{signal.linkedMatrix}</td>
-      <td className="px-5 py-2.5 text-[10px] text-muted-foreground">{signal.timestamp.split(" ")[1]}</td>
-      <td className="px-5 py-2.5 text-center">
+      <td className="px-3 py-2.5 type-metadata truncate max-w-[140px]">{signal.linkedFunction}</td>
+      <td className="px-3 py-2.5 type-metadata truncate max-w-[160px]">{signal.linkedMatrix}</td>
+      <td className="px-3 py-2.5 type-metadata font-mono">{signal.timestamp.split(" ")[1]}</td>
+      <td className="px-6 py-2.5 text-center">
         {signal.status !== "normal" && (
           <button
             onClick={() => onInvestigate(signal.parameter)}
-            className="text-[11px] text-foreground/70 hover:text-foreground flex items-center gap-1 transition-colors"
+            className="text-[11px] text-muted-foreground/60 hover:text-foreground flex items-center gap-1 transition-colors opacity-0 group-hover:opacity-100"
           >
             Inspect <ArrowRight className="w-3 h-3" />
           </button>
