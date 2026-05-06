@@ -107,14 +107,16 @@ export function ContextInspector({ className }: ContextInspectorProps) {
               v{linkedRule.version} · {linkedRule.parameterType}
             </div>
             {linkedRule.name === "Контроль перегрева" && (
-              <div className="bg-destructive/8 border border-destructive/15 rounded-lg p-2 text-[10px] font-mono">
-                <div className="text-muted-foreground">Температура = <span className="text-destructive">96°C</span></div>
-                <div className="text-muted-foreground">Порог = <span className="text-foreground">90°C</span></div>
-                <div className="text-destructive mt-1">→ правило активировано</div>
+              <div className="font-mono text-[10.5px] space-y-0.5 pl-2 border-l border-destructive/40">
+                <div className="text-muted-foreground/70">temp <span className="text-destructive">= 96°C</span></div>
+                <div className="text-muted-foreground/70">limit <span className="text-foreground/80">= 90°C</span></div>
+                <div className="text-destructive/90 pt-0.5">→ rule fired</div>
               </div>
             )}
-            <InspectorLink label="Перейти к определению" />
-            <InspectorLink label="Показать использования" />
+            <div className="flex flex-col gap-1 pt-1">
+              <InspectorLink label="Go to definition" />
+              <InspectorLink label="Find usages" />
+            </div>
           </div>
         </InspectorSection>
       )}
