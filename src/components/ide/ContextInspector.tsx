@@ -172,19 +172,19 @@ function InspectorSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-b border-border">
-      <div className="flex items-center gap-1.5 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {icon}
+    <div className="px-5 py-4 border-t border-border/40 first:border-t-0">
+      <div className="flex items-center gap-1.5 type-state mb-2.5">
+        <span className="text-muted-foreground/50">{icon}</span>
         {title}
       </div>
-      <div className="px-4 pb-3">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
 
 function InspectorLink({ label }: { label: string }) {
   return (
-    <button className="flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors">
+    <button className="flex items-center gap-1 text-[10px] text-foreground/60 hover:text-foreground transition-colors">
       <ExternalLink className="w-2.5 h-2.5" />
       {label}
     </button>
@@ -196,25 +196,33 @@ function MiniSparkline() {
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
-  const w = 120;
-  const h = 24;
+  const w = 200;
+  const h = 36;
   const pts = data.map((v, i) => ({
     x: (i / (data.length - 1)) * w,
-    y: h - ((v - min) / range) * (h - 4) - 2,
+    y: h - ((v - min) / range) * (h - 6) - 3,
   }));
   const linePoints = pts.map((p) => `${p.x},${p.y}`).join(" ");
+  const areaPoints = `0,${h} ${linePoints} ${w},${h}`;
 
   return (
-    <svg width={w} height={h} className="w-full">
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-9 block" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="spark-fill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="hsl(0, 72%, 51%)" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="hsl(0, 72%, 51%)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={areaPoints} fill="url(#spark-fill)" />
       <polyline
         points={linePoints}
         fill="none"
-        stroke="hsl(0, 72%, 51%)"
-        strokeWidth="1.5"
+        stroke="hsl(0, 72%, 60%)"
+        strokeWidth="1.25"
         strokeLinejoin="round"
         strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
       />
-      <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y} r="2" fill="hsl(0, 72%, 51%)" />
     </svg>
   );
 }
