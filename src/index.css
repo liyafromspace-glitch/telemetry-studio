@@ -349,15 +349,17 @@
     color: hsl(var(--code-function));
   }
 
-  /* Stat card */
+  /* Stat card — borderless, separated by rhythm not boxes */
   .stat-card {
-    @apply vercel-card p-4 flex flex-col gap-1.5 transition-all duration-200;
+    @apply px-4 py-3 flex flex-col gap-1 transition-all duration-200 border-r border-border/50 last:border-r-0;
+    background: transparent;
   }
   .stat-card-label {
-    @apply flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-wider font-medium;
+    @apply flex items-center gap-1.5 text-[10px] text-muted-foreground/70 uppercase tracking-[0.08em] font-medium;
   }
   .stat-card-value {
-    @apply text-sm font-semibold text-foreground;
+    @apply text-[15px] font-semibold text-foreground tracking-tight;
+    letter-spacing: -0.01em;
   }
 
   /* Action button variants — Fey style */
