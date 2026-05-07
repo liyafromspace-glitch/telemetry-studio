@@ -93,33 +93,7 @@ export function RightPanel({ rule }: RightPanelProps) {
       </CollapsibleSection>
 
       <CollapsibleSection title="Input Signals" open={openSections.has("signals")} onToggle={() => toggleSection("signals")}>
-        <div className="p-4 space-y-3 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Тип параметра</span>
-            <span className="text-foreground font-medium">{rule.parameterType}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Последние значения</span>
-            <Sparkline data={sparkData} />
-          </div>
-          <div className="flex gap-1 flex-wrap justify-end">
-            {sparkData.map((v, i) => (
-              <span key={i} className="sparkline-value">{v}</span>
-            ))}
-          </div>
-          {rule.parameterType === "Температура" && (
-            <div className="flex items-start gap-2 text-destructive bg-destructive/8 p-3 rounded-xl border border-destructive/15">
-              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span className="text-[11px] font-medium">Текущее значение 96°C превышает порог 90°C</span>
-            </div>
-          )}
-          {rule.parameterType === "Давление" && (
-            <div className="flex items-start gap-2 text-warning bg-warning/8 p-3 rounded-xl border border-warning/15">
-              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span className="text-[11px] font-medium">Давление 12.3 бар приближается к критическому</span>
-            </div>
-          )}
-        </div>
+        <SignalList parameterType={rule.parameterType} sparkData={sparkData} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Validation Console" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
