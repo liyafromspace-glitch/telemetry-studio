@@ -73,6 +73,13 @@ export function IDELayoutInner() {
           <span>Spaces: 2</span>
         </div>
       </div>
-    </div>
+  );
+}
+
+export function IDELayout() {
+  return (
+    <DebugProvider>
+      <IDELayoutInner />
+    </DebugProvider>
   );
 }
