@@ -3,6 +3,7 @@ import { CheckCircle, AlertTriangle, XCircle, Keyboard, Cpu, Link2, FileText, Za
 import { useState } from "react";
 import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 import { CollapsibleSection, PropRow } from "@/components/ui/collapsible-section";
+import { useDebug, signalRegistry } from "./DebugContext";
 
 interface RightPanelProps {
   rule: Rule;
@@ -92,33 +93,7 @@ export function RightPanel({ rule }: RightPanelProps) {
       </CollapsibleSection>
 
       <CollapsibleSection title="Input Signals" open={openSections.has("signals")} onToggle={() => toggleSection("signals")}>
-        <div className="p-4 space-y-3 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Тип параметра</span>
-            <span className="text-foreground font-medium">{rule.parameterType}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Последние значения</span>
-            <Sparkline data={sparkData} />
-          </div>
-          <div className="flex gap-1 flex-wrap justify-end">
-            {sparkData.map((v, i) => (
-              <span key={i} className="sparkline-value">{v}</span>
-            ))}
-          </div>
-          {rule.parameterType === "Температура" && (
-            <div className="flex items-start gap-2 text-destructive bg-destructive/8 p-3 rounded-xl border border-destructive/15">
-              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span className="text-[11px] font-medium">Текущее значение 96°C превышает порог 90°C</span>
-            </div>
-          )}
-          {rule.parameterType === "Давление" && (
-            <div className="flex items-start gap-2 text-warning bg-warning/8 p-3 rounded-xl border border-warning/15">
-              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span className="text-[11px] font-medium">Давление 12.3 бар приближается к критическому</span>
-            </div>
-          )}
-        </div>
+        <SignalList parameterType={rule.parameterType} sparkData={sparkData} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Validation Console" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
@@ -188,6 +163,73 @@ export function RightPanel({ rule }: RightPanelProps) {
           <Keyboard className="w-2.5 h-2.5" />
           <span>⌘↵ Validate · ⌘⇧S Deploy · Esc Close</span>
         </div>
+      </div>
+    </div>
+  );
+}
+
+const paramToSignalKeys: Record<string, string[]> = {
+  "Температура": ["TI-R12-01"],
+  "Давление": ["PI-R12-01"],
+  "Скорость": ["SI-R12-01"],
+  "Клапан": ["XV-R12-01"],
+  "Уровень": [],
+};
+
+function SignalList({ parameterType, sparkData }: { parameterType: string; sparkData: number[] }) {
+  const { highlightedSignal, setHighlightedSignal } = useDebug();
+  const keys = paramToSignalKeys[parameterType] || [];
+
+  return (
+    <div className="p-3 space-y-2 text-xs">
+      <div className="flex items-center justify-between">
+        <span className="type-state">Bound signals</span>
+        {highlightedSignal && (
+          <button
+            onClick={() => setHighlightedSignal(null)}
+            className="text-[9px] text-muted-foreground hover:text-foreground"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+      {keys.length === 0 && (
+        <div className="text-[10px] text-muted-foreground italic">No bound signals</div>
+      )}
+      {keys.map((key) => {
+        const snap = signalRegistry[key];
+        if (!snap) return null;
+        const active = highlightedSignal === key;
+        const dotColor =
+          snap.status === "error" ? "bg-destructive" :
+          snap.status === "warning" ? "bg-warning" : "bg-success";
+        return (
+          <button
+            key={key}
+            onClick={() => setHighlightedSignal(active ? null : key)}
+            className={`w-full text-left rounded-md px-2.5 py-2 transition-colors border ${
+              active
+                ? "border-primary/50 bg-primary/5"
+                : "border-transparent hover:bg-accent/40"
+            }`}
+            title="Click to highlight related rule clauses"
+          >
+            <div className="flex items-center gap-2">
+              <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+              <span className="font-mono text-[11px] text-foreground">{snap.signal}</span>
+              <span className="ml-auto font-mono text-[11px] text-foreground">{snap.value}</span>
+            </div>
+            {snap.threshold && (
+              <div className="mt-1 pl-3.5 text-[10px] text-muted-foreground font-mono">
+                threshold {snap.threshold} · {snap.timestamp}
+              </div>
+            )}
+          </button>
+        );
+      })}
+      <div className="pt-2 mt-1 border-t border-border/40 flex items-center justify-between">
+        <span className="text-[10px] text-muted-foreground">Trend</span>
+        <Sparkline data={sparkData} />
       </div>
     </div>
   );

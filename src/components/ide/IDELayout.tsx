@@ -7,8 +7,9 @@ import { MatrixCenterPanel } from "./MatrixCenterPanel";
 import { RightPanel } from "./RightPanel";
 import { MatrixRightPanel } from "./MatrixRightPanel";
 import { Activity } from "lucide-react";
+import { DebugProvider } from "./DebugContext";
 
-export function IDELayout() {
+export function IDELayoutInner() {
   const [selected, setSelected] = useState<SelectedItem>({ type: "rule", item: rules[0] });
 
   const totalActive =
@@ -73,5 +74,13 @@ export function IDELayout() {
         </div>
       </div>
     </div>
+  );
+}
+
+export function IDELayout() {
+  return (
+    <DebugProvider>
+      <IDELayoutInner />
+    </DebugProvider>
   );
 }
