@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Filter, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { getSnapshot } from "./DebugContext";
 
 export interface TraceEntry {
   id: string;
