@@ -1,8 +1,11 @@
 import { Rule, statusLabels } from "@/data/mockRules";
-import { CheckCircle, AlertTriangle, XCircle, FileText, Link2, GitBranch } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, FileText, Link2, GitBranch, Sparkles } from "lucide-react";
 import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
+import { useDebug, signalRegistry, getSnapshot } from "./DebugContext";
+import { CausalChain, buildIncidentChain } from "./CausalChain";
 
-function highlightCode(code: string) {
+function highlightCode(code: string, highlightTokens: string[]) {
+  const tokenSet = new Set(highlightTokens.map((t) => t.toLowerCase()));
   return code.split('\n').map((line, i) => {
     if (line.trimStart().startsWith('//')) {
       return <div key={i}><span className="comment">{line}</span></div>;
@@ -10,6 +13,7 @@ function highlightCode(code: string) {
     const keywords = /\b(const|let|var|if|else|return|function|new|typeof|instanceof)\b/g;
     const stringRegex = /"[^"]*"|'[^']*'/g;
     const numberRegex = /\b\d+\.?\d*\b/g;
+    const identRegex = /\b[A-Za-z_][A-Za-z0-9_]*\b/g;
     const tokens: { start: number; end: number; type: string; text: string }[] = [];
     let match;
     while ((match = stringRegex.exec(line)) !== null) {
@@ -23,17 +27,31 @@ function highlightCode(code: string) {
       const overlaps = tokens.some((t) => match!.index >= t.start && match!.index < t.end);
       if (!overlaps) tokens.push({ start: match.index, end: match.index + match[0].length, type: 'number', text: match[0] });
     }
+    if (tokenSet.size > 0) {
+      while ((match = identRegex.exec(line)) !== null) {
+        if (!tokenSet.has(match[0].toLowerCase())) continue;
+        const overlaps = tokens.some((t) => match!.index >= t.start && match!.index < t.end);
+        if (!overlaps) tokens.push({ start: match.index, end: match.index + match[0].length, type: 'highlight', text: match[0] });
+      }
+    }
     tokens.sort((a, b) => a.start - b.start);
     if (tokens.length === 0) return <div key={i}>{line || '\u00A0'}</div>;
     const result: React.ReactNode[] = [];
     let pos = 0;
     tokens.forEach((token, ti) => {
       if (token.start > pos) result.push(<span key={`t-${ti}-pre`}>{line.slice(pos, token.start)}</span>);
-      result.push(<span key={`t-${ti}`} className={token.type}>{token.text}</span>);
+      const cls = token.type === 'highlight' ? 'code-highlight' : token.type;
+      result.push(<span key={`t-${ti}`} className={cls}>{token.text}</span>);
       pos = token.end;
     });
     if (pos < line.length) result.push(<span key="rest">{line.slice(pos)}</span>);
-    return <div key={i}>{result}</div>;
+    // Mark whole line if it contains a highlight
+    const hasHighlight = tokens.some((t) => t.type === 'highlight');
+    return (
+      <div key={i} className={hasHighlight ? 'code-line-active' : undefined}>
+        {result}
+      </div>
+    );
   });
 }
 
@@ -42,6 +60,10 @@ interface RuleOverviewProps {
 }
 
 export function RuleOverview({ rule }: RuleOverviewProps) {
+  const { highlightedSignal, showCausal, setShowCausal } = useDebug();
+  const snapshot = getSnapshot(highlightedSignal);
+  const tokens = snapshot ? snapshot.codeTokens : [];
+
   return (
     <div className="px-6 pt-6 pb-8 space-y-8">
       {/* Object header */}
@@ -60,7 +82,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
         </div>
       </div>
 
-      {/* Stat strip — borderless, divider-separated */}
+      {/* Stat strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 border-y border-border/60">
         <div className="stat-card">
           <div className="stat-card-label">
@@ -101,7 +123,7 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
         </div>
       </div>
 
-      {/* Properties — flat */}
+      {/* Properties */}
       <div className="space-y-3">
         <div className="type-state">Properties</div>
         <div className="grid grid-cols-2 gap-x-10 gap-y-3 text-xs">
@@ -114,13 +136,49 @@ export function RuleOverview({ rule }: RuleOverviewProps) {
         </div>
       </div>
 
-      {/* Code — flat */}
+      {/* Code */}
       <div className="space-y-3">
-        <div className="type-state">Transform Function</div>
+        <div className="flex items-center justify-between">
+          <div className="type-state">Transform Function</div>
+          <div className="flex items-center gap-2">
+            {snapshot && (
+              <span className="text-[10px] text-muted-foreground">
+                Highlighting clauses for{" "}
+                <span className="font-mono text-primary">{snapshot.signal}</span>{" "}
+                = <span className="font-mono text-foreground">{snapshot.value}</span>
+              </span>
+            )}
+            <button
+              onClick={() => setShowCausal(!showCausal)}
+              className="btn-secondary"
+              title="Open causal breakdown"
+            >
+              <Sparkles className="w-3 h-3" />
+              {showCausal ? "Hide" : "Show"} why activated
+            </button>
+          </div>
+        </div>
         <pre className="text-xs font-mono text-foreground overflow-x-auto leading-relaxed code-block py-4 px-4 rounded-lg border border-border/50 bg-[hsl(0_0%_4%)]">
-          <code>{highlightCode(rule.code)}</code>
+          <code>{highlightCode(rule.code, tokens)}</code>
         </pre>
       </div>
+
+      {/* Causal breakdown */}
+      {showCausal && (
+        <div className="space-y-3 animate-fade-in">
+          <div className="type-state">Causal Breakdown</div>
+          <CausalChain
+            title="Why did this rule activate?"
+            steps={buildIncidentChain({
+              linkedParameters: ["TI-R12-01", "PI-R12-01"],
+              linkedFunctions: [rule.name],
+              linkedMatrices: ["Аварийная защита"],
+              title: "Перегрев резервуара-12",
+              description: "Температура превысила порог при повышенном давлении линии",
+            })}
+          />
+        </div>
+      )}
     </div>
   );
 }
