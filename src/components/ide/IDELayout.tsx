@@ -73,6 +73,7 @@ export function IDELayoutInner() {
           <span>Spaces: 2</span>
         </div>
       </div>
+    </div>
   );
 }
 
