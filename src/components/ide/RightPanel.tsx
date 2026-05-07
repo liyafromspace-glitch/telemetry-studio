@@ -3,6 +3,7 @@ import { CheckCircle, AlertTriangle, XCircle, Keyboard, Cpu, Link2, FileText, Za
 import { useState } from "react";
 import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
 import { CollapsibleSection, PropRow } from "@/components/ui/collapsible-section";
+import { useDebug, signalRegistry } from "./DebugContext";
 
 interface RightPanelProps {
   rule: Rule;
