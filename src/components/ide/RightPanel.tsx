@@ -167,3 +167,70 @@ export function RightPanel({ rule }: RightPanelProps) {
     </div>
   );
 }
+
+const paramToSignalKeys: Record<string, string[]> = {
+  "Температура": ["TI-R12-01"],
+  "Давление": ["PI-R12-01"],
+  "Скорость": ["SI-R12-01"],
+  "Клапан": ["XV-R12-01"],
+  "Уровень": [],
+};
+
+function SignalList({ parameterType, sparkData }: { parameterType: string; sparkData: number[] }) {
+  const { highlightedSignal, setHighlightedSignal } = useDebug();
+  const keys = paramToSignalKeys[parameterType] || [];
+
+  return (
+    <div className="p-3 space-y-2 text-xs">
+      <div className="flex items-center justify-between">
+        <span className="type-state">Bound signals</span>
+        {highlightedSignal && (
+          <button
+            onClick={() => setHighlightedSignal(null)}
+            className="text-[9px] text-muted-foreground hover:text-foreground"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+      {keys.length === 0 && (
+        <div className="text-[10px] text-muted-foreground italic">No bound signals</div>
+      )}
+      {keys.map((key) => {
+        const snap = signalRegistry[key];
+        if (!snap) return null;
+        const active = highlightedSignal === key;
+        const dotColor =
+          snap.status === "error" ? "bg-destructive" :
+          snap.status === "warning" ? "bg-warning" : "bg-success";
+        return (
+          <button
+            key={key}
+            onClick={() => setHighlightedSignal(active ? null : key)}
+            className={`w-full text-left rounded-md px-2.5 py-2 transition-colors border ${
+              active
+                ? "border-primary/50 bg-primary/5"
+                : "border-transparent hover:bg-accent/40"
+            }`}
+            title="Click to highlight related rule clauses"
+          >
+            <div className="flex items-center gap-2">
+              <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+              <span className="font-mono text-[11px] text-foreground">{snap.signal}</span>
+              <span className="ml-auto font-mono text-[11px] text-foreground">{snap.value}</span>
+            </div>
+            {snap.threshold && (
+              <div className="mt-1 pl-3.5 text-[10px] text-muted-foreground font-mono">
+                threshold {snap.threshold} · {snap.timestamp}
+              </div>
+            )}
+          </button>
+        );
+      })}
+      <div className="pt-2 mt-1 border-t border-border/40 flex items-center justify-between">
+        <span className="text-[10px] text-muted-foreground">Trend</span>
+        <Sparkline data={sparkData} />
+      </div>
+    </div>
+  );
+}
