@@ -112,25 +112,62 @@ export function TracePanel({ onSelectTrace, className }: TracePanelProps) {
 
       {/* Trace entries */}
       <div className="flex-1 overflow-y-auto font-mono text-[11px] min-h-0">
-        {filtered.map((entry) => (
-          <button
-            key={entry.id}
-            onClick={() => onSelectTrace?.(entry)}
-            className="w-full flex items-center gap-3 px-4 py-1 hover:bg-accent/30 transition-colors text-left"
-          >
-            <span className="text-[10px] text-muted-foreground w-14 shrink-0">{entry.timestamp}</span>
-            <span className={`text-[9px] font-semibold w-6 shrink-0 ${typeColors[entry.type]}`}>
-              {typeLabels[entry.type]}
-            </span>
-            <span className={`flex-1 truncate ${
-              entry.severity === "error" ? "text-destructive" :
-              entry.severity === "warning" ? "text-warning" :
-              "text-foreground/70"
-            }`}>
-              {entry.message}
-            </span>
-          </button>
-        ))}
+        {filtered.map((entry) => {
+          const snap = getSnapshot(entry.entity ?? null);
+          const row = (
+            <button
+              key={entry.id}
+              onClick={() => onSelectTrace?.(entry)}
+              className="w-full flex items-center gap-3 px-4 py-1 hover:bg-accent/30 transition-colors text-left"
+            >
+              <span className="text-[10px] text-muted-foreground w-14 shrink-0">{entry.timestamp}</span>
+              <span className={`text-[9px] font-semibold w-6 shrink-0 ${typeColors[entry.type]}`}>
+                {typeLabels[entry.type]}
+              </span>
+              <span className={`flex-1 truncate ${
+                entry.severity === "error" ? "text-destructive" :
+                entry.severity === "warning" ? "text-warning" :
+                "text-foreground/70"
+              }`}>
+                {entry.message}
+              </span>
+            </button>
+          );
+          if (!snap) return <div key={entry.id}>{row}</div>;
+          return (
+            <HoverCard key={entry.id} openDelay={150} closeDelay={50}>
+              <HoverCardTrigger asChild>{row}</HoverCardTrigger>
+              <HoverCardContent side="top" align="start" className="w-80 p-3 font-mono text-[11px]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Condition snapshot</span>
+                  <span className="text-[10px] text-muted-foreground">{entry.timestamp}</span>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">signal</span>
+                    <span className="text-primary">{snap.signal}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">value</span>
+                    <span className={
+                      snap.status === "error" ? "text-destructive" :
+                      snap.status === "warning" ? "text-warning" : "text-success"
+                    }>{snap.value}</span>
+                  </div>
+                  {snap.threshold && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">threshold</span>
+                      <span className="text-foreground">{snap.threshold}</span>
+                    </div>
+                  )}
+                  <div className="pt-1.5 mt-1.5 border-t border-border/40 text-[10px] text-muted-foreground">
+                    {entry.message}
+                  </div>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          );
+        })}
       </div>
     </div>
   );
