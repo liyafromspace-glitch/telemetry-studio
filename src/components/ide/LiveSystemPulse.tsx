@@ -26,32 +26,33 @@ export function LiveSystemPulse() {
   }, []);
 
   return (
-    <div className="flex items-center gap-3 bg-muted rounded-lg px-3 py-1.5">
+    <div className="inline-flex items-center gap-3 bg-card/80 border border-border/60 rounded-full pl-2.5 pr-4 py-1.5 shadow-sm">
       {/* Live indicator */}
       <div className="flex items-center gap-1.5">
         <div className="relative">
-          <div className="w-2 h-2 rounded-full bg-success" />
-          <div className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping opacity-60" />
+          <div className="w-1.5 h-1.5 rounded-full bg-success" />
+          <div className="absolute inset-0 w-1.5 h-1.5 rounded-full bg-success animate-ping opacity-60" />
         </div>
-        <span className="text-[10px] font-medium text-foreground uppercase tracking-wider">Live</span>
+        <span className="text-[11px] font-semibold text-foreground uppercase tracking-[0.12em]">Live</span>
       </div>
-
-      <div className="w-px h-3.5 bg-border" />
 
       {/* Mini telemetry wave */}
       <PulseWave value={pulse.signalsPerSec} />
 
-      <div className="flex items-center gap-3 text-[10px]">
-        <span className="flex items-center gap-1 text-muted-foreground">
-          <span className="font-mono text-foreground font-medium">{pulse.signalsPerSec}</span> сигналов/с
+      <div className="flex items-center gap-4 text-[11px]">
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          <span className="font-mono text-foreground font-semibold tabular-nums">{pulse.signalsPerSec}</span>
+          <span className="text-muted-foreground/70">сигналов/с</span>
         </span>
-        <span className="flex items-center gap-1 text-muted-foreground">
-          <Zap className="w-2.5 h-2.5 text-conn-orange" />
-          <span className="font-mono text-foreground font-medium">{pulse.rulesPerSec}</span> правил/с
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          <Zap className="w-3 h-3 text-warning fill-warning" />
+          <span className="font-mono text-foreground font-semibold tabular-nums">{pulse.rulesPerSec}</span>
+          <span className="text-muted-foreground/70">правил/с</span>
         </span>
-        <span className="flex items-center gap-1 text-muted-foreground">
-          <AlertTriangle className="w-2.5 h-2.5 text-warning" />
-          <span className="font-mono text-foreground font-medium">{pulse.activeIncidents}</span> инцидентов
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          <AlertTriangle className="w-3 h-3 text-muted-foreground" />
+          <span className="font-mono text-foreground font-semibold tabular-nums">{pulse.activeIncidents}</span>
+          <span className="text-muted-foreground/70">инцидентов</span>
         </span>
       </div>
     </div>
