@@ -1,5 +1,5 @@
 import { type AppState } from "@/data/mockPlatform";
-import { Radio, Bug, BarChart3, Settings2, Shield } from "lucide-react";
+import { Radio, Bug, BarChart3, Settings2, Shield, Cog } from "lucide-react";
 
 interface GlobalNavProps {
   activeState: AppState;
@@ -12,6 +12,7 @@ const navItems: { state: AppState; icon: typeof Radio; label: string }[] = [
   { state: "analyze", icon: BarChart3, label: "TRACE" },
   { state: "configure", icon: Settings2, label: "EDIT" },
   { state: "govern", icon: Shield, label: "DEPLOY" },
+  { state: "admin", icon: Cog, label: "ADMIN" },
 ];
 
 export function GlobalNav({ activeState, onStateChange }: GlobalNavProps) {

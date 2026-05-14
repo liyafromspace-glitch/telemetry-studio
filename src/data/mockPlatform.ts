@@ -1,6 +1,6 @@
 // Shared platform data: incidents, reports, live signals, context, users
 
-export type AppState = "live" | "investigate" | "analyze" | "configure" | "govern";
+export type AppState = "live" | "investigate" | "analyze" | "configure" | "govern" | "admin";
 
 export interface PlatformContext {
   environment: string;

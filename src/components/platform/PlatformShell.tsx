@@ -9,6 +9,7 @@ import { InvestigateView } from "./InvestigateView";
 import { AnalyzeView } from "./AnalyzeView";
 import { ConfigureView } from "./ConfigureView";
 import { GovernView } from "./GovernView";
+import { AdminView } from "./AdminView";
 import { CommandPalette } from "./CommandPalette";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Minimize2, Maximize2, Activity, AlertTriangle as AlertIcon } from "lucide-react";
@@ -44,6 +45,7 @@ export function PlatformShell() {
     analyze: "TRACE",
     configure: "EDIT",
     govern: "DEPLOY",
+    admin: "ADMIN",
   };
 
   return (
@@ -121,6 +123,7 @@ export function PlatformShell() {
           {activeState === "govern" && (
             <GovernView onNavigateToAnalyze={() => setActiveState("analyze")} />
           )}
+          {activeState === "admin" && <AdminView />}
         </div>
       </div>
 
