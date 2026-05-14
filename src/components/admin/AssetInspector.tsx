@@ -1,7 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { assets, assetRelations, relationLabels, type AssetRelation, type Asset } from "@/data/mockAssets";
 import { ChevronUp, ChevronDown, Tag, Activity, Heart, Link2, Layers } from "lucide-react";
 import { CollapsibleSection } from "@/components/ui/collapsible-section";
+
+function useSection(initial = true) {
+  const [open, setOpen] = useState(initial);
+  return { open, onToggle: () => setOpen((v) => !v) };
+}
 
 interface AssetInspectorProps {
   selectedId: string | null;
