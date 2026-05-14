@@ -123,7 +123,7 @@ export function AssetInspector({ selectedId, onSelect }: AssetInspectorProps) {
           )}
         </div>
 
-        <CollapsibleSection title="Dependencies" icon={<Link2 className="w-3 h-3" />} defaultOpen>
+        <CollapsibleSection title="Dependencies" defaultOpen>
           <div className="space-y-0.5">
             {upstream.length === 0 && (
               <div className="text-[11px] text-muted-foreground px-2 py-1">No upstream dependencies</div>
@@ -136,7 +136,7 @@ export function AssetInspector({ selectedId, onSelect }: AssetInspectorProps) {
 
         <CollapsibleSection
           title={`Downstream Impact (${impactSet.length})`}
-          icon={<ChevronDown className="w-3 h-3" />}
+         
           defaultOpen
         >
           <div className="space-y-0.5">
@@ -154,7 +154,7 @@ export function AssetInspector({ selectedId, onSelect }: AssetInspectorProps) {
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title={`Related Assets (${related.length})`} icon={<Layers className="w-3 h-3" />}>
+        <CollapsibleSection title={`Related Assets (${related.length})`}>
           <div className="space-y-0.5">
             {related.slice(0, 8).map((a) => (
               <button
@@ -172,7 +172,7 @@ export function AssetInspector({ selectedId, onSelect }: AssetInspectorProps) {
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Semantic Health" icon={<Heart className="w-3 h-3" />}>
+        <CollapsibleSection title="Semantic Health">
           <div className="px-2 py-1.5 space-y-2">
             <div className="flex items-center justify-between text-[11px]">
               <span className="text-muted-foreground">Status</span>
@@ -193,7 +193,7 @@ export function AssetInspector({ selectedId, onSelect }: AssetInspectorProps) {
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Tags" icon={<Tag className="w-3 h-3" />} defaultOpen>
+        <CollapsibleSection title="Tags" defaultOpen>
           <div className="px-2 py-1 flex flex-wrap gap-1">
             {asset.tags.map((t) => (
               <span
@@ -209,7 +209,7 @@ export function AssetInspector({ selectedId, onSelect }: AssetInspectorProps) {
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Metadata" icon={<Activity className="w-3 h-3" />}>
+        <CollapsibleSection title="Metadata">
           <div className="px-2 py-1.5 space-y-1 text-[11px]">
             <div className="flex justify-between"><span className="text-muted-foreground">ID</span><span className="font-mono text-foreground/80">{asset.id}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Kind</span><span>{asset.kind}</span></div>
