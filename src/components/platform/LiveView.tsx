@@ -80,7 +80,7 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
             </div>
             <button
               onClick={() => onNavigateToInvestigate("TI-R12-01")}
-              className="shrink-0 px-3 py-1.5 text-[11px] font-medium bg-destructive/15 hover:bg-destructive/25 text-destructive rounded-md flex items-center gap-1.5 transition-colors border border-destructive/20"
+              className="btn-primary shrink-0"
             >
               Debug <ArrowRight className="w-3 h-3" />
             </button>
