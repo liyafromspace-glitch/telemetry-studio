@@ -352,9 +352,9 @@ export function CaseStudy() {
           </div>
           <div className="flex flex-col gap-2 text-right">
             <p className="text-[11px] text-muted-foreground/50 mb-1">Other projects</p>
-            <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">KVP · Nexxen</a>
-            <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Smartgreen</a>
-            <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Wallet All-In</a>
+            <a href="https://kvp-nexxen-case.vercel.app" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">KVP · Nexxen</a>
+            <a href="https://liyabell.com/Smartgreen-1" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Smartgreen</a>
+            <a href="https://liyabell.com/Walletallin" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Wallet All-In</a>
           </div>
         </div>
       </footer>
