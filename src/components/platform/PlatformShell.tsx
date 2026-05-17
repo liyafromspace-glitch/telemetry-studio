@@ -14,8 +14,13 @@ import { CommandPalette } from "./CommandPalette";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Minimize2, Maximize2, Activity, AlertTriangle as AlertIcon } from "lucide-react";
 
-export function PlatformShell() {
-  const [activeState, setActiveState] = useState<AppState>("configure");
+interface PlatformShellProps {
+  initialState?: AppState;
+  embedded?: boolean;
+}
+
+export function PlatformShell({ initialState = "configure", embedded = false }: PlatformShellProps) {
+  const [activeState, setActiveState] = useState<AppState>(initialState);
   const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
   const [investigateSignal, setInvestigateSignal] = useState<string | null>(null);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -49,7 +54,7 @@ export function PlatformShell() {
   };
 
   return (
-    <div className={`h-screen flex flex-col bg-background text-foreground ${density === "compact" ? "density-compact" : ""}`}>
+    <div className={`${embedded ? "h-full" : "h-screen"} flex flex-col bg-background text-foreground ${density === "compact" ? "density-compact" : ""}`}>
       {/* System status header */}
       <div className="h-10 flex items-center justify-between px-4 border-b border-border bg-card text-xs select-none shrink-0">
         <div className="flex items-center gap-4">

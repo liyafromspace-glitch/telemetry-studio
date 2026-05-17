@@ -1,7 +1,5 @@
-import { PlatformShell } from "@/components/platform/PlatformShell";
+import { CaseStudy } from "./CaseStudy";
 
-const Index = () => {
-  return <PlatformShell />;
-};
+const Index = () => <CaseStudy />;
 
 export default Index;
