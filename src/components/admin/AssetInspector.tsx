@@ -94,35 +94,37 @@ export function AssetInspector({ selectedId, onSelect }: AssetInspectorProps) {
 
   if (!asset) {
     return (
-      <div className="flex flex-col h-full bg-card overflow-hidden items-center justify-center text-xs text-muted-foreground">
-        Select an asset
+      <div className="flex flex-col h-full bg-card overflow-hidden">
+        <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-2">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            No asset selected
+          </div>
+          <div className="text-[11px] text-muted-foreground/80 max-w-[220px] leading-relaxed">
+            Pick an asset from the hierarchy or graph to inspect its dependencies, downstream impact and health.
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full bg-card overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-border shrink-0">
-        <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-          Inspector
-        </div>
-      </div>
       <div className="flex-1 overflow-y-auto min-h-0">
-        {/* Hero */}
-        <div className="px-4 pt-4 pb-3 border-b border-border">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{asset.kind}</div>
-              <div className="text-[15px] font-semibold tracking-tight text-foreground truncate">
-                {asset.name}
-              </div>
+        {/* Hero — dominant focal block */}
+        <div className="px-4 pt-5 pb-4 border-b border-border">
+          <div className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70 font-semibold">
+            {asset.kind}
+          </div>
+          <div className="flex items-start justify-between gap-3 mt-1">
+            <div className="text-[18px] font-semibold tracking-tight text-foreground leading-tight truncate">
+              {asset.name}
             </div>
-            <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${healthBg[asset.health]}`}>
+            <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium shrink-0 ${healthBg[asset.health]}`}>
               {asset.health}
             </span>
           </div>
           {asset.vendor && (
-            <div className="text-[11px] text-muted-foreground mt-1">
+            <div className="text-[11px] text-muted-foreground mt-1.5">
               {asset.vendor} · {asset.model}
             </div>
           )}
@@ -139,13 +141,30 @@ export function AssetInspector({ selectedId, onSelect }: AssetInspectorProps) {
   );
 }
 
+function EmptyHint({ what, why, action }: { what: string; why: string; action: string }) {
+  return (
+    <div className="px-3 py-2 space-y-0.5">
+      <div className="text-[11px] text-foreground/80">{what}</div>
+      <div className="text-[10px] text-muted-foreground leading-relaxed">{why}</div>
+      <div className="text-[10px] text-primary/90 pt-0.5">→ {action}</div>
+    </div>
+  );
+}
+
 function SectionDeps({ upstream, onSelect }: { upstream: { rel: AssetRelation; asset: Asset }[]; onSelect: (id: string) => void }) {
   const s = useSection(true);
   return (
     <CollapsibleSection title="Dependencies" {...s}>
       <div className="space-y-0.5 px-1.5 py-1.5">
-        {upstream.length === 0 && <div className="text-[11px] text-muted-foreground px-2 py-1">No upstream dependencies</div>}
-        {upstream.map(({ rel, asset: a }) => <RelationLine key={rel.id} rel={rel} asset={a} onSelect={onSelect} direction="up" />)}
+        {upstream.length === 0 ? (
+          <EmptyHint
+            what="No upstream dependencies."
+            why="This asset isn't fed or controlled by anything — it may be a source, or a missing topology link."
+            action="Add a 'feeds' or 'controls' relation from its parent system."
+          />
+        ) : (
+          upstream.map(({ rel, asset: a }) => <RelationLine key={rel.id} rel={rel} asset={a} onSelect={onSelect} direction="up" />)
+        )}
       </div>
     </CollapsibleSection>
   );
@@ -156,10 +175,19 @@ function SectionImpact({ downstream, impactSet, onSelect }: { downstream: { rel:
   return (
     <CollapsibleSection title={`Downstream Impact (${impactSet.length})`} {...s}>
       <div className="space-y-0.5 px-1.5 py-1.5">
-        {impactSet.length === 0 && <div className="text-[11px] text-muted-foreground px-2 py-1">No downstream impact</div>}
-        {downstream.map(({ rel, asset: a }) => <RelationLine key={rel.id} rel={rel} asset={a} onSelect={onSelect} direction="down" />)}
-        {impactSet.length > downstream.length && (
-          <div className="text-[10px] text-muted-foreground px-2 pt-1">+ {impactSet.length - downstream.length} transitive</div>
+        {impactSet.length === 0 ? (
+          <EmptyHint
+            what="Nothing depends on this asset."
+            why="A fault here won't cascade — but it also means it's not declared as a source for any downstream system."
+            action="Link consumers via 'feeds' or 'measures' so impact analysis can trace incidents."
+          />
+        ) : (
+          <>
+            {downstream.map(({ rel, asset: a }) => <RelationLine key={rel.id} rel={rel} asset={a} onSelect={onSelect} direction="down" />)}
+            {impactSet.length > downstream.length && (
+              <div className="text-[10px] text-muted-foreground px-2 pt-1">+ {impactSet.length - downstream.length} transitive</div>
+            )}
+          </>
         )}
       </div>
     </CollapsibleSection>
@@ -177,7 +205,13 @@ function SectionRelated({ related, onSelect }: { related: Asset[]; onSelect: (id
             <span className="ml-auto text-[9px] text-muted-foreground">{a.kind}</span>
           </button>
         ))}
-        {related.length === 0 && <div className="text-[11px] text-muted-foreground px-2 py-1">No related assets</div>}
+        {related.length === 0 && (
+          <EmptyHint
+            what="No related assets found."
+            why="Related grouping uses shared tags — no other asset shares this one's tags yet."
+            action="Add shared tags (e.g. 'HVAC', 'Critical') to surface peers across the portfolio."
+          />
+        )}
       </div>
     </CollapsibleSection>
   );
