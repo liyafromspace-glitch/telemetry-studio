@@ -1,5 +1,6 @@
 import { ChevronRight, ArrowUpRight, ArrowDownRight, ShieldCheck, AlertTriangle } from "lucide-react";
 import { assets, assetRelations, assetKindLabels, type Asset } from "@/data/mockAssets";
+import { defaultContext } from "@/data/mockPlatform";
 import { useMemo } from "react";
 
 interface Props {
@@ -64,11 +65,15 @@ export function AssetContextHeader({ selectedId, onSelect }: Props) {
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 min-w-0 flex-1">
         <span className="text-muted-foreground/70 uppercase tracking-[0.14em] text-[10px] font-semibold">
-          Admin
+          Digital Twin
         </span>
         <ChevronRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
-        <span className="text-muted-foreground/70 uppercase tracking-[0.14em] text-[10px] font-semibold">
-          Assets
+        <span className="text-muted-foreground/70 text-[10px] font-medium truncate">
+          {defaultContext.environment}
+        </span>
+        <ChevronRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
+        <span className="text-muted-foreground/70 text-[10px] font-medium truncate">
+          {defaultContext.reservoir}
         </span>
         {chain.map((a, i) => {
           const last = i === chain.length - 1;

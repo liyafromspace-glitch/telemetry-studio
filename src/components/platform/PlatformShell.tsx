@@ -40,12 +40,12 @@ export function PlatformShell() {
   });
 
   const stateLabels: Record<AppState, string> = {
-    live: "LIVE",
-    investigate: "DEBUG",
+    live: "MONITOR",
+    investigate: "INVESTIGATE",
     analyze: "TRACE",
-    configure: "EDIT",
+    configure: "CONFIGURE",
     govern: "DEPLOY",
-    admin: "ADMIN",
+    admin: "MANAGE",
   };
 
   return (

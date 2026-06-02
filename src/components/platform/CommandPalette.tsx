@@ -46,11 +46,11 @@ export function CommandPalette({ open, onOpenChange, onNavigate, onSelectEntity 
 
     // Navigation
     const navItems: { state: AppState; label: string; icon: React.ReactNode; shortcut?: string }[] = [
-      { state: "live", label: "LIVE — Мониторинг сигналов", icon: <Radio className="w-3.5 h-3.5" />, shortcut: "⌘1" },
-      { state: "investigate", label: "DEBUG — Расследование инцидентов", icon: <Bug className="w-3.5 h-3.5" />, shortcut: "⌘I" },
-      { state: "analyze", label: "TRACE — Отчёты и анализ", icon: <BarChart3 className="w-3.5 h-3.5" />, shortcut: "⌘3" },
-      { state: "configure", label: "EDIT — Редактор правил", icon: <Settings2 className="w-3.5 h-3.5" />, shortcut: "⌘M" },
-      { state: "govern", label: "DEPLOY — Управление версиями", icon: <Shield className="w-3.5 h-3.5" />, shortcut: "⌘5" },
+      { state: "live", label: "Monitor — Мониторинг сигналов", icon: <Radio className="w-3.5 h-3.5" />, shortcut: "⌘1" },
+      { state: "investigate", label: "Investigate — Расследование инцидентов", icon: <Bug className="w-3.5 h-3.5" />, shortcut: "⌘I" },
+      { state: "analyze", label: "Trace — Отчёты и анализ", icon: <BarChart3 className="w-3.5 h-3.5" />, shortcut: "⌘3" },
+      { state: "configure", label: "Configure — Редактор правил", icon: <Settings2 className="w-3.5 h-3.5" />, shortcut: "⌘M" },
+      { state: "govern", label: "Deploy — Управление версиями", icon: <Shield className="w-3.5 h-3.5" />, shortcut: "⌘5" },
     ];
     navItems.forEach((n) =>
       items.push({
