@@ -226,7 +226,7 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
       <Tooltip key={id}>
         <TooltipTrigger asChild>
           <g
-            style={{ opacity: dim ? 0.15 : 1, cursor: "pointer", transition: "opacity 200ms ease" }}
+            style={{ opacity: dim ? 0.22 : 1, cursor: "pointer", transition: "opacity 200ms ease" }}
             onMouseEnter={() => setHovered(id)}
             onMouseLeave={() => setHovered(null)}
             onClick={() => onSelect(id)}
@@ -366,7 +366,17 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
               const b = layout.positions[e.to];
               if (!a || !b) return null;
               const inFocus = isInFocus(e.from) && isInFocus(e.to);
-              const colorKey = e.structural ? "blue" : relationColors[e.kind];
+              // Upstream/downstream emphasis relative to selection
+              const isUpstreamEdge = selectedId && e.to === selectedId;
+              const isDownstreamEdge = selectedId && e.from === selectedId;
+              const touchesSelected = isUpstreamEdge || isDownstreamEdge;
+              const colorKey = isUpstreamEdge
+                ? "blue"
+                : isDownstreamEdge
+                ? "orange"
+                : e.structural
+                ? "blue"
+                : relationColors[e.kind];
               const color = connColors[colorKey];
               const dx = b.x - a.x;
               const dy = b.y - a.y;
@@ -383,9 +393,9 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
                   x2={bx}
                   y2={by}
                   stroke={color}
-                  strokeWidth={1}
-                  strokeDasharray={e.structural ? "3 3" : "none"}
-                  opacity={inFocus ? 0.55 : 0.08}
+                  strokeWidth={touchesSelected ? 1.5 : 1}
+                  strokeDasharray={e.structural && !touchesSelected ? "3 3" : "none"}
+                  opacity={!inFocus ? 0.08 : touchesSelected ? 0.95 : selectedId ? 0.22 : 0.5}
                   markerEnd={`url(#asset-arrow-${colorKey})`}
                 />
               );
