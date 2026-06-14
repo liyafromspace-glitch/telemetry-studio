@@ -5,12 +5,13 @@ import { AssetGraph } from "./AssetGraph";
 import { AssetInspector } from "./AssetInspector";
 import { AssetBottomTabs } from "./AssetBottomTabs";
 import { AssetContextHeader } from "./AssetContextHeader";
+import "./nostalgic.css";
 
 export function AssetManagementView() {
   const [selectedId, setSelectedId] = useState<string | null>("eq-pump-4");
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="nostalgic-scope flex-1 flex flex-col min-h-0">
       <AssetContextHeader selectedId={selectedId} onSelect={setSelectedId} />
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={20} minSize={14} maxSize={30}>
