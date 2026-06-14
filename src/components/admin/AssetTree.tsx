@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Search, Building2, Layers, Cpu, Wrench, HardDrive, Activity } from "lucide-react";
+import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { assets, type Asset, type AssetKind, assetKindLabels } from "@/data/mockAssets";
 import { cn } from "@/lib/utils";
 
@@ -8,13 +8,13 @@ interface AssetTreeProps {
   onSelect: (id: string) => void;
 }
 
-const kindIcon: Record<AssetKind, React.ComponentType<{ className?: string }>> = {
-  building: Building2,
-  floor: Layers,
-  system: Cpu,
-  equipment: Wrench,
-  device: HardDrive,
-  signal: Activity,
+const kindGlyph: Record<AssetKind, string> = {
+  building: "▣",
+  floor: "═",
+  system: "◆",
+  equipment: "▤",
+  device: "▪",
+  signal: "·",
 };
 
 const healthDot: Record<string, string> = {
@@ -68,7 +68,6 @@ export function AssetTree({ selectedId, onSelect }: AssetTreeProps) {
     const kids = childrenMap.get(node.id) || [];
     const hasKids = kids.length > 0;
     const isOpen = expanded.has(node.id) || (matchSet && matchSet.has(node.id));
-    const Icon = kindIcon[node.kind];
     const active = selectedId === node.id;
 
     return (
@@ -76,11 +75,16 @@ export function AssetTree({ selectedId, onSelect }: AssetTreeProps) {
         <button
           onClick={() => onSelect(node.id)}
           className={cn(
-            "w-full flex items-center gap-1.5 pr-2 py-1 text-xs transition-colors group",
-            active ? "bg-accent text-foreground" : "text-secondary-foreground hover:bg-accent/50"
+            "w-full flex items-center gap-1.5 pr-2 py-1 text-[11px] font-mono transition-colors group relative",
+            active
+              ? "text-[hsl(var(--conn-orange))] bg-[hsl(var(--conn-orange)/0.07)]"
+              : "text-secondary-foreground hover:bg-accent/40 hover:text-foreground"
           )}
           style={{ paddingLeft: 8 + depth * 12 }}
         >
+          {active && (
+            <span className="absolute left-0 top-0 bottom-0 w-[2px] bg-[hsl(var(--conn-orange))]" />
+          )}
           {hasKids ? (
             <span
               role="button"
@@ -95,9 +99,9 @@ export function AssetTree({ selectedId, onSelect }: AssetTreeProps) {
           ) : (
             <span className="w-3.5" />
           )}
-          <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-          <span className="truncate">{node.name}</span>
-          <span className={cn("ml-auto w-1.5 h-1.5 rounded-full shrink-0", healthDot[node.health])} />
+          <span className="text-muted-foreground/70 w-3 text-center shrink-0">{kindGlyph[node.kind]}</span>
+          <span className="truncate tracking-tight">{node.name}</span>
+          <span className={cn("ml-auto w-1.5 h-1.5 rounded-[1px] shrink-0", healthDot[node.health])} />
         </button>
         {isOpen && hasKids && kids.map((c) => renderNode(c, depth + 1))}
       </div>
@@ -114,31 +118,31 @@ export function AssetTree({ selectedId, onSelect }: AssetTreeProps) {
   return (
     <div className="flex flex-col h-full bg-card overflow-hidden">
       <div className="px-4 py-2.5 border-b border-border shrink-0">
-        <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-          Asset Hierarchy
+        <div className="n-label">
+          <span className="n-accent">▸</span> Asset Hierarchy
         </div>
       </div>
-      <div className="p-2.5 border-b border-border shrink-0">
+      <div className="p-2.5 border-b border-dashed border-border shrink-0">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search assets, tags…"
+            placeholder="grep assets, tags…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-input text-foreground text-xs pl-8 pr-3 py-2 rounded-lg border border-border focus:border-primary focus:outline-none placeholder:text-muted-foreground"
+            className="w-full bg-background text-foreground text-[11px] font-mono pl-8 pr-3 py-2 border border-border focus:border-[hsl(var(--conn-orange))] focus:outline-none placeholder:text-muted-foreground/60 rounded-none"
           />
         </div>
       </div>
       <div className="flex-1 overflow-y-auto py-1.5 min-h-0">
         {roots.map((r) => renderNode(r, 0))}
       </div>
-      <div className="border-t border-border px-4 py-2 text-[10px] text-muted-foreground shrink-0 flex items-center justify-between">
-        <span>{assets.length} entities</span>
-        <span className="font-mono">
+      <div className="border-t border-dashed border-border px-4 py-2 text-[10px] text-muted-foreground shrink-0 flex items-center justify-between font-mono uppercase tracking-wider">
+        <span>{String(assets.length).padStart(3, "0")} entities</span>
+        <span>
           {Object.entries(counts)
             .map(([k, v]) => `${assetKindLabels[k as AssetKind][0]}${v}`)
-            .join(" · ")}
+            .join("·")}
         </span>
       </div>
     </div>
