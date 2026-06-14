@@ -28,12 +28,40 @@ const levelColor: Record<string, string> = {
   error: "text-destructive",
 };
 
+// Pixel heatmap row for telemetry density
+function Heatstrip({ seed = 1 }: { seed?: number }) {
+  const cells = Array.from({ length: 48 }, (_, i) => {
+    const v = (Math.sin(i * 0.6 + seed) + 1) / 2;
+    return v;
+  });
+  return (
+    <div className="flex gap-[2px]">
+      {cells.map((v, i) => (
+        <span
+          key={i}
+          className="w-2 h-3"
+          style={{
+            background:
+              v > 0.85
+                ? "hsl(var(--conn-orange))"
+                : v > 0.6
+                ? "hsl(var(--conn-orange) / 0.6)"
+                : v > 0.3
+                ? "hsl(var(--muted-foreground) / 0.4)"
+                : "hsl(var(--border))",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function AssetBottomTabs({ selectedId }: AssetBottomTabsProps) {
   const [tab, setTab] = useState<Tab>("telemetry");
   const asset = assets.find((a) => a.id === selectedId);
 
   return (
-    <div className="flex flex-col h-full bg-card overflow-hidden">
+    <div className="flex flex-col h-full bg-card overflow-hidden font-mono">
       <div className="flex items-center px-2 border-b border-border shrink-0">
         {tabs.map((t) => {
           const Icon = t.icon;
@@ -42,9 +70,9 @@ export function AssetBottomTabs({ selectedId }: AssetBottomTabsProps) {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium border-b-2 transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-[0.16em] border-b-2 transition-colors ${
                 active
-                  ? "border-primary text-foreground"
+                  ? "border-[hsl(var(--conn-orange))] text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -53,14 +81,14 @@ export function AssetBottomTabs({ selectedId }: AssetBottomTabsProps) {
             </button>
           );
         })}
-        <div className="ml-auto pr-3 text-[10px] text-muted-foreground">
-          {asset ? asset.name : "—"}
+        <div className="ml-auto pr-3 text-[10px] text-muted-foreground uppercase tracking-wider">
+          {asset ? `// ${asset.name}` : "// —"}
         </div>
       </div>
       <div className="flex-1 overflow-auto min-h-0 p-3 text-xs">
         {tab === "telemetry" && (
-          <div className="space-y-2">
-            {!asset && <div className="text-muted-foreground">Select an asset to view telemetry</div>}
+          <div className="space-y-3">
+            {!asset && <div className="text-muted-foreground">// select an asset</div>}
             {asset && (
               <>
                 <div className="grid grid-cols-4 gap-3">
@@ -70,22 +98,21 @@ export function AssetBottomTabs({ selectedId }: AssetBottomTabsProps) {
                     { l: "Last value", v: asset.kind === "signal" ? "42.1" : "—" },
                     { l: "Quality", v: asset.health === "critical" ? "Bad" : "Good" },
                   ].map((s) => (
-                    <div key={s.l}>
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.l}</div>
-                      <div className="text-[14px] font-semibold tabular-nums text-foreground">{s.v}</div>
+                    <div key={s.l} className="border-l border-border pl-2">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{s.l}</div>
+                      <div className="text-[14px] font-semibold tabular-nums text-foreground mt-0.5">{s.v}</div>
                     </div>
                   ))}
                 </div>
-                <svg viewBox="0 0 400 60" className="w-full h-16 mt-2">
-                  <polyline
-                    fill="none"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="1.5"
-                    points={Array.from({ length: 40 })
-                      .map((_, i) => `${i * 10},${30 + Math.sin(i / 2) * 12 + (i % 5) * 1.5}`)
-                      .join(" ")}
-                  />
-                </svg>
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                    <span>▸ density · 48 buckets</span>
+                    <span>now</span>
+                  </div>
+                  <Heatstrip seed={1} />
+                  <Heatstrip seed={2.3} />
+                  <Heatstrip seed={4.1} />
+                </div>
               </>
             )}
           </div>
@@ -104,25 +131,25 @@ export function AssetBottomTabs({ selectedId }: AssetBottomTabsProps) {
                 ["Parent", asset.parentId || "—"],
               ].map(([k, v]) => (
                 <div key={k} className="contents">
-                  <div className="text-[11px] text-muted-foreground">{k}</div>
-                  <div className="text-[11px] text-foreground font-mono">{v}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-[0.16em]">{k}</div>
+                  <div className="text-[11px] text-foreground">{v}</div>
                 </div>
               ))
             ) : (
-              <div className="text-muted-foreground col-span-2">Select an asset</div>
+              <div className="text-muted-foreground col-span-2">// select an asset</div>
             )}
           </div>
         )}
         {tab === "bulk" && (
           <div className="space-y-2">
-            <div className="text-[11px] text-muted-foreground">
-              Select multiple assets in the tree to bulk-edit tags, vendor, or topology links.
+            <div className="text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
+              // select multiple assets to bulk-edit tags, vendor, or topology
             </div>
             <table className="w-full text-[11px]">
               <thead>
-                <tr className="text-left text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border">
+                <tr className="text-left text-[10px] uppercase tracking-[0.16em] text-muted-foreground border-b border-dashed border-border">
                   <th className="py-1.5 font-medium">
-                    <input type="checkbox" className="accent-primary" />
+                    <input type="checkbox" className="accent-[hsl(var(--conn-orange))]" />
                   </th>
                   <th className="py-1.5 font-medium">Name</th>
                   <th className="py-1.5 font-medium">Kind</th>
@@ -132,12 +159,12 @@ export function AssetBottomTabs({ selectedId }: AssetBottomTabsProps) {
               </thead>
               <tbody>
                 {assets.slice(0, 10).map((a) => (
-                  <tr key={a.id} className="border-b border-border/50 hover:bg-accent/40">
-                    <td className="py-1.5"><input type="checkbox" className="accent-primary" /></td>
+                  <tr key={a.id} className="border-b border-border/40 hover:bg-accent/30">
+                    <td className="py-1.5"><input type="checkbox" className="accent-[hsl(var(--conn-orange))]" /></td>
                     <td className="py-1.5 text-foreground">{a.name}</td>
-                    <td className="py-1.5 text-muted-foreground">{a.kind}</td>
+                    <td className="py-1.5 text-muted-foreground uppercase tracking-wider text-[10px]">{a.kind}</td>
                     <td className="py-1.5 text-muted-foreground">{a.tags.join(", ") || "—"}</td>
-                    <td className="py-1.5 capitalize">{a.health}</td>
+                    <td className="py-1.5 uppercase tracking-wider text-[10px]">{a.health}</td>
                   </tr>
                 ))}
               </tbody>
@@ -145,11 +172,11 @@ export function AssetBottomTabs({ selectedId }: AssetBottomTabsProps) {
           </div>
         )}
         {tab === "events" && (
-          <div className="space-y-1 font-mono">
+          <div className="space-y-0.5">
             {fakeEvents.map((e, i) => (
-              <div key={i} className="flex items-start gap-3 text-[11px]">
-                <span className="text-muted-foreground">{e.ts}</span>
-                <span className={`${levelColor[e.level]} uppercase w-12`}>{e.level}</span>
+              <div key={i} className="flex items-start gap-3 text-[11px] hover:bg-accent/30 px-1">
+                <span className="text-muted-foreground tabular-nums">{e.ts}</span>
+                <span className={`${levelColor[e.level]} uppercase w-12 tracking-wider text-[10px]`}>{e.level}</span>
                 <span className="text-foreground/90">{e.msg}</span>
               </div>
             ))}

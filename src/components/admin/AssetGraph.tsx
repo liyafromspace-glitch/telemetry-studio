@@ -22,15 +22,6 @@ const healthStroke: Record<string, string> = {
   unknown: "hsl(var(--border))",
 };
 
-const kindShape: Record<AssetKind, "rect" | "hex" | "circle" | "diamond"> = {
-  building: "rect",
-  floor: "rect",
-  system: "hex",
-  equipment: "rect",
-  device: "diamond",
-  signal: "circle",
-};
-
 // Layout: place nodes in columns by kind for a constrained, readable graph
 const columnByKind: Record<AssetKind, number> = {
   building: 0,
@@ -47,10 +38,10 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
   const [showAi, setShowAi] = useState(true);
 
   const layout = useMemo(() => {
-    const COL_W = 160;
+    const COL_W = 168;
     const ROW_H = 64;
     const PAD_X = 40;
-    const PAD_Y = 32;
+    const PAD_Y = 40;
 
     const byCol: Record<number, string[]> = {};
     for (const a of assets) {
@@ -71,7 +62,6 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
     return { positions, width, height };
   }, []);
 
-  // Combine declared relations + parent links so the graph reads as a system
   const edges = useMemo(() => {
     const parentEdges = assets
       .filter((a) => a.parentId)
@@ -114,16 +104,13 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
     [focusSet]
   );
 
-  // AI insights
   const aiInsights = useMemo(() => {
     const issues: { id: string; severity: "info" | "warn"; message: string }[] = [];
-    // Missing tags
     for (const a of assets) {
       if (a.kind === "equipment" && a.tags.length === 0) {
         issues.push({ id: a.id, severity: "warn", message: `${a.name}: missing tags` });
       }
     }
-    // Disconnected: equipment with no relations
     const connected = new Set<string>();
     for (const r of assetRelations) {
       connected.add(r.from);
@@ -134,7 +121,6 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
         issues.push({ id: a.id, severity: "warn", message: `${a.name}: disconnected from any system topology` });
       }
     }
-    // Topology validation: VFDs without a controlled motor link
     for (const a of assets) {
       if (a.kind === "device" && a.name.includes("VFD")) {
         const ok = assetRelations.some((r) => r.from === a.id && r.kind === "controls");
@@ -150,126 +136,98 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
     const a = assets.find((x) => x.id === id);
     if (!a) return null;
     const pos = layout.positions[id];
-    const shape = kindShape[a.kind];
     const stroke = healthStroke[a.health];
     const isSelected = selectedId === id;
     const isHovered = hovered === id;
     const dim = !isInFocus(id);
-    const w = 116;
-    const h = 36;
+    const w = 120;
+    const h = 32;
 
-    let shapeEl: JSX.Element;
-    if (shape === "rect") {
-      shapeEl = (
-        <rect
-          x={pos.x - w / 2}
-          y={pos.y - h / 2}
-          width={w}
-          height={h}
-          rx={6}
-          fill="hsl(var(--card))"
-          stroke={isSelected ? "hsl(var(--primary))" : stroke}
-          strokeWidth={isSelected ? 1.5 : 1}
-        />
-      );
-    } else if (shape === "hex") {
-      const points = [
-        [pos.x - w / 2, pos.y],
-        [pos.x - w / 2 + 10, pos.y - h / 2],
-        [pos.x + w / 2 - 10, pos.y - h / 2],
-        [pos.x + w / 2, pos.y],
-        [pos.x + w / 2 - 10, pos.y + h / 2],
-        [pos.x - w / 2 + 10, pos.y + h / 2],
-      ]
-        .map((p) => p.join(","))
-        .join(" ");
-      shapeEl = (
-        <polygon
-          points={points}
-          fill="hsl(var(--card))"
-          stroke={isSelected ? "hsl(var(--primary))" : stroke}
-          strokeWidth={isSelected ? 1.5 : 1}
-        />
-      );
-    } else if (shape === "diamond") {
-      const points = [
-        [pos.x, pos.y - h / 2],
-        [pos.x + w / 2, pos.y],
-        [pos.x, pos.y + h / 2],
-        [pos.x - w / 2, pos.y],
-      ]
-        .map((p) => p.join(","))
-        .join(" ");
-      shapeEl = (
-        <polygon
-          points={points}
-          fill="hsl(var(--card))"
-          stroke={isSelected ? "hsl(var(--primary))" : stroke}
-          strokeWidth={isSelected ? 1.5 : 1}
-        />
-      );
-    } else {
-      shapeEl = (
-        <ellipse
-          cx={pos.x}
-          cy={pos.y}
-          rx={w / 2}
-          ry={h / 2}
-          fill="hsl(var(--card))"
-          stroke={isSelected ? "hsl(var(--primary))" : stroke}
-          strokeWidth={isSelected ? 1.5 : 1}
-        />
-      );
-    }
+    // Pixel-style box with corner brackets (terminal frame)
+    const x = pos.x - w / 2;
+    const y = pos.y - h / 2;
+    const c = 4; // bracket size
 
     return (
       <Tooltip key={id}>
         <TooltipTrigger asChild>
           <g
-            style={{ opacity: dim ? 0.22 : 1, cursor: "pointer", transition: "opacity 200ms ease" }}
+            style={{ opacity: dim ? 0.2 : 1, cursor: "pointer", transition: "opacity 180ms ease" }}
             onMouseEnter={() => setHovered(id)}
             onMouseLeave={() => setHovered(null)}
             onClick={() => onSelect(id)}
           >
-            {shapeEl}
-            <circle cx={pos.x - w / 2 + 6} cy={pos.y} r={3} fill={stroke} />
+            {/* Background pixel fill */}
+            <rect
+              x={x}
+              y={y}
+              width={w}
+              height={h}
+              fill={isSelected ? "hsl(var(--conn-orange) / 0.08)" : "hsl(var(--background))"}
+              stroke={isSelected ? "hsl(var(--conn-orange))" : "hsl(var(--border))"}
+              strokeWidth={1}
+              shapeRendering="crispEdges"
+            />
+            {/* Corner brackets — terminal feel */}
+            {[
+              [x, y, x + c, y, x, y + c],
+              [x + w, y, x + w - c, y, x + w, y + c],
+              [x, y + h, x + c, y + h, x, y + h - c],
+              [x + w, y + h, x + w - c, y + h, x + w, y + h - c],
+            ].map((pts, i) => (
+              <polyline
+                key={i}
+                points={`${pts[0]},${pts[1]} ${pts[2]},${pts[3]} ${pts[0]},${pts[1]} ${pts[4]},${pts[5]}`}
+                fill="none"
+                stroke={isSelected ? "hsl(var(--conn-orange))" : "hsl(var(--muted-foreground) / 0.5)"}
+                strokeWidth={1}
+                shapeRendering="crispEdges"
+              />
+            ))}
+            {/* Health pixel */}
+            <rect x={x + 6} y={pos.y - 3} width={6} height={6} fill={stroke} shapeRendering="crispEdges" />
+            {/* Name */}
             <text
-              x={pos.x - w / 2 + 14}
+              x={x + 18}
               y={pos.y - 1}
               fontSize="10"
-              fontFamily="Inter, sans-serif"
+              fontFamily="JetBrains Mono, monospace"
               fontWeight={isSelected ? 600 : 500}
-              fill="hsl(var(--foreground))"
+              fill={isSelected ? "hsl(var(--conn-orange))" : "hsl(var(--foreground))"}
+              style={{ letterSpacing: "0.02em" }}
             >
-              {a.name.length > 16 ? a.name.slice(0, 15) + "…" : a.name}
+              {a.name.length > 17 ? a.name.slice(0, 16) + "…" : a.name}
             </text>
+            {/* Meta */}
             <text
-              x={pos.x - w / 2 + 14}
-              y={pos.y + 11}
+              x={x + 18}
+              y={pos.y + 10}
               fontSize="8"
-              fontFamily="Inter, sans-serif"
+              fontFamily="JetBrains Mono, monospace"
               fill="hsl(var(--muted-foreground))"
+              style={{ letterSpacing: "0.15em", textTransform: "uppercase" }}
             >
-              {a.kind}
+              {a.kind} · {a.health[0].toUpperCase()}
             </text>
-            {isHovered && (
+            {isHovered && !isSelected && (
               <rect
-                x={pos.x - w / 2 - 1}
-                y={pos.y - h / 2 - 1}
-                width={w + 2}
-                height={h + 2}
-                rx={7}
+                x={x - 2}
+                y={y - 2}
+                width={w + 4}
+                height={h + 4}
                 fill="none"
-                stroke="hsl(var(--primary))"
-                strokeOpacity={0.4}
+                stroke="hsl(var(--conn-orange))"
+                strokeOpacity={0.5}
                 strokeWidth={1}
+                strokeDasharray="2 2"
+                shapeRendering="crispEdges"
               />
             )}
           </g>
         </TooltipTrigger>
-        <TooltipContent side="top" className="text-[10px] max-w-[200px]">
+        <TooltipContent side="top" className="text-[10px] max-w-[200px] font-mono">
           <div className="font-medium">{a.name}</div>
-          <div className="text-muted-foreground">{a.kind} · {a.health}</div>
+          <div className="text-muted-foreground uppercase tracking-wider">{a.kind} · {a.health}</div>
           {a.vendor && <div className="text-muted-foreground">{a.vendor} {a.model}</div>}
         </TooltipContent>
       </Tooltip>
@@ -277,74 +235,81 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden">
-      <div className="h-9 flex items-center justify-between px-4 border-b border-border shrink-0 text-xs">
+    <div className="flex flex-col h-full overflow-hidden bg-background">
+      {/* Header bar */}
+      <div className="h-9 flex items-center justify-between px-4 border-b border-border shrink-0 bg-card/40">
         <div className="flex items-center gap-3">
-          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-            Relationship Graph
+          <span className="n-label">
+            <span className="n-accent">▸</span> Relationship Graph
           </span>
-          <span className="text-[10px] text-muted-foreground/60">
-            {assets.length} nodes · {assetRelations.length + assets.filter((a) => a.parentId).length} edges
+          <span className="n-mono text-[10px] text-muted-foreground/70 tracking-wider">
+            {String(assets.length).padStart(2, "0")} NODES · {String(assetRelations.length + assets.filter((a) => a.parentId).length).padStart(2, "0")} EDGES
           </span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 font-mono">
           <button
             onClick={() => setShowAi((v) => !v)}
-            className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium transition-colors ${
-              showAi ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+            className={`flex items-center gap-1.5 px-2 py-1 text-[10px] uppercase tracking-wider transition-colors ${
+              showAi ? "text-[hsl(var(--conn-orange))]" : "text-muted-foreground hover:text-foreground"
             }`}
-            title="AI insights"
           >
             <Sparkles className="w-3 h-3" />
             AI
           </button>
           <button
             onClick={() => setFocusMode((v) => !v)}
-            className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium transition-colors ${
-              focusMode ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"
+            className={`flex items-center gap-1.5 px-2 py-1 text-[10px] uppercase tracking-wider transition-colors ${
+              focusMode ? "text-[hsl(var(--conn-orange))]" : "text-muted-foreground hover:text-foreground"
             }`}
-            title="Focus on selected and its neighborhood"
           >
             <Focus className="w-3 h-3" />
             Focus
           </button>
-          <button
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] text-muted-foreground hover:text-foreground"
-            title="Fit to screen"
-          >
+          <button className="flex items-center gap-1.5 px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground">
             <Maximize2 className="w-3 h-3" />
             Fit
           </button>
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-auto">
+      {/* Canvas with dot grid */}
+      <div className="flex-1 min-h-0 overflow-auto nostalgic-dot-grid relative">
+        <div className="absolute inset-0 nostalgic-scanlines pointer-events-none" />
         <TooltipProvider delayDuration={150}>
           <svg
             width={layout.width}
             height={layout.height}
             viewBox={`0 0 ${layout.width} ${layout.height}`}
-            className="block"
+            className="block relative"
           >
             {/* Column headers */}
             {(["building", "floor", "system", "equipment", "device", "signal"] as AssetKind[]).map(
               (k, i) => (
-                <text
-                  key={k}
-                  x={40 + i * 160 + 70}
-                  y={16}
-                  fontSize="9"
-                  fontFamily="Inter, sans-serif"
-                  fontWeight={500}
-                  fill="hsl(var(--muted-foreground))"
-                  textAnchor="middle"
-                  style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}
-                >
-                  {k}
-                </text>
+                <g key={k}>
+                  <text
+                    x={40 + i * 168 + 70}
+                    y={18}
+                    fontSize="9"
+                    fontFamily="JetBrains Mono, monospace"
+                    fontWeight={500}
+                    fill="hsl(var(--muted-foreground))"
+                    textAnchor="middle"
+                    style={{ textTransform: "uppercase", letterSpacing: "0.22em" }}
+                  >
+                    {String(i).padStart(2, "0")} · {k}
+                  </text>
+                  <line
+                    x1={40 + i * 168 + 70 - 30}
+                    x2={40 + i * 168 + 70 + 30}
+                    y1={24}
+                    y2={24}
+                    stroke="hsl(var(--border))"
+                    strokeDasharray="2 2"
+                    shapeRendering="crispEdges"
+                  />
+                </g>
               )
             )}
-            {/* Edges */}
             <defs>
               {Object.entries(connColors).map(([k, c]) => (
                 <marker
@@ -357,7 +322,7 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
                   markerHeight="6"
                   orient="auto"
                 >
-                  <path d="M0,0 L6,3 L0,6" fill="none" stroke={c} strokeWidth="1" opacity="0.7" />
+                  <path d="M0,0 L6,3 L0,6" fill="none" stroke={c} strokeWidth="1" opacity="0.8" />
                 </marker>
               ))}
             </defs>
@@ -366,7 +331,6 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
               const b = layout.positions[e.to];
               if (!a || !b) return null;
               const inFocus = isInFocus(e.from) && isInFocus(e.to);
-              // Upstream/downstream emphasis relative to selection
               const isUpstreamEdge = selectedId && e.to === selectedId;
               const isDownstreamEdge = selectedId && e.from === selectedId;
               const touchesSelected = isUpstreamEdge || isDownstreamEdge;
@@ -381,10 +345,10 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
               const dx = b.x - a.x;
               const dy = b.y - a.y;
               const angle = Math.atan2(dy, dx);
-              const ax = a.x + Math.cos(angle) * 60;
-              const ay = a.y + Math.sin(angle) * 16;
-              const bx = b.x - Math.cos(angle) * 60;
-              const by = b.y - Math.sin(angle) * 16;
+              const ax = a.x + Math.cos(angle) * 62;
+              const ay = a.y + Math.sin(angle) * 14;
+              const bx = b.x - Math.cos(angle) * 62;
+              const by = b.y - Math.sin(angle) * 14;
               return (
                 <line
                   key={e.id}
@@ -393,57 +357,55 @@ export function AssetGraph({ selectedId, onSelect }: AssetGraphProps) {
                   x2={bx}
                   y2={by}
                   stroke={color}
-                  strokeWidth={touchesSelected ? 1.5 : 1}
-                  strokeDasharray={e.structural && !touchesSelected ? "3 3" : "none"}
-                  opacity={!inFocus ? 0.08 : touchesSelected ? 0.95 : selectedId ? 0.22 : 0.5}
+                  strokeWidth={touchesSelected ? 1.25 : 1}
+                  strokeDasharray={e.structural && !touchesSelected ? "2 3" : touchesSelected ? "none" : "4 2"}
+                  opacity={!inFocus ? 0.08 : touchesSelected ? 1 : selectedId ? 0.25 : 0.45}
                   markerEnd={`url(#asset-arrow-${colorKey})`}
+                  shapeRendering="crispEdges"
                 />
               );
             })}
-            {/* Nodes */}
             {assets.map((a) => renderNode(a.id))}
           </svg>
         </TooltipProvider>
       </div>
 
-      {/* AI Insight strip */}
+      {/* AI strip */}
       {showAi && (aiInsights.length > 0 || explain) && (
-        <div className="border-t border-border bg-card/50 px-4 py-2 shrink-0 space-y-1.5">
+        <div className="border-t border-dashed border-border bg-card/40 px-4 py-2 shrink-0 space-y-1 font-mono">
           {explain && (
             <div className="flex items-start gap-2 text-[11px]">
-              <Sparkles className="w-3 h-3 text-primary mt-0.5 shrink-0" />
+              <span className="text-[hsl(var(--conn-orange))] text-[10px] mt-0.5">▸ AI</span>
               <span className="text-foreground/90">{explain}</span>
             </div>
           )}
           {aiInsights.map((ins, i) => (
             <div key={i} className="flex items-start gap-2 text-[11px]">
-              <Sparkles className="w-3 h-3 text-warning mt-0.5 shrink-0" />
-              <span className="text-muted-foreground">
-                <button
-                  className="text-foreground/90 hover:text-primary underline-offset-2 hover:underline"
-                  onClick={() => onSelect(ins.id)}
-                >
-                  {ins.message}
-                </button>
-              </span>
+              <span className="text-warning text-[10px] mt-0.5">!</span>
+              <button
+                className="text-foreground/80 hover:text-[hsl(var(--conn-orange))] text-left"
+                onClick={() => onSelect(ins.id)}
+              >
+                {ins.message}
+              </button>
             </div>
           ))}
         </div>
       )}
 
       {/* Legend */}
-      <div className="border-t border-border bg-card/30 px-4 py-1.5 shrink-0 flex items-center gap-4 text-[10px] text-muted-foreground">
+      <div className="border-t border-border bg-card/30 px-4 py-1.5 shrink-0 flex items-center gap-4 text-[10px] text-muted-foreground font-mono uppercase tracking-wider">
         {Object.entries(relationLabels).map(([k, label]) => (
           <span key={k} className="flex items-center gap-1.5">
             <span
-              className="w-2.5 h-px"
+              className="w-3 h-px"
               style={{ background: connColors[relationColors[k as keyof typeof relationLabels]] }}
             />
             {label}
           </span>
         ))}
         <span className="text-border">|</span>
-        <span>--- structural</span>
+        <span>┄┄ structural</span>
       </div>
     </div>
   );

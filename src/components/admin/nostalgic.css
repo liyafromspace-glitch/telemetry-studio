@@ -1,0 +1,69 @@
+/* Scoped nostalgic/computational terminal styling for Asset Management.
+   Applies only inside .nostalgic-scope wrappers. */
+
+.nostalgic-scope {
+  font-family: var(--font-mono);
+}
+
+.nostalgic-scope .n-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum", "zero", "cv02";
+}
+
+.nostalgic-scope .n-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.nostalgic-scope .n-accent {
+  color: hsl(var(--conn-orange));
+}
+
+.nostalgic-scope .n-divider {
+  border-color: hsl(var(--border));
+  border-style: dashed;
+}
+
+/* 12px dot grid — terminal scaffolding */
+.nostalgic-dot-grid {
+  background-color: hsl(var(--background));
+  background-image: radial-gradient(hsl(var(--border) / 0.9) 1px, transparent 1px);
+  background-size: 12px 12px;
+  background-position: 0 0;
+}
+
+/* Tighter 8px grid for canvases */
+.nostalgic-dot-grid-tight {
+  background-color: hsl(var(--background));
+  background-image: radial-gradient(hsl(var(--border) / 0.85) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+/* Scanline overlay */
+.nostalgic-scanlines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    hsl(var(--foreground) / 0.025) 0px,
+    hsl(var(--foreground) / 0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* Pixel/box node */
+.nostalgic-scope .n-pixel-border {
+  border: 1px solid hsl(var(--border));
+  box-shadow: inset 0 0 0 1px hsl(var(--background));
+}
+
+/* Heatmap cell */
+.n-heatcell {
+  width: 10px;
+  height: 10px;
+  border-radius: 1px;
+  background: hsl(var(--muted));
+  display: inline-block;
+}

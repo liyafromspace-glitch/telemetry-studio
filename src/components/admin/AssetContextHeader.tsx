@@ -15,7 +15,7 @@ const healthTone: Record<string, string> = {
   unknown: "text-muted-foreground",
 };
 
-const healthDot: Record<string, string> = {
+const healthSwatch: Record<string, string> = {
   healthy: "bg-success",
   degraded: "bg-warning",
   critical: "bg-destructive",
@@ -61,28 +61,27 @@ export function AssetContextHeader({ selectedId, onSelect }: Props) {
   }, [selectedId]);
 
   return (
-    <div className="h-11 flex items-center gap-3 px-4 border-b border-border bg-card/40 shrink-0 text-[11px]">
-      {/* Breadcrumb */}
+    <div className="h-11 flex items-center gap-3 px-4 border-b border-border bg-card/40 shrink-0 text-[11px] font-mono">
       <nav className="flex items-center gap-1 min-w-0 flex-1">
-        <span className="text-muted-foreground/70 uppercase tracking-[0.14em] text-[10px] font-semibold">
-          Digital Twin
+        <span className="text-[hsl(var(--conn-orange))] uppercase tracking-[0.18em] text-[10px] font-semibold">
+          ▸ Digital Twin
         </span>
-        <ChevronRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
-        <span className="text-muted-foreground/70 text-[10px] font-medium truncate">
+        <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+        <span className="text-muted-foreground/80 uppercase tracking-wider text-[10px] truncate">
           {defaultContext.environment}
         </span>
-        <ChevronRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
-        <span className="text-muted-foreground/70 text-[10px] font-medium truncate">
+        <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+        <span className="text-muted-foreground/80 uppercase tracking-wider text-[10px] truncate">
           {defaultContext.reservoir}
         </span>
         {chain.map((a, i) => {
           const last = i === chain.length - 1;
           return (
             <span key={a.id} className="flex items-center gap-1 min-w-0">
-              <ChevronRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
+              <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
               <button
                 onClick={() => onSelect(a.id)}
-                className={`truncate transition-colors ${
+                className={`truncate transition-colors uppercase tracking-wider text-[10px] ${
                   last
                     ? "text-foreground font-semibold"
                     : "text-muted-foreground hover:text-foreground"
@@ -95,46 +94,41 @@ export function AssetContextHeader({ selectedId, onSelect }: Props) {
           );
         })}
         {!asset && (
-          <span className="text-muted-foreground italic ml-1">No asset selected</span>
+          <span className="text-muted-foreground italic ml-1">// no asset selected</span>
         )}
       </nav>
 
-      {/* Consolidated status summary */}
       {asset && (
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-4 shrink-0 uppercase tracking-wider text-[10px]">
           <div className="flex items-center gap-1.5">
-            <span className={`w-1.5 h-1.5 rounded-full ${healthDot[asset.health]}`} />
-            <span className={`uppercase tracking-wider text-[10px] font-semibold ${healthTone[asset.health]}`}>
+            <span className={`w-1.5 h-1.5 rounded-[1px] ${healthSwatch[asset.health]}`} />
+            <span className={`font-semibold ${healthTone[asset.health]}`}>
               {asset.health}
             </span>
           </div>
-          <div className="h-3 w-px bg-border" />
+          <span className="text-border">|</span>
           <div className="flex items-center gap-3 tabular-nums text-muted-foreground">
-            <span className="flex items-center gap-1" title="Upstream dependencies">
+            <span className="flex items-center gap-1" title="Upstream">
               <ArrowUpRight className="w-3 h-3 text-[hsl(var(--conn-blue))]" />
-              <span className="text-foreground/90">{upCount}</span>
+              <span className="text-foreground/90">{String(upCount).padStart(2, "0")}</span>
             </span>
-            <span className="flex items-center gap-1" title="Direct downstream">
+            <span className="flex items-center gap-1" title="Downstream / impact">
               <ArrowDownRight className="w-3 h-3 text-[hsl(var(--conn-orange))]" />
-              <span className="text-foreground/90">{downCount}</span>
-              <span className="text-muted-foreground/60">/ {impactCount} impact</span>
+              <span className="text-foreground/90">{String(downCount).padStart(2, "0")}</span>
+              <span className="text-muted-foreground/60">/{String(impactCount).padStart(2, "0")}</span>
             </span>
           </div>
-          <div className="h-3 w-px bg-border" />
+          <span className="text-border">|</span>
           <div className="flex items-center gap-1.5">
             {hasTopologyIssue ? (
               <>
                 <AlertTriangle className="w-3 h-3 text-warning" />
-                <span className="text-warning text-[10px] uppercase tracking-wider font-semibold">
-                  Topology
-                </span>
+                <span className="text-warning font-semibold">Topology</span>
               </>
             ) : (
               <>
                 <ShieldCheck className="w-3 h-3 text-success" />
-                <span className="text-muted-foreground text-[10px] uppercase tracking-wider font-semibold">
-                  Validated
-                </span>
+                <span className="text-muted-foreground font-semibold">Validated</span>
               </>
             )}
           </div>
