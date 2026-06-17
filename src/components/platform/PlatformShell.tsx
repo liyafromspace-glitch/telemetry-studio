@@ -134,7 +134,6 @@ export function PlatformShell() {
           <span className="uppercase tracking-wider font-semibold text-foreground/60">
             {stateLabels[activeState]}
           </span>
-          <span className="font-mono">Северное месторождение / Резервуар-12</span>
           <span>UTC+3</span>
         </div>
         <div className="flex items-center gap-4 font-mono">
