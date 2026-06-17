@@ -13,6 +13,7 @@ import { AdminView } from "./AdminView";
 import { CommandPalette } from "./CommandPalette";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Minimize2, Maximize2, Activity, AlertTriangle as AlertIcon } from "lucide-react";
+import "@/components/admin/nostalgic.css";
 
 export function PlatformShell() {
   const [activeState, setActiveState] = useState<AppState>("configure");
@@ -49,7 +50,7 @@ export function PlatformShell() {
   };
 
   return (
-    <div className={`h-screen flex flex-col bg-background text-foreground ${density === "compact" ? "density-compact" : ""}`}>
+    <div className={`nostalgic-scope h-screen flex flex-col bg-background text-foreground ${density === "compact" ? "density-compact" : ""}`}>
       {/* System status header */}
       <div className="h-10 flex items-center justify-between px-4 border-b border-border bg-card text-xs select-none shrink-0">
         <div className="flex items-center gap-4">
