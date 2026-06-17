@@ -60,7 +60,7 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
   return (
     <ResizablePanelGroup direction="vertical" className="flex-1">
       <ResizablePanel defaultSize={75} minSize={40}>
-        <div className="flex flex-col h-full min-h-0">
+        
           {/* Dominant alert moment */}
           <div className="alert-dominant flex items-start gap-4 px-6 py-4 shrink-0">
             <div className="mt-1 relative shrink-0">
@@ -125,7 +125,6 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
                 ))}
               </tbody>
             </table>
-          </div>
         </div>
       </ResizablePanel>
       <ResizableHandle />
