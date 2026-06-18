@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { assets, assetRelations, relationLabels, type AssetRelation, type Asset } from "@/data/mockAssets";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { CollapsibleSection } from "@/components/ui/collapsible-section";
+import { InspectorShell, InspectorEmpty as EmptyHint, type InspectorTone } from "@/components/ui/inspector-shell";
 
 function useSection(initial = true) {
   const [open, setOpen] = useState(initial);
@@ -101,66 +102,44 @@ export function AssetInspector({ selectedId, onSelect }: AssetInspectorProps) {
 
   if (!asset) {
     return (
-      <div className="flex flex-col h-full bg-card overflow-hidden">
-        <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-2 font-mono">
+      <InspectorShell>
+        <div className="flex-1 flex flex-col items-center justify-center px-8 py-16 text-center gap-2 font-mono">
           <div className="n-label">No asset selected</div>
           <div className="text-[11px] text-muted-foreground/80 max-w-[220px] leading-relaxed">
             Pick an asset to inspect dependencies, downstream impact and health.
           </div>
         </div>
-      </div>
+      </InspectorShell>
     );
   }
 
-  return (
-    <div className="flex flex-col h-full bg-card overflow-hidden">
-      <div className="flex-1 overflow-y-auto min-h-0">
-        {/* Hero — dot-grid panel */}
-        <div className="relative px-4 pt-5 pb-4 border-b border-dashed border-border nostalgic-dot-grid-tight">
-          <div className="absolute inset-0 nostalgic-scanlines pointer-events-none" />
-          <div className="relative">
-            <div className="n-label flex items-center gap-2">
-              <span className="n-accent">▸</span> {asset.kind}
-              <span className="text-muted-foreground/50">·</span>
-              <span className="text-muted-foreground/60">{asset.id}</span>
-            </div>
-            <div className="flex items-start justify-between gap-3 mt-1.5">
-              <div className="text-[18px] font-mono font-semibold tracking-tight text-foreground leading-tight truncate">
-                {asset.name}
-              </div>
-              <span className={`flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider shrink-0 border border-current ${healthTone[asset.health]}`}>
-                <span className={`w-1.5 h-1.5 rounded-[1px] ${healthSwatch[asset.health]}`} />
-                {asset.health}
-              </span>
-            </div>
-            {asset.vendor && (
-              <div className="text-[11px] font-mono text-muted-foreground mt-1.5 uppercase tracking-wider">
-                {asset.vendor} · {asset.model}
-              </div>
-            )}
-          </div>
-        </div>
+  const healthToneMap: Record<string, InspectorTone> = {
+    healthy: "success",
+    degraded: "warning",
+    critical: "destructive",
+    unknown: "muted",
+  };
 
-        <SectionDeps upstream={upstream} onSelect={onSelect} />
-        <SectionImpact downstream={downstream} impactSet={impactSet} onSelect={onSelect} />
-        <SectionRelated related={related} onSelect={onSelect} />
-        <SectionHealth asset={asset} upstream={upstream} downstream={downstream} />
-        <SectionTags asset={asset} />
-        <SectionMeta asset={asset} />
-      </div>
-    </div>
+  return (
+    <InspectorShell
+      hero={{
+        kind: asset.kind,
+        id: asset.id,
+        title: asset.name,
+        subtitle: asset.vendor ? `${asset.vendor} · ${asset.model}` : undefined,
+        status: { label: asset.health, tone: healthToneMap[asset.health] ?? "muted" },
+      }}
+    >
+      <SectionDeps upstream={upstream} onSelect={onSelect} />
+      <SectionImpact downstream={downstream} impactSet={impactSet} onSelect={onSelect} />
+      <SectionRelated related={related} onSelect={onSelect} />
+      <SectionHealth asset={asset} upstream={upstream} downstream={downstream} />
+      <SectionTags asset={asset} />
+      <SectionMeta asset={asset} />
+    </InspectorShell>
   );
 }
 
-function EmptyHint({ what, why, action }: { what: string; why: string; action: string }) {
-  return (
-    <div className="px-3 py-2 space-y-0.5 font-mono">
-      <div className="text-[11px] text-foreground/80">{what}</div>
-      <div className="text-[10px] text-muted-foreground leading-relaxed">{why}</div>
-      <div className="text-[10px] text-[hsl(var(--conn-orange))] pt-0.5">→ {action}</div>
-    </div>
-  );
-}
 
 function SectionDeps({ upstream, onSelect }: { upstream: { rel: AssetRelation; asset: Asset }[]; onSelect: (id: string) => void }) {
   const s = useSection(true);
