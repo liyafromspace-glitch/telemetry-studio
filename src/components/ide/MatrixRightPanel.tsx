@@ -1,21 +1,32 @@
 import { Matrix } from "@/data/mockMatrices";
-import { statusLabels } from "@/data/mockRules";
+import { RuleStatus, statusLabels } from "@/data/mockRules";
 import { CheckCircle, AlertTriangle, XCircle, Keyboard, Link2, FileText, Cpu } from "lucide-react";
 import { useState } from "react";
-import { StatusBadge, ruleStatusToVariant } from "@/components/ui/status-badge";
-import { CollapsibleSection, PropRow } from "@/components/ui/collapsible-section";
+import { CollapsibleSection } from "@/components/ui/collapsible-section";
+import {
+  InspectorShell,
+  InspectorRow,
+  type InspectorTone,
+} from "@/components/ui/inspector-shell";
 
 interface MatrixRightPanelProps {
   matrix: Matrix;
 }
 
+const statusTone: Record<RuleStatus, InspectorTone> = {
+  active: "success",
+  error: "destructive",
+  draft: "muted",
+  scheduled: "warning",
+};
+
 export function MatrixRightPanel({ matrix }: MatrixRightPanelProps) {
   const [openSections, setOpenSections] = useState<Set<string>>(
-    new Set(["props", "validation", "deps", "metadata"])
+    new Set(["desc", "validation", "deps", "metadata"])
   );
 
   const toggleSection = (id: string) => {
-    setOpenSections(prev => {
+    setOpenSections((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
@@ -23,90 +34,94 @@ export function MatrixRightPanel({ matrix }: MatrixRightPanelProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-card overflow-y-auto border-l border-border">
-      <CollapsibleSection title="Свойства матрицы" open={openSections.has("props")} onToggle={() => toggleSection("props")}>
-        <div className="p-3 space-y-2 text-xs">
-          <PropRow label="Название" value={matrix.name} />
-          <PropRow label="Тип" value={matrix.matrixType} />
-          <PropRow label="Статус">
-            <StatusBadge variant={ruleStatusToVariant(matrix.status)}>
-              {statusLabels[matrix.status]}
-            </StatusBadge>
-          </PropRow>
-          <PropRow label="Версия" value={`v${matrix.version}`} />
-          <PropRow label="Автор" value={matrix.author} />
-          <PropRow label="Проверка" value={matrix.lastCheck} />
+    <InspectorShell
+      hero={{
+        kind: "Matrix",
+        id: matrix.id,
+        title: matrix.name,
+        subtitle: `${matrix.matrixType} · v${matrix.version}`,
+        status: { label: statusLabels[matrix.status], tone: statusTone[matrix.status] },
+      }}
+      footer={
+        <div className="flex items-center gap-1.5 text-[9px] font-mono text-muted-foreground uppercase tracking-wider">
+          <Keyboard className="w-2.5 h-2.5" />
+          <span>⌘↵ Validate · ⌘⇧S Activate · Esc Close</span>
         </div>
-      </CollapsibleSection>
-
+      }
+    >
       <CollapsibleSection title="Описание" open={openSections.has("desc")} onToggle={() => toggleSection("desc")}>
-        <div className="p-3 text-xs text-foreground leading-relaxed">
+        <div className="px-3 py-2 text-[11px] font-mono text-foreground/85 leading-relaxed">
           {matrix.description}
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Консоль проверки" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
-        <div className="p-3 space-y-1 text-[11px] font-mono">
-          <div className="flex items-center gap-1.5 text-success">
-            <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
-            Структура корректна
+      <CollapsibleSection title="Validation Console" open={openSections.has("validation")} onToggle={() => toggleSection("validation")}>
+        <div className="px-3 py-2 space-y-1.5 font-mono text-[11px]">
+          <div className="flex items-center gap-2 text-success">
+            <CheckCircle className="w-3 h-3 shrink-0" />
+            <span className="uppercase tracking-wider text-[10px]">Structure OK</span>
           </div>
           {matrix.warningCount > 0 && (
-            <div className="flex items-center gap-1.5 text-warning">
-              <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-              {matrix.warningCount} предупреждений
+            <div className="flex items-center gap-2 text-warning">
+              <AlertTriangle className="w-3 h-3 shrink-0" />
+              <span className="uppercase tracking-wider text-[10px]">{matrix.warningCount} warnings</span>
             </div>
           )}
           {matrix.errorCount > 0 && (
-            <div className="flex items-center gap-1.5 text-destructive">
-              <XCircle className="w-3.5 h-3.5 flex-shrink-0" />
-              {matrix.errorCount} ошибок
+            <div className="flex items-center gap-2 text-destructive">
+              <XCircle className="w-3 h-3 shrink-0" />
+              <span className="uppercase tracking-wider text-[10px]">{matrix.errorCount} errors</span>
             </div>
           )}
-          {matrix.rows.filter(r => r.statusMessage).map((row) => (
+          {matrix.rows.filter((r) => r.statusMessage).map((row) => (
             <div
               key={row.id}
               className={`flex items-start gap-1.5 pl-4 ${row.status === "error" ? "text-destructive" : "text-warning"}`}
             >
               <span className="text-[10px]">└</span>
-              <span className="text-[10px]">{row.source}: {row.statusMessage}</span>
+              <span className="text-[10px] uppercase tracking-wider">{row.source}: {row.statusMessage}</span>
             </div>
           ))}
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Зависимости" open={openSections.has("deps")} onToggle={() => toggleSection("deps")}>
-        <div className="p-3 space-y-1.5 text-xs">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Link2 className="w-3 h-3" />
-            <span>{matrix.parametersLinked} параметров</span>
+      <CollapsibleSection title="Dependencies" open={openSections.has("deps")} onToggle={() => toggleSection("deps")}>
+        <div className="px-3 py-2 space-y-1.5 font-mono text-[11px]">
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span className="flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+              <Link2 className="w-3 h-3" /> Parameters
+            </span>
+            <span className="text-foreground tabular-nums">{matrix.parametersLinked}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Cpu className="w-3 h-3" />
-            <span>{matrix.functionsLinked} функций</span>
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span className="flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+              <Cpu className="w-3 h-3" /> Functions
+            </span>
+            <span className="text-foreground tabular-nums">{matrix.functionsLinked}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <FileText className="w-3 h-3" />
-            <span>{matrix.reportsUsed} отчётов</span>
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span className="flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+              <FileText className="w-3 h-3" /> Reports
+            </span>
+            <span className="text-foreground tabular-nums">{matrix.reportsUsed}</span>
           </div>
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Метаданные" open={openSections.has("metadata")} onToggle={() => toggleSection("metadata")}>
-        <div className="p-3 space-y-2 text-xs">
-          <PropRow label="Создано" value={matrix.createdAt} />
-          <PropRow label="ID" value={matrix.id} mono />
-          <PropRow label="Строк" value={String(matrix.rows.length)} />
-          <PropRow label="Активов" value={String(matrix.assets.reduce((acc, a) => acc + 1 + (a.children?.length || 0), 0))} />
+      <CollapsibleSection title="Metadata" open={openSections.has("metadata")} onToggle={() => toggleSection("metadata")}>
+        <div className="px-3 py-2 space-y-1.5">
+          <InspectorRow k="Author" v={matrix.author} />
+          <InspectorRow k="Created" v={matrix.createdAt} />
+          <InspectorRow k="Last check" v={matrix.lastCheck} />
+          <InspectorRow k="Rows" v={String(matrix.rows.length)} mono />
+          <InspectorRow
+            k="Assets"
+            v={String(matrix.assets.reduce((acc, a) => acc + 1 + (a.children?.length || 0), 0))}
+            mono
+          />
+          <InspectorRow k="ID" v={matrix.id} mono />
         </div>
       </CollapsibleSection>
-
-      <div className="mt-auto p-2.5 border-t border-border">
-        <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
-          <Keyboard className="w-2.5 h-2.5" />
-          <span>⌘Enter проверить · ⌘⇧S активировать · ESC закрыть</span>
-        </div>
-      </div>
-    </div>
+    </InspectorShell>
   );
 }
