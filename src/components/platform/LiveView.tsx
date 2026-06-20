@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { liveSignals, type LiveSignal } from "@/data/mockPlatform";
 import { Clock, ArrowRight } from "lucide-react";
 import { LiveSystemPulse } from "@/components/ide/LiveSystemPulse";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { TracePanel } from "@/components/ide/TracePanel";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { AIBriefingStrip } from "./AIBriefingStrip";
+import { IntelligenceInspector } from "./IntelligenceInspector";
+import { useOperationalIntelligence } from "@/hooks/useOperationalIntelligence";
 
 interface LiveViewProps {
   onNavigateToInvestigate: (signalParam: string) => void;
@@ -57,80 +60,107 @@ export function LiveView({ onNavigateToInvestigate }: LiveViewProps) {
   const criticalCount = liveSignals.filter((s) => s.status === "critical").length;
   const warningCount = liveSignals.filter((s) => s.status === "warning").length;
 
+  const { items, counts, avgConfidence, setStatus, acknowledgeAll } =
+    useOperationalIntelligence();
+  const [inspectorId, setInspectorId] = useState<string | null>(null);
+  const activeItem = items.find((i) => i.id === inspectorId) ?? null;
+
   return (
     <ResizablePanelGroup direction="vertical" className="flex-1">
       <ResizablePanel defaultSize={75} minSize={40}>
-        
-          {/* Dominant alert moment */}
-          <div className="alert-dominant flex items-start gap-4 px-6 py-4 shrink-0">
-            <div className="mt-1 relative shrink-0">
-              <div className="w-2 h-2 rounded-full bg-destructive" />
-              <div className="absolute inset-0 w-2 h-2 rounded-full bg-destructive animate-ping opacity-60" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="type-state text-destructive/80 mb-1">Runtime error · TI-R12-01</div>
-              <div className="type-object text-[15px] text-foreground">
-                Temperature exceeds threshold
-              </div>
-              <div className="type-evidence mt-1.5 text-muted-foreground">
-                <span className="text-destructive font-semibold">96°C</span>
-                <span className="text-muted-foreground/50"> / 90°C threshold</span>
-                <span className="text-muted-foreground/40"> · 6°C over</span>
-              </div>
-            </div>
-            <button
-              onClick={() => onNavigateToInvestigate("TI-R12-01")}
-              className="btn-primary shrink-0"
-            >
-              Debug <ArrowRight className="w-3 h-3" />
-            </button>
+        {/* Dominant alert moment */}
+        <div className="alert-dominant flex items-start gap-4 px-6 py-4 shrink-0">
+          <div className="mt-1 relative shrink-0">
+            <div className="w-2 h-2 rounded-full bg-destructive" />
+            <div className="absolute inset-0 w-2 h-2 rounded-full bg-destructive animate-ping opacity-60" />
           </div>
-
-          <div className="flex items-center justify-between px-6 py-2 border-b border-border/60 shrink-0">
-            <div className="flex items-center gap-3 text-xs">
-              <div className="relative">
-                <div className="w-1.5 h-1.5 rounded-full bg-success" />
-                <div className="absolute inset-0 w-1.5 h-1.5 rounded-full bg-success animate-ping opacity-75" />
-              </div>
-              <LiveSystemPulse />
+          <div className="flex-1 min-w-0">
+            <div className="type-state text-destructive/80 mb-1">Runtime error · TI-R12-01</div>
+            <div className="type-object text-[15px] text-foreground">
+              Temperature exceeds threshold
             </div>
-            <div className="flex items-center gap-4 type-metadata">
-              <span><span className="text-destructive font-medium">{criticalCount}</span> errors</span>
-              <span><span className="text-warning font-medium">{warningCount}</span> warnings</span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3" /> just now
-              </span>
+            <div className="type-evidence mt-1.5 text-muted-foreground">
+              <span className="text-destructive font-semibold">96°C</span>
+              <span className="text-muted-foreground/50"> / 90°C threshold</span>
+              <span className="text-muted-foreground/40"> · 6°C over</span>
             </div>
           </div>
+          <button
+            onClick={() => onNavigateToInvestigate("TI-R12-01")}
+            className="btn-primary shrink-0"
+          >
+            Debug <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
 
-          <div className="flex-1 overflow-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-border/50 type-state">
-                  <th className="text-left px-6 py-2 font-medium w-8"></th>
-                  <th className="text-left px-3 py-2 font-medium">Signal</th>
-                  <th className="text-right px-3 py-2 font-medium">Value</th>
-                  <th className="text-right px-3 py-2 font-medium">Expected</th>
-                  <th className="text-left px-3 py-2 font-medium">Unit</th>
-                  <th className="text-center px-3 py-2 font-medium">Trend</th>
-                  <th className="text-left px-3 py-2 font-medium">Rule</th>
-                  <th className="text-left px-3 py-2 font-medium">Matrix</th>
-                  <th className="text-left px-3 py-2 font-medium">Time</th>
-                  <th className="text-center px-6 py-2 font-medium"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {liveSignals.map((signal) => (
-                  <SignalRow key={signal.id} signal={signal} onInvestigate={onNavigateToInvestigate} />
-                ))}
-              </tbody>
-            </table>
+        {/* AI Operational Brief */}
+        <AIBriefingStrip
+          counts={counts}
+          total={items.length}
+          avgConfidence={avgConfidence}
+          onReview={() => setInspectorId(items[0]?.id ?? null)}
+          onAcknowledgeAll={acknowledgeAll}
+        />
+
+        <div className="flex items-center justify-between px-6 py-2 border-b border-border/60 shrink-0">
+          <div className="flex items-center gap-3 text-xs">
+            <div className="relative">
+              <div className="w-1.5 h-1.5 rounded-full bg-success" />
+              <div className="absolute inset-0 w-1.5 h-1.5 rounded-full bg-success animate-ping opacity-75" />
+            </div>
+            <LiveSystemPulse />
+          </div>
+          <div className="flex items-center gap-4 type-metadata">
+            <span><span className="text-destructive font-medium">{criticalCount}</span> errors</span>
+            <span><span className="text-warning font-medium">{warningCount}</span> warnings</span>
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-3 h-3" /> just now
+            </span>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border/50 type-state">
+                <th className="text-left px-6 py-2 font-medium w-8"></th>
+                <th className="text-left px-3 py-2 font-medium">Signal</th>
+                <th className="text-right px-3 py-2 font-medium">Value</th>
+                <th className="text-right px-3 py-2 font-medium">Expected</th>
+                <th className="text-left px-3 py-2 font-medium">Unit</th>
+                <th className="text-center px-3 py-2 font-medium">Trend</th>
+                <th className="text-left px-3 py-2 font-medium">Rule</th>
+                <th className="text-left px-3 py-2 font-medium">Matrix</th>
+                <th className="text-left px-3 py-2 font-medium">Time</th>
+                <th className="text-center px-6 py-2 font-medium"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {liveSignals.map((signal) => (
+                <SignalRow key={signal.id} signal={signal} onInvestigate={onNavigateToInvestigate} />
+              ))}
+            </tbody>
+          </table>
         </div>
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel defaultSize={25} minSize={8} collapsible>
         <TracePanel />
       </ResizablePanel>
+
+      <IntelligenceInspector
+        item={activeItem}
+        items={items}
+        onClose={() => setInspectorId(null)}
+        onSelect={setInspectorId}
+        onAcknowledge={(id) => setStatus(id, "acknowledged")}
+        onMonitor={(id) => setStatus(id, "monitoring")}
+        onOpenInvestigate={(it) => {
+          setInspectorId(null);
+          const sig = it.evidence.find((e) => e.sourceType === "signal");
+          onNavigateToInvestigate(sig?.label ?? "TI-R12-01");
+        }}
+      />
     </ResizablePanelGroup>
   );
 }
